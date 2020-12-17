@@ -1,4 +1,3 @@
-ARG REGISTRY
-FROM $REGISTRY/ubuntu:base
+FROM ubuntu:20.10
 COPY wipe.sh /
 ENTRYPOINT ["./wipe.sh"]

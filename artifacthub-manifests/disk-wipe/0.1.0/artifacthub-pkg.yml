@@ -9,22 +9,25 @@ license: Apache-2
 homeURL: https://github.com/tinkerbell/actions
 appVersion: 0.1.0
 containersImages:
-- name: disk-wipe
-  image: quay.io/tinkerbell-actions/disk-wipe:v0.1.0
+    - name: disk-wipe
+      image: quay.io/tinkerbell-actions/disk-wipe:v0.1.0
 keywords:
-- disk
+    - disk
 links:
-- name: website
-  url: https://tinkerbell.org/
-- name: support
-  url: https://github.com/tinkerbell/actions/issues
-readme: |
-  <p>Wipe an entire disk. This is not a joke! All the data in your hard drive or SSD
-  will go away. Be prepared.</p>
-  <pre><code>  actions:
-    - name: &quot;disk-wipe&quot;
-      image: quay.io/tinkerbell-action/disk-wipe:v0.1.0
-      timeout: 90
-  </code></pre>
+    - name: website
+      url: https://tinkerbell.org/
+    - name: support
+      url: https://github.com/tinkerbell/actions/issues
+readme: |+
+    Wipe an entire disk. This is not a joke! All the data in your hard drive or SSD will go away. Be prepared.
+
+    ```
+      actions:
+      - name: "disk-wipe"
+        image: quay.io/tinkerbell-actions/disk-wipe:v0.1.0
+        timeout: 90
+    ```
+
+
 provider:
-  name: tinkerbell-community
+    name: tinkerbell-community

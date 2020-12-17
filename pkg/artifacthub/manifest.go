@@ -10,11 +10,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mattn/godown"
+
 	"github.com/pkg/errors"
 	"github.com/yuin/goldmark"
 	meta "github.com/yuin/goldmark-meta"
 	"github.com/yuin/goldmark/parser"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 // Manifest represents the ArtifactHub manifest file that gets used to populate
@@ -65,18 +67,28 @@ func PopulateFromActionMarkdown(file io.Reader, m *Manifest) error {
 	)
 	readme, err := ioutil.ReadAll(file)
 	if err != nil {
-		return errors.Wrap(err, "error reading the README.md proposal")
+		return errors.Wrap(err, "error reading the README.md")
 	}
 	var buf bytes.Buffer
 	context := parser.NewContext()
 	if err := md.Convert(readme, &buf, parser.WithContext(context)); err != nil {
-		return errors.Wrap(err, "error converting the README.md proposal")
+		return errors.Wrap(err, "error converting the README.md")
 	}
 	metaData := meta.Get(context)
 
+	// This is a very dirty hack but since I am not able to understand how to
+	// get the original body of the README.md (without the headers). A quick
+	// way I have to get markdown and not YAML is to re-convert it.
+	// https://github.com/yuin/goldmark/discussions/168#discussioncomment-219417
+	readmeBack := bytes.NewBuffer([]byte{})
+	if err := godown.Convert(readmeBack, &buf, nil); err != nil {
+		return errors.Wrap(err, "error converting the readme back from html to markdown")
+
+	}
+
 	m.Name = metaData["slug"].(string)
 	m.DisplayName = metaData["name"].(string)
-	m.Readme = buf.String()
+	m.Readme = readmeBack.String()
 	m.Version = metaData["version"].(string)[1:]
 	m.AppVersion = m.Version
 	m.Keywords = strings.Split(metaData["tags"].(string), ",")
