@@ -13,3 +13,15 @@ To know more about the direction of the project have a look at proposal number
 
 ...More will come I promise but if you are curious you can [join our contributors
 meeting, or our Slack channel](https://tinkerbell.org/community/).
+
+## Contribution
+
+... more will come...
+
+## Development
+
+To comfortably try and test this project you need to have nix and in particular
+nix-shell installed.
+
+You don't need to know how it works but we use it to double check that the
+required files are there.
