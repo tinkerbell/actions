@@ -14,7 +14,7 @@ Wipe an entire disk. This is not a joke! All the data in your hard drive or SSD
 will go away. Be prepared.
 
 ```yaml
-  actions:
+actions:
   - name: "disk-wipe"
     image: quay.io/tinkerbell-actions/disk-wipe:v0.1.0
     timeout: 90
