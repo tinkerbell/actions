@@ -4,8 +4,8 @@
 PR](https://github.com/gianarb/actions/workflows/For%20each%20commit%20and%20PR/badge.svg)](https://github.com/gianarb/actions/actions?query=workflow%3A%22For+each+commit+and+PR%22)
 ![](https://img.shields.io/badge/Stability-Experimental-red.svg)
 
-Action is the repository that contains reusable Tinkerbell Actions maintained by
-the Tinkerbell community.
+Action is the repository that contains reusable Tinkerbell Actions and in the
+near future Workflows maintained by the Tinkerbell community.
 
 This is an ongoing and work in progress collaboration with
 [ArtifactHub](https://artifacthub.io) a project sponsored by the CNCF.
