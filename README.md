@@ -1,5 +1,7 @@
 # Tinkerbell
 
+[![For each commit and
+PR](https://github.com/gianarb/actions/workflows/For%20each%20commit%20and%20PR/badge.svg)](https://github.com/gianarb/actions/actions?query=workflow%3A%22For+each+commit+and+PR%22)
 ![](https://img.shields.io/badge/Stability-Experimental-red.svg)
 
 Action is the repository that contains reusable Tinkerbell Actions maintained by

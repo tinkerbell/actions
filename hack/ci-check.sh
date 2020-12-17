@@ -19,10 +19,9 @@ if ! git ls-files '*.sh' | xargs shellcheck; then
 fi
 
 if [[ "$failed" -eq 1 ]]; then
-    exit "$failed"
+	exit "$failed"
 fi
 
 go vet ./...
 
 go test -v ./...
-
