@@ -9,11 +9,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 	"github.com/yuin/goldmark"
 	meta "github.com/yuin/goldmark-meta"
 	"github.com/yuin/goldmark/parser"
+	"gopkg.in/yaml.v2"
 )
 
 // Manifest represents the ArtifactHub manifest file that gets used to populate
@@ -30,9 +30,9 @@ type Manifest struct {
 	HomeURL          string `yaml:"homeURL,omitempty"`
 	AppVersion       string `yaml:"appVersion,omitempty"`
 	ContainersImages []struct {
-		Name        string `yaml:"name,omitempty"`
-		Image       string `yaml:"image,omitempty"`
-		Whitelisted string `yaml:"whitelisted,omitempty"`
+		Name  string `yaml:"name,omitempty"`
+		Image string `yaml:"image,omitempty"`
+		//Whitelisted string `yaml:"whitelisted,omitempty"`
 	} `yaml:"containersImages,omitempty"`
 	//ContainsSecurityUpdates string   `yaml:"containsSecurityUpdates,omitempty"`
 	//Operator                string   `yaml:"operator,omitempty"`
@@ -82,9 +82,9 @@ func PopulateFromActionMarkdown(file io.Reader, m *Manifest) error {
 	m.Description = metaData["description"].(string)
 
 	m.ContainersImages = []struct {
-		Name        string `yaml:"name,omitempty"`
-		Image       string `yaml:"image,omitempty"`
-		Whitelisted string `yaml:"whitelisted,omitempty"`
+		Name  string `yaml:"name,omitempty"`
+		Image string `yaml:"image,omitempty"`
+		//Whitelisted string `yaml:"whitelisted,omitempty"`
 	}{
 		{
 			Name:  fmt.Sprintf("quay.io/tinkerbell-actions/%s:%s", m.Name, m.Version),

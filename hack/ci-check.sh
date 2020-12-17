@@ -22,6 +22,11 @@ if [[ "$failed" -eq 1 ]]; then
 	exit "$failed"
 fi
 
+go mod tidy
+test -z "$(git status --porcelain)"
+
 go vet ./...
 
 go test -v ./...
+
+test -z "$(git status --porcelain)"
