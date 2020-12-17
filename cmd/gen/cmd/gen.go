@@ -27,7 +27,7 @@ var generateCmd = &cobra.Command{
 
 func init() {
 	generateCmd.PersistentFlags().StringVar(&generateOpts.context, "context", ".", "base path for the proposals repository in your local file system")
-	generateCmd.PersistentFlags().StringVar(&generateOpts.output, "output", "./artifacthub-manifests", "where the generate website will be stored")
+	generateCmd.PersistentFlags().StringVar(&generateOpts.output, "output", "./artifacthub-manifests/actions", "where the generate website will be stored")
 
 	rootCmd.AddCommand(generateCmd)
 }
