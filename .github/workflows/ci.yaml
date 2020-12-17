@@ -9,7 +9,20 @@ jobs:
     env:
       CGO_ENABLED: 0
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
     - uses: cachix/install-nix-action@v12
       with:
         nix_path: nixpkgs=channel:nixos-unstable
-    - run: ./hack/ci-checks.sh
+    - run: make ci
+      name: Ci checks
+    - run: make artifacthub/gen-manifests
+      name: Generate Artifact Hub manifests
+    - name: Deploy ArtifactHub manifests 🚀
+      uses: JamesIves/github-pages-deploy-action@3.7.1
+      if: ${{ startsWith(github.ref, 'refs/heads/main') }}
+      with:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        BRANCH: artifacthub-manifests
+        FOLDER: out
+        CLEAN: true
