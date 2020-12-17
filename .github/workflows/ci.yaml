@@ -19,11 +19,3 @@ jobs:
       name: Ci checks
     - run: make artifacthub/gen-manifests
       name: Generate Artifact Hub manifests
-    - name: Deploy ArtifactHub manifests 🚀
-      uses: JamesIves/github-pages-deploy-action@3.7.1
-      if: ${{ startsWith(github.ref, 'refs/heads/main') }}
-      with:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        BRANCH: artifacthub-manifests
-        FOLDER: manifest
-        CLEAN: true

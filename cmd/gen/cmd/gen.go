@@ -27,7 +27,7 @@ var generateCmd = &cobra.Command{
 
 func init() {
 	generateCmd.PersistentFlags().StringVar(&generateOpts.context, "context", ".", "base path for the proposals repository in your local file system")
-	generateCmd.PersistentFlags().StringVar(&generateOpts.output, "output", "./manifest", "where the generate website will be stored")
+	generateCmd.PersistentFlags().StringVar(&generateOpts.output, "output", "./artifacthub-manifests", "where the generate website will be stored")
 
 	rootCmd.AddCommand(generateCmd)
 }
@@ -60,7 +60,7 @@ func runGenerate(opts *generateOptions) error {
 			Name: "tinkerbell-community",
 		},
 		HomeURL:  "https://github.com/tinkerbell/actions",
-		LogoPath: "./logo.png",
+		LogoPath: "./../../logo.png",
 		License:  "Apache-2",
 		Links: []struct {
 			Name string `yaml:"name"`
@@ -87,7 +87,7 @@ func runGenerate(opts *generateOptions) error {
 			return errors.Wrap(err, "error converting the README.md to an ArtifactHub manifest")
 		}
 
-		if err := artifacthub.WriteToFile(manifest, path.Join(generateOpts.output, manifest.Name+".yaml")); err != nil {
+		if err := artifacthub.WriteToFile(manifest, generateOpts.output); err != nil {
 			return errors.Wrap(err, "error writing manifest to a file")
 		}
 	}

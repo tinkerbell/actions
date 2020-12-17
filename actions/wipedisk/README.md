@@ -3,7 +3,7 @@ slug: disk-wipe
 name: Disk Wipe
 tags: disk
 maintainers: Dan Finneran <email@email.com>
-description: "this action wipes an entire disk. A common use for it is at the
+description: "This action wipes an entire disk. A common use for it is at the
 beginning of the workflow, to be sure that you are starting from a cleaned
 environment"
 version: v0.1.0
