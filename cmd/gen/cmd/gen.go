@@ -60,7 +60,7 @@ func runGenerate(opts *generateOptions) error {
 			Name: "tinkerbell-community",
 		},
 		HomeURL:  "https://github.com/tinkerbell/actions",
-		LogoPath: "https://avatars3.githubusercontent.com/u/62397138?s=200&v=4",
+		LogoPath: "./logo.png",
 		License:  "Apache-2",
 		Links: []struct {
 			Name string `yaml:"name"`

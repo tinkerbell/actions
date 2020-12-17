@@ -23,10 +23,8 @@ if [[ "$failed" -eq 1 ]]; then
 fi
 
 go mod tidy
-test -z "$(git status --porcelain)"
+test -z "$(git status --porcelain go.mod go.sum)"
 
 go vet ./...
 
 go test -v ./...
-
-test -z "$(git status --porcelain)"

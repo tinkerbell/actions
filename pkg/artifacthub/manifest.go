@@ -92,8 +92,8 @@ func PopulateFromActionMarkdown(file io.Reader, m *Manifest) error {
 		},
 	}
 
-	if _, err := time.Parse("January 2, 2006", metaData["createdAt"].(string)); err != nil {
-		println(fmt.Sprintf("action: %s error converting createdAt right format is \"January 2, 2016\" got %s", m.Name, metaData["createdAt"].(string)))
+	if _, err := time.Parse(time.RFC3339, metaData["createdAt"].(string)); err != nil {
+		println(fmt.Sprintf("action: %s error converting createdAt right format is \"2016-06-20T12:41:45.14Z\" got %s", m.Name, metaData["createdAt"].(string)))
 	} else {
 		m.CreatedAt = metaData["createdAt"].(string)
 	}
