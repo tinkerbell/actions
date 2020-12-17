@@ -77,7 +77,7 @@ func PopulateFromActionMarkdown(file io.Reader, m *Manifest) error {
 	m.Name = metaData["slug"].(string)
 	m.DisplayName = metaData["name"].(string)
 	m.Readme = buf.String()
-	m.Version = metaData["version"].(string)
+	m.Version = metaData["version"].(string)[1:]
 	m.AppVersion = m.Version
 	m.Keywords = strings.Split(metaData["tags"].(string), ",")
 	m.Description = metaData["description"].(string)
@@ -88,8 +88,8 @@ func PopulateFromActionMarkdown(file io.Reader, m *Manifest) error {
 		//Whitelisted string `yaml:"whitelisted,omitempty"`
 	}{
 		{
-			Name:  fmt.Sprintf("quay.io/tinkerbell-actions/%s:%s", m.Name, m.Version),
-			Image: fmt.Sprintf("quay.io/tinkerbell-actions/%s:%s", m.Name, m.Version),
+			Name:  fmt.Sprintf("quay.io/tinkerbell-actions/%s:v%s", m.Name, m.Version),
+			Image: fmt.Sprintf("quay.io/tinkerbell-actions/%s:v%s", m.Name, m.Version),
 		},
 	}
 
@@ -109,11 +109,11 @@ func WriteToFile(manifest *Manifest, dst string) error {
 	if err != nil {
 		return errors.Wrap(err, "error marshalling manifest to yaml")
 	}
-	if err := os.MkdirAll(path.Join(dst, manifest.Name, manifest.Version[1:]), 0700); err != nil {
+	if err := os.MkdirAll(path.Join(dst, manifest.Name, manifest.Version), 0700); err != nil {
 		return errors.Wrap(err, "error creating directory")
 	}
 	dstFile, err := os.OpenFile(
-		path.Join(dst, manifest.Name, manifest.Version[1:], "artifacthub-pkg.yml"),
+		path.Join(dst, manifest.Name, manifest.Version, "artifacthub-pkg.yml"),
 		os.O_CREATE|os.O_WRONLY,
 		0644)
 	if err != nil {
