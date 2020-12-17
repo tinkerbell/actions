@@ -14,6 +14,7 @@ in
 with pkgs;
 
 mkShell {
+  GOROOT = "";
   buildInputs = [
     git
     gnumake

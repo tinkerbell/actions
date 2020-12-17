@@ -4,6 +4,8 @@
 
 set -eux
 
+env
+
 failed=0
 
 if ! git ls-files '*.yml' '*.json' '*.md' | xargs prettier --check; then
