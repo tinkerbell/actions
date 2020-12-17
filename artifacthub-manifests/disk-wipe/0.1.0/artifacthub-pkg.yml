@@ -9,7 +9,7 @@ license: Apache-2
 homeURL: https://github.com/tinkerbell/actions
 appVersion: 0.1.0
 containersImages:
-- name: quay.io/tinkerbell-actions/disk-wipe:v0.1.0
+- name: disk-wipe
   image: quay.io/tinkerbell-actions/disk-wipe:v0.1.0
 keywords:
 - disk

@@ -88,7 +88,7 @@ func PopulateFromActionMarkdown(file io.Reader, m *Manifest) error {
 		//Whitelisted string `yaml:"whitelisted,omitempty"`
 	}{
 		{
-			Name:  fmt.Sprintf("quay.io/tinkerbell-actions/%s:v%s", m.Name, m.Version),
+			Name:  m.Name,
 			Image: fmt.Sprintf("quay.io/tinkerbell-actions/%s:v%s", m.Name, m.Version),
 		},
 	}
