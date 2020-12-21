@@ -3,6 +3,7 @@
 [![For each commit and
 PR](https://github.com/gianarb/actions/workflows/For%20each%20commit%20and%20PR/badge.svg)](https://github.com/gianarb/actions/actions?query=workflow%3A%22For+each+commit+and+PR%22)
 ![](https://img.shields.io/badge/Stability-Experimental-red.svg)
+[![Artifact HUB](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/tinkerbell-community)](https://artifacthub.io/packages/search?repo=tinkerbell-community)
 
 Action is the repository that contains reusable Tinkerbell Actions and in the
 near future Workflows maintained by the Tinkerbell community.
