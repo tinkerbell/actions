@@ -16,6 +16,6 @@ will go away. Be prepared.
 ```yaml
 actions:
     - name: "disk-wipe"
-      image: quay.io/tinkerbell-actions/disk-wipe:v0.1.0
+      image: quay.io/tinkerbell-actions/disk-wipe:v1.0.0
       timeout: 90
 ```
