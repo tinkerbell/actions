@@ -25,3 +25,4 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./public
         publish_branch: artifacthub-manifests
+        keep_files: true
