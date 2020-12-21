@@ -6,7 +6,7 @@ maintainers: Dan Finneran <email@email.com>
 description: "This action wipes an entire disk. A common use for it is at the
 beginning of the workflow, to be sure that you are starting from a cleaned
 environment"
-version: v0.1.0
+version: v1.0.0
 createdAt: "2016-06-20T12:41:45.14Z"
 ---
 

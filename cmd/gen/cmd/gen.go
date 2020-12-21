@@ -33,8 +33,8 @@ func init() {
 }
 
 func runGenerate(opts *generateOptions) error {
-	actionsDir := path.Join(opts.context, "actions")
-	info, err := os.Stat(actionsDir)
+	actionsPath := path.Join(opts.context, "actions")
+	info, err := os.Stat(actionsPath)
 	if os.IsNotExist(err) {
 		return errors.Wrap(err, "we expect a actions directory inside the repository.")
 	}
@@ -42,7 +42,7 @@ func runGenerate(opts *generateOptions) error {
 		return errors.New("the expected actions directory has to be a directory, not a file")
 	}
 
-	files, err := ioutil.ReadDir(actionsDir)
+	actionsDir, err := ioutil.ReadDir(actionsPath)
 	if err != nil {
 		return err
 	}
@@ -77,20 +77,29 @@ func runGenerate(opts *generateOptions) error {
 		},
 	}
 
-	for _, f := range files {
-		readmeFile, err := os.Open(path.Join(actionsDir, f.Name(), "README.md"))
+	// ./actions/disk-wipe/v1
+	//              ↑ _____ we are here
+	for _, actionPath := range actionsDir {
+		versionDir, err := ioutil.ReadDir(path.Join(actionsPath, actionPath.Name()))
 		if err != nil {
-			return errors.Wrap(err, "error reading the README.md proposal")
+			return err
 		}
+		// ./actions/disk-wipe/v1
+		//                      ↑ _____ we are here
+		for _, v := range versionDir {
+			readmeFile, err := os.Open(path.Join(actionsPath, actionPath.Name(), v.Name(), "README.md"))
+			if err != nil {
+				return errors.Wrap(err, "error reading the README.md proposal")
+			}
 
-		if err := artifacthub.PopulateFromActionMarkdown(readmeFile, manifest); err != nil {
-			return errors.Wrap(err, "error converting the README.md to an ArtifactHub manifest")
-		}
+			if err := artifacthub.PopulateFromActionMarkdown(readmeFile, manifest); err != nil {
+				return errors.Wrap(err, "error converting the README.md to an ArtifactHub manifest")
+			}
 
-		if err := artifacthub.WriteToFile(manifest, generateOpts.output); err != nil {
-			return errors.Wrap(err, "error writing manifest to a file")
+			if err := artifacthub.WriteToFile(manifest, generateOpts.output); err != nil {
+				return errors.Wrap(err, "error writing manifest to a file")
+			}
 		}
 	}
-
 	return nil
 }
