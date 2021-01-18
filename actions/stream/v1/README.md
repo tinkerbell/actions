@@ -15,10 +15,10 @@ finally mounting the disks.
 ```yaml
     actions:
       - name: "stream ubuntu"
-        image: thebsdbox/strea:0.0
+        image: thebsdbox/stream:0.0
         timeout: 90
         environment:
-          IMG_URL: 192.168.1.2/ubuntu.img
-          DEST_DISK: /dev/sda3
-          COMPRESSED: true
+          IMG_URL: 192.168.1.2/ubuntu.raw
+          DEST_DISK: /dev/sda
+          COMPRESSED: false
 ```
