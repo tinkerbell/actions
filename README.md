@@ -17,6 +17,12 @@ To know more about the direction of the project have a look at proposal number
 ...More will come I promise but if you are curious you can [join our contributors
 meeting, or our Slack channel](https://tinkerbell.org/community/).
 
+Action are currently maintained and built for:
+
+* `linux/amd64`
+* `linux/arm/6`
+* `linux/arm/7`
+
 ## Contribution
 
 ... more will come...
