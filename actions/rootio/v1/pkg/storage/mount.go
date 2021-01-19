@@ -7,7 +7,7 @@ import (
 	"syscall"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/thebsdbox/rootio/pkg/types.go"
+	"github.com/tinkerbell/hub/actions/rootio/v1/pkg/types.go"
 )
 
 //Mount -=

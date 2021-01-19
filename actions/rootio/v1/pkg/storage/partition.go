@@ -7,7 +7,7 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/thebsdbox/rootio/pkg/types.go"
+	"github.com/tinkerbell/hub/actions/rootio/v1/pkg/types.go"
 
 	diskfs "github.com/diskfs/go-diskfs"
 	"github.com/diskfs/go-diskfs/partition/gpt"

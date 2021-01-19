@@ -8,8 +8,8 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/thebsdbox/rootio/pkg/storage"
-	"github.com/thebsdbox/rootio/pkg/types.go"
+	"github.com/tinkerbell/hub/actions/rootio/v1/pkg/storage"
+	"github.com/tinkerbell/hub/actions/rootio/v1/pkg/types.go"
 )
 
 var metadata *types.Metadata

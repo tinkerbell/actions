@@ -1,4 +1,4 @@
-module github.com/thebsdbox/rootio
+module github.com/tinkerbell/hub/actions/rootio/v1
 
 go 1.15
 
