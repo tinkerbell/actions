@@ -6,7 +6,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/thebsdbox/hub/actions/stream/v1/pkg/image"
+	"github.com/tinkerbell/hub/actions/stream/v1/pkg/image"
 )
 
 func main() {
