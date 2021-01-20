@@ -1,6 +1,6 @@
 ---
-slug: stream 
-name: stream
+slug: image2disk 
+name: image2disk
 tags: disk
 maintainers: Dan Finneran <daniel.finneran@gmail.com>
 description: "This action will stream a remote disk image (raw) to a block device, and
@@ -17,7 +17,7 @@ it to the block storage disk `/dev/sda`. The raw image is uncompressed in this e
 ```yaml
     actions:
       - name: "stream ubuntu"
-        image: thebsdbox/stream:0.0
+        image: thebsdbox/image2disk:0.0
         timeout: 90
         environment:
           IMG_URL: 192.168.1.2/ubuntu.raw
@@ -37,7 +37,7 @@ tar -cvzf ubuntu.tar.gz ubuntu.raw
 ```yaml
     actions:
       - name: "stream ubuntu"
-        image: thebsdbox/stream:0.0
+        image: thebsdbox/image2disk:0.0
         timeout: 90
         environment:
           IMG_URL: 192.168.1.2/ubuntu.tar.gz

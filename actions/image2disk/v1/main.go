@@ -7,12 +7,12 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/tinkerbell/hub/actions/stream/v1/pkg/image"
+	"github.com/tinkerbell/hub/actions/image2disk/v1/pkg/image"
 )
 
 func main() {
 
-	fmt.Printf("STREAM - Cloud image streamer\n------------------------\n")
+	fmt.Printf("IMAGE2DISK - Cloud image streamer\n------------------------\n")
 	disk := os.Getenv("DEST_DISK")
 	img := os.Getenv("IMG_URL")
 	compressedEnv := os.Getenv("COMPRESSED")

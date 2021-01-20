@@ -1,4 +1,4 @@
-module github.com/tinkerbell/hub/actions/stream/v1
+module github.com/tinkerbell/hub/actions/image2disk/v1
 
 go 1.15
 
