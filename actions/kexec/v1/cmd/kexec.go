@@ -20,7 +20,7 @@ const mountAction = "/mountAction"
 
 var kexecCmd = &cobra.Command{
 	Use:   "kexec",
-	Short: "This is a tool for managing storage for bare-metal servers",
+	Short: "This is an action for performing a kexec into a new kernel/ramdisk",
 	Run: func(cmd *cobra.Command, args []string) {
 
 		// Parse the environment variables that are passed into the action
