@@ -2,11 +2,15 @@ package cmd
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"syscall"
 
+	"path/filepath"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/tinkerbell/hub/actions/kexec/v1/cmd/grub"
 	"golang.org/x/sys/unix"
 )
 
@@ -30,6 +34,9 @@ var kexecCmd = &cobra.Command{
 		initrdPath := os.Getenv("INITRD_PATH")
 		cmdLine := os.Getenv("CMD_LINE")
 
+		// These two strings contain the updated paths including the mountAction path
+		var kernelMountPath, initrdMountPath string
+
 		if blockDevice == "" {
 			log.Fatalf("No Block Device speified with Environment Variable [BLOCK_DEVICE]")
 		}
@@ -40,32 +47,50 @@ var kexecCmd = &cobra.Command{
 			log.Fatalf("Error creating the action Mountpoint [%s]", mountAction)
 		}
 
+		// Mount the block device to the /mountAction point
 		err = syscall.Mount(blockDevice, mountAction, filesystemType, 0, "")
 		if err != nil {
 			log.Fatalf("Mounting [%s] -> [%s] error [%v]", blockDevice, mountAction, err)
 		}
+
+		// If we specify no kernelPath then we will fallback to autodetect and ignore the initrd and cmdline that may be passed
+		// by environment variables
+		if kernelPath == "" {
+			grubFile, err := ioutil.ReadFile(fmt.Sprintf("%s/boot/grub/grub.conf", mountAction))
+			if err != nil {
+				log.Fatal(err)
+			}
+			bootConfig := grub.GetDefaultConfig(string(grubFile))
+			if bootConfig == nil {
+				log.Fatal("No Kernel configuration passed in [KERNEL_PATH] and unable to parse [/boot/grub/grub.conf]")
+			}
+			kernelMountPath = filepath.Join(mountAction, bootConfig.Kernel)
+			initrdMountPath = filepath.Join(mountAction, bootConfig.Initramfs)
+			// Overwrite the cmdline with what is found in grub.conf
+			cmdLine = bootConfig.KernelArgs
+		} else {
+			kernelMountPath = filepath.Join(mountAction, kernelPath)
+			initrdMountPath = filepath.Join(mountAction, initrdPath)
+		}
 		// /mountAction/boot/vmlinuz
-		kernel, err := os.Open(fmt.Sprintf("%s%s", mountAction, kernelPath)) // For read access.
+		kernel, err := os.Open(kernelMountPath) // For read access.
 		if err != nil {
 			log.Fatal(err)
 		}
 		// /mountAction/boot/vmlinuz
-		initrd, err := os.Open(fmt.Sprintf("%s%s", mountAction, initrdPath)) // For read access.
+		initrd, err := os.Open(initrdMountPath) // For read access.
 		if err != nil {
 			log.Fatal(err)
 		}
 
+		// Load the kernel configuration into memory
 		err = unix.KexecFileLoad(int(kernel.Fd()), int(initrd.Fd()), cmdLine, 0)
 		if err != nil {
 			log.Fatal(err)
 		}
+		// Call the unix reboot command with the kexec functionality
 		unix.Reboot(unix.LINUX_REBOOT_CMD_KEXEC)
 	},
-}
-
-func init() {
-
-	// TODO - refactor at a later date.
 }
 
 // Execute - starts the command parsing process
