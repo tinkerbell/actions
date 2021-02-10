@@ -52,11 +52,12 @@ var kexecCmd = &cobra.Command{
 		if err != nil {
 			log.Fatalf("Mounting [%s] -> [%s] error [%v]", blockDevice, mountAction, err)
 		}
+		log.Infof("Mounted [%s] -> [%s]", blockDevice, mountAction)
 
 		// If we specify no kernelPath then we will fallback to autodetect and ignore the initrd and cmdline that may be passed
 		// by environment variables
 		if kernelPath == "" {
-			grubFile, err := ioutil.ReadFile(fmt.Sprintf("%s/boot/grub/grub.conf", mountAction))
+			grubFile, err := ioutil.ReadFile(fmt.Sprintf("%s/boot/grub/grub.cfg", mountAction))
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -66,8 +67,10 @@ var kexecCmd = &cobra.Command{
 			}
 			kernelMountPath = filepath.Join(mountAction, bootConfig.Kernel)
 			initrdMountPath = filepath.Join(mountAction, bootConfig.Initramfs)
-			// Overwrite the cmdline with what is found in grub.conf
-			cmdLine = bootConfig.KernelArgs
+			// Overwrite the cmdline with what is found in grub.conf, unless something specific is added
+			if cmdLine == "" {
+				cmdLine = bootConfig.KernelArgs
+			}
 		} else {
 			kernelMountPath = filepath.Join(mountAction, kernelPath)
 			initrdMountPath = filepath.Join(mountAction, initrdPath)
