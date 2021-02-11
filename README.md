@@ -20,7 +20,6 @@ meeting, or our Slack channel](https://tinkerbell.org/community/).
 Action are currently maintained and built for:
 
 -   `linux/amd64`
--   `linux/arm/6`
 -   `linux/arm/7`
 
 ## Contribution
