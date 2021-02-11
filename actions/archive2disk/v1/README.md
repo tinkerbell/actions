@@ -16,8 +16,9 @@ The below example will stream a compressed root filesystem into archive2disk, wh
 will be written to the filesystem on the block device `/dev/sda3`.
 
 Archive types supported:
-- `tar`: standard tar archive
-- `targz`: A gzipped tar archive (compressed)
+
+-   `tar`: standard tar archive
+-   `targz`: A gzipped tar archive (compressed)
 
 ```yaml
 actions:
