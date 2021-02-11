@@ -5,7 +5,7 @@ tags: disk
 maintainers: Dan Finneran <daniel.finneran@gmail.com>
 description: "This action will stream a compressed filesystem archive into archive2disk
 where it will mount a block device and uncompress this archive to a destination path on
-it's filesystem. Usually the `DEST_PATH` should be "/" as we normally will be writing a 
+it's filesystem. Usually the `DEST_PATH` should be `/` as we normally will be writing a
 root filesystem, however it can be used to stream application data to a different area on
 disk (such as preloading container images, or web server assets)."
 version: v1.0.0
