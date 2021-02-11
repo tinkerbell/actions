@@ -25,7 +25,7 @@ actions:
       image: quay.io/tinkerbell-actions/archive2disk:v1.0.0
       timeout: 90
       environment:
-          ARCHIVE_URL: 192.168.1.2/ubuntu.tar.gz
+          ARCHIVE_URL: http://192.168.1.2/ubuntu.tar.gz
           ARCHIVE_TYPE: targz
           DEST_DISK: /dev/sda3
           FS_TYPE: ext4
