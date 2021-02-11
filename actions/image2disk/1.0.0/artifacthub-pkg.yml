@@ -27,7 +27,7 @@ readme: |+
           image: quay.io/tinkerbell-actions/image2disk:v1.0.0
           timeout: 90
           environment:
-              IMG_URL: 192.168.1.2/ubuntu.raw
+              IMG_URL: http://192.168.1.2/ubuntu.raw
               DEST_DISK: /dev/sda
               COMPRESSED: false
     ```
@@ -45,7 +45,7 @@ readme: |+
           image: quay.io/tinkerbell-actions/image2disk:v1.0.0
           timeout: 90
           environment:
-              IMG_URL: 192.168.1.2/ubuntu.tar.gz
+              IMG_URL: http://192.168.1.2/ubuntu.tar.gz
               DEST_DISK: /dev/sda
               COMPRESSED: true
     ```
