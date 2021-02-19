@@ -40,9 +40,17 @@ func main() {
 	log.Infof("Mounted [%s] -> [%s]", blockDevice, mountAction)
 
 	// Write the image to disk
+<<<<<<< HEAD
 	err = archive.Write(archiveURL, archiveType, filepath.Join(mountAction, "path"))
 	if err != nil {
 		log.Fatal(err)
 	}
 	log.Info("Successfully unpacked [%s] to [%s] on device [%s]", archiveURL, path, blockDevice)
+=======
+	err = archive.Write(archiveURL, archiveType, filepath.Join(mountAction, path))
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Infof("Successfully unpacked [%s] to [%s] on device [%s]", archiveURL, path, blockDevice)
+>>>>>>> upstream/main
 }

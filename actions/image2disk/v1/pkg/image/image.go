@@ -1,13 +1,11 @@
-package archive
+package image
 
 // This package handles the pulling and management of images
 
 import (
-	"archive/tar"
 	"compress/gzip"
 	"fmt"
 	"io"
-<<<<<<< HEAD
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -16,6 +14,7 @@ import (
 	"time"
 
 	"github.com/dustin/go-humanize"
+	log "github.com/sirupsen/logrus"
 )
 
 var tick chan time.Time
@@ -146,21 +145,12 @@ func UploadMultipartFile(client *http.Client, uri, key, path string, compressed 
 	return resp, nil
 }
 
-=======
-	"net/http"
-	"os"
-	"path/filepath"
-
-	log "github.com/sirupsen/logrus"
-)
-
->>>>>>> upstream/main
 // Write will pull an image and write it to local storage device
 // with compress set to true it will use gzip compression to expand the data before
 // writing to an underlying device
-func Write(archiveURL, archiveType, path string) error {
+func Write(sourceImage, destinationDevice string, compressed bool) error {
 
-	req, err := http.NewRequest("GET", archiveURL, nil)
+	req, err := http.NewRequest("GET", sourceImage, nil)
 	if err != nil {
 		return err
 	}
@@ -174,133 +164,54 @@ func Write(archiveURL, archiveType, path string) error {
 	if resp.StatusCode > 300 {
 		// Customise response for the 404 to make degugging simpler
 		if resp.StatusCode == 404 {
-			return fmt.Errorf("%s not found", archiveURL)
+			return fmt.Errorf("%s not found", sourceImage)
 		}
 		return fmt.Errorf("%s", resp.Status)
 	}
 
-	var out *tar.Reader
-	absPath, err := filepath.Abs(path)
+	var out io.Reader
 
-	switch archiveType {
-	case "gz":
-		// With compression run data through gzip writer
-		// zipOUT, err := gzip.NewReader(resp.Body)
-		// if err != nil {
-		// 	fmt.Println("[ERROR] New gzip reader:", err)
-		// }
-		// defer zipOUT.Close()
-		// out = zipOUT
-	case "tar":
-		// With compression run data through gzip writer
-		out = tar.NewReader(resp.Body)
-		//out = tarOUT
-	case "targz":
+	fileOut, err := os.OpenFile(destinationDevice, os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
+	defer fileOut.Close()
+
+	if !compressed {
+		// Without compression send raw output
+		out = resp.Body
+	} else {
 		// With compression run data through gzip writer
 		zipOUT, err := gzip.NewReader(resp.Body)
 		if err != nil {
-<<<<<<< HEAD
 			fmt.Println("[ERROR] New gzip reader:", err)
-=======
-			log.Fatalf("[ERROR] New gzip reader:", err)
->>>>>>> upstream/main
 		}
 		defer zipOUT.Close()
-		out = tar.NewReader(zipOUT)
-		//out = tarOUT
-	default:
-
+		out = zipOUT
 	}
-	// untar each segment
-	for {
-		hdr, err := out.Next()
-		if err == io.EOF {
-			break
+
+	log.Infof("Beginning write of image [%s] to disk [%s]", filepath.Base(sourceImage), destinationDevice)
+	// Create our progress reporter and pass it to be used alongside our writer
+	ticker := time.NewTicker(500 * time.Millisecond)
+	counter := &WriteCounter{}
+
+	go func() {
+		for ; true; <-ticker.C {
+			tickerProgress(counter.Total)
 		}
-		if err != nil {
-			return err
-		}
-		// determine proper file path info
-		finfo := hdr.FileInfo()
-		fileName := hdr.Name
-		absFileName := filepath.Join(absPath, fileName)
-		// if a dir, create it, then go to next segment
-		if finfo.Mode().IsDir() {
-			if err := os.MkdirAll(absFileName, 0755); err != nil {
-				return err
-			}
-			continue
-		}
-		// create new file with original file mode
-		file, err := os.OpenFile(
-			absFileName,
-			os.O_RDWR|os.O_CREATE|os.O_TRUNC,
-			finfo.Mode().Perm(),
-		)
-		if err != nil {
-			return err
-		}
-<<<<<<< HEAD
-		fmt.Printf("x %s\n", absFileName)
-=======
->>>>>>> upstream/main
-		n, cpErr := io.Copy(file, out)
-		if closeErr := file.Close(); closeErr != nil {
-			return err
-		}
-		if cpErr != nil {
-			return cpErr
-		}
-		if n != finfo.Size() {
-			return fmt.Errorf("wrote %d, want %d", n, finfo.Size())
-		}
-<<<<<<< HEAD
+	}()
+	if _, err = io.Copy(fileOut, io.TeeReader(out, counter)); err != nil {
+		ticker.Stop()
+		return err
 	}
-	// fileOut, err := os.OpenFile(destinationDevice, os.O_CREATE|os.O_WRONLY, 0644)
-	// if err != nil {
-	// 	return err
-	// }
-	// defer fileOut.Close()
 
-	// if !compressed {
-	// 	// Without compression send raw output
-	// 	out = resp.Body
-	// } else {
-	// 	// With compression run data through gzip writer
-	// 	zipOUT, err := gzip.NewReader(resp.Body)
-	// 	if err != nil {
-	// 		fmt.Println("[ERROR] New gzip reader:", err)
-	// 	}
-	// 	defer zipOUT.Close()
-	// 	out = zipOUT
-	// }
-
-	// log.Infof("Beginning write of image [%s] to disk [%s]", filepath.Base(sourceImage), destinationDevice)
-	// // Create our progress reporter and pass it to be used alongside our writer
-	// ticker := time.NewTicker(500 * time.Millisecond)
-	// counter := &WriteCounter{}
-
-	// go func() {
-	// 	for ; true; <-ticker.C {
-	// 		tickerProgress(counter.Total)
-	// 	}
-	// }()
-	// if _, err = io.Copy(fileOut, io.TeeReader(out, counter)); err != nil {
-	// 	ticker.Stop()
-	// 	return err
-	// }
-
-	// count, err := io.Copy(fileOut, out)
-	// if err != nil {
-	// 	ticker.Stop()
-	// 	return fmt.Errorf("Error writing %d bytes to disk [%s] -> %v", count, destinationDevice, err)
-	// }
-	// fmt.Printf("\n")
-
-	// ticker.Stop()
-=======
-		log.Infof("Extracted [%s] to [%s]", fileName, absFileName)
+	count, err := io.Copy(fileOut, out)
+	if err != nil {
+		ticker.Stop()
+		return fmt.Errorf("Error writing %d bytes to disk [%s] -> %v", count, destinationDevice, err)
 	}
->>>>>>> upstream/main
+	fmt.Printf("\n")
+
+	ticker.Stop()
 	return nil
 }
