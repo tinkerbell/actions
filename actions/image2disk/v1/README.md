@@ -26,11 +26,11 @@ actions:
 ```
 
 The below example will stream a compressed raw ubuntu cloud image (converted by qemu-img)
-and then compressed with tar/gzip to reduce local space.
+and then compressed with gzip to reduce local space.
 
 ```
 qemu-img convert ubuntu.img ubuntu.raw
-tar -cvzf ubuntu.tar.gz ubuntu.raw
+gzip ubuntu.raw
 ```
 
 ```yaml
