@@ -17,41 +17,41 @@ have their actions determined by the contents of the storage section in the meta
 
 ```yaml
 actions:
-    - name: "disk-wipe-partition"
-      image: quay.io/tinkerbell-actions/rootio:v1.0.0
-      timeout: 90
-      command: ["partition"]
-      environment:
-          MIRROR_HOST: 192.168.1.2
-    - name: "format"
-      image: quay.io/tinkerbell-actions/rootio:v1.0.0
-      timeout: 90
-      command: ["format"]
-      environment:
-          MIRROR_HOST: 192.168.1.2
-    - name: "mount"
-      image: quay.io/tinkerbell-actions/rootio:v1.0.0
-      timeout: 90
-      command: ["mount"]
-      environment:
-          MIRROR_HOST: 192.168.1.2
+  - name: "disk-wipe-partition"
+    image: quay.io/tinkerbell-actions/rootio:v1.0.0
+    timeout: 90
+    command: ["partition"]
+    environment:
+      MIRROR_HOST: 192.168.1.2
+  - name: "format"
+    image: quay.io/tinkerbell-actions/rootio:v1.0.0
+    timeout: 90
+    command: ["format"]
+    environment:
+      MIRROR_HOST: 192.168.1.2
+  - name: "mount"
+    image: quay.io/tinkerbell-actions/rootio:v1.0.0
+    timeout: 90
+    command: ["mount"]
+    environment:
+      MIRROR_HOST: 192.168.1.2
 ```
 
 **Advanced**
 
 For certain use-cases we may need to use [MBR]() support, examples being
 VMware vSphere and it's installer. In order to support this, we can pass
-an environment variable to rootio for `partition` options. 
+an environment variable to rootio for `partition` options.
 
 ```yaml
 actions:
-    - name: "disk-wipe-partition"
-      image: quay.io/tinkerbell-actions/rootio:v1.0.0
-      timeout: 90
-      command: ["partition"]
-      environment:
-          MIRROR_HOST: 192.168.1.2
-          MBR: true
+  - name: "disk-wipe-partition"
+    image: quay.io/tinkerbell-actions/rootio:v1.0.0
+    timeout: 90
+    command: ["partition"]
+    environment:
+      MIRROR_HOST: 192.168.1.2
+      MBR: true
 ```
 
 This also supports an extended version of CPR:
@@ -86,5 +86,5 @@ This also supports an extended version of CPR:
   }
 ```
 
-Where labels `FAT32/Linux` can be appended with `_ACTIVE` to make them a 
+Where labels `FAT32/Linux` can be appended with `_ACTIVE` to make them a
 bootable partition.
