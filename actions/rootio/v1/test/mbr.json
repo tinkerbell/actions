@@ -1,0 +1,37 @@
+{
+  "crypted_root_password": "$6$password$u/Cn/tSGIYFtqv4AwZ9tjP1gMxjlvLHt3KO8zbK6ZnMn8anv6tSCo.XidktlU0MdRjWe3./lahF9FTMcnja9q.",
+  "hostname": "server001",
+  "operating_system_version": {
+    "distro": "debian",
+    "os_codename": "bullseye",
+    "os_slug": "debian_11",
+    "version": "11"
+  },
+  "storage": {
+    "disks": [
+      {
+        "device": "/dev/sdb",
+        "partitions": [
+          {
+            "label": "FAT32_ACTIVE",
+            "number": 1,
+            "size": 0
+          }
+        ],
+        "wipe_table": true
+      }
+    ],
+    "filesystems": [
+      {
+        "mount": {
+          "create": {
+            "options": ["-L", "ROOT"]
+          },
+          "device": "/dev/sdb1",
+          "format": "vfat",
+          "point": "/"
+        }
+      }
+    ]
+  }
+}

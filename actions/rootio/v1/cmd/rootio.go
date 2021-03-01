@@ -109,7 +109,11 @@ var rootioPartition = &cobra.Command{
 				}
 			}
 			log.Infoln("Partitioning")
-			err = storage.Partition(metadata.Storage.Disks[disk])
+			if os.Getenv("MBR") != "" {
+				err = storage.MBRPartition(metadata.Storage.Disks[disk])
+			} else {
+				err = storage.Partition(metadata.Storage.Disks[disk])
+			}
 			if err != nil {
 				log.Error(err)
 			}
@@ -129,7 +133,7 @@ var rootioVersion = &cobra.Command{
 
 func test() (*types.Metadata, error) {
 	// Open our jsonFile
-	jsonFile, err := os.Open("./test/test.json")
+	jsonFile, err := os.Open(os.Getenv("JSON_FILE"))
 	// if we os.Open returns an error then handle it
 	if err != nil {
 		return nil, err
