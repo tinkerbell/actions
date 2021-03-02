@@ -36,3 +36,55 @@ actions:
       environment:
           MIRROR_HOST: 192.168.1.2
 ```
+
+**Advanced**
+
+For certain use-cases we may need to use [MBR]() support, examples being
+VMware vSphere and it's installer. In order to support this, we can pass
+an environment variable to rootio for `partition` options. 
+
+```yaml
+actions:
+    - name: "disk-wipe-partition"
+      image: quay.io/tinkerbell-actions/rootio:v1.0.0
+      timeout: 90
+      command: ["partition"]
+      environment:
+          MIRROR_HOST: 192.168.1.2
+          MBR: true
+```
+
+This also supports an extended version of CPR:
+
+```json
+"storage": {
+    "disks": [
+      {
+        "device": "/dev/sdb",
+        "partitions": [
+          {
+            "label": "FAT32_ACTIVE",
+            "number": 1,
+            "size": 0
+          }
+        ],
+        "wipe_table": true
+      }
+    ],
+    "filesystems": [
+      {
+        "mount": {
+          "create": {
+            "options": ["-L", "ROOT"]
+          },
+          "device": "/dev/sdb1",
+          "format": "vfat",
+          "point": "/"
+        }
+      }
+    ]
+  }
+```
+
+Where labels `FAT32/Linux` can be appended with `_ACTIVE` to make them a 
+bootable partition.

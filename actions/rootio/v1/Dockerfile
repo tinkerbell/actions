@@ -28,10 +28,18 @@ RUN --mount=type=cache,sharing=locked,id=gomod,target=/go/pkg/mod/cache \
     --mount=type=cache,sharing=locked,id=goroot,target=/root/.cache/go-build \
     CGO_ENABLED=1 GOOS=linux go build -a -ldflags "-linkmode external -extldflags '-static' -s -w" -o rootio
 
+# build fattools as static
+FROM gcc:10.2.0 as fattools
+RUN git clone https://github.com/dosfstools/dosfstools
+WORKDIR dosfstools//
+RUN ./autogen.sh; ./configure
+RUN make LDFLAGS="--static"
+
 # Build final image
 FROM scratch
 COPY --from=mke2fs /e2fsprogs-1.45.6/misc/mke2fs.static /sbin/mke2fs
 COPY --from=swap util-linux/swapon /sbin/swapon
 COPY --from=swap util-linux/mkswap /sbin/mkswap
+COPY --from=fattools dosfstools/src/mkfs.fat /sbin/mkfs.fat
 COPY --from=rootio /go/src/github.com/thebsdbox/rootio/rootio .
 ENTRYPOINT ["/rootio"]
