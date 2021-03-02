@@ -25,5 +25,6 @@ mkShell {
     nodePackages.prettier
     shfmt
     shellcheck
+    libseccomp
   ];
 }

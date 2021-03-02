@@ -4,7 +4,7 @@
 
 set -eux
 
-go run cmd/gen/main.go generate
+go run cmd/hub/main.go generate
 
 # ArtifactHub accept a logo but it has to live in the repository itself.
 # This is a little hack to get the Tinkerbell logo deployed side by side with the artifacts
