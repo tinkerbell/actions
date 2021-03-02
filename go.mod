@@ -7,13 +7,12 @@ require (
 	github.com/containerd/containerd v1.4.1-0.20201117152358-0edc412565dc
 	github.com/cyphar/filepath-securejoin v0.2.2
 	github.com/docker/distribution v2.7.1+incompatible
-	github.com/docker/docker v17.12.0-ce-rc1.0.20200309214505-aa6a9891b09c+incompatible
 	github.com/genuinetools/img v0.5.11
 	github.com/google/go-cmp v0.4.1
 	github.com/mattn/godown v0.0.0-20201027140031-2c7783b24de7
 	github.com/moby/buildkit v0.7.2
 	github.com/pkg/errors v0.9.1
-	github.com/sirupsen/logrus v1.7.0
+	github.com/sirupsen/logrus v1.7.0 // indirect
 	github.com/spf13/cobra v1.1.1
 	github.com/yuin/goldmark v1.2.1
 	github.com/yuin/goldmark-meta v1.0.0
