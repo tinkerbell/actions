@@ -36,7 +36,7 @@ func runGenerate(opts *generateOptions) error {
 	actionsPath := path.Join(opts.context, "actions")
 	info, err := os.Stat(actionsPath)
 	if os.IsNotExist(err) {
-		return errors.Wrap(err, "we expect a actions directory inside the repository.")
+		return errors.Wrap(err, "we expect an actions directory inside the repository.")
 	}
 	if info.IsDir() == false {
 		return errors.New("the expected actions directory has to be a directory, not a file")

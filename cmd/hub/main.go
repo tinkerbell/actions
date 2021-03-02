@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/tinkerbell/actions/cmd/gen/cmd"
+	"github.com/tinkerbell/actions/cmd/hub/cmd"
 	"go.uber.org/zap"
 )
 
