@@ -5,7 +5,11 @@ go 1.15
 require (
 	github.com/containerd/console v0.0.0-20191219165238-8375c3424e4d
 	github.com/containerd/containerd v1.4.1-0.20201117152358-0edc412565dc
+	github.com/containernetworking/cni v0.8.1
+	github.com/containernetworking/plugins v0.9.1
 	github.com/cyphar/filepath-securejoin v0.2.2
+	github.com/d2g/dhcp4 v0.0.0-20170904100407-a1d1b6c41b1c
+	github.com/d2g/dhcp4client v1.0.0
 	github.com/docker/distribution v2.7.1+incompatible
 	github.com/genuinetools/img v0.5.11
 	github.com/google/go-cmp v0.4.1
@@ -14,6 +18,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.7.0 // indirect
 	github.com/spf13/cobra v1.1.1
+	github.com/vishvananda/netlink v1.1.1-0.20201029203352-d40f9887b852
 	github.com/yuin/goldmark v1.2.1
 	github.com/yuin/goldmark-meta v1.0.0
 	go.uber.org/zap v1.16.0
