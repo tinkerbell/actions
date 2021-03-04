@@ -25,5 +25,5 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Info("Successfully written [%s] to [%s]", img, disk)
+	log.Infof("Successfully written [%s] to [%s]", img, disk)
 }
