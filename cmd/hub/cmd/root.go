@@ -5,12 +5,17 @@ import (
 	"go.uber.org/zap"
 )
 
+var log *zap.Logger
 var rootCmd = &cobra.Command{
-	Use:  "gen",
+	Use:  "hub",
 	Long: ``,
 }
 
-func Execute(log *zap.Logger) {
+// Execute starts the command line interface.
+func Execute(zap *zap.Logger) {
+	// Make the logger available in subcommands.
+	log = zap
+
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatal(err.Error())
 	}

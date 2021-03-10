@@ -157,7 +157,7 @@ menuentry 'Ubuntu' --class ubuntu --class gnu-linux --class gnu --class os $menu
         else
           search --no-floppy --fs-uuid --set=root afad0891-8f09-4093-9520-d02a1fdf5726
         fi
-        linux   /boot/vmlinuz-4.15.0-135-generic root=/dev/mapper/code--vg-root ro  
+        linux   /boot/vmlinuz-4.15.0-135-generic root=/dev/mapper/code--vg-root ro
         initrd  /boot/initrd.img-4.15.0-135-generic
 }
 submenu 'Advanced options for Ubuntu' $menuentry_id_option 'gnulinux-advanced-afad0891-8f09-4093-9520-d02a1fdf5726' {
@@ -177,7 +177,7 @@ submenu 'Advanced options for Ubuntu' $menuentry_id_option 'gnulinux-advanced-af
                   search --no-floppy --fs-uuid --set=root afad0891-8f09-4093-9520-d02a1fdf5726
                 fi
                 echo    'Loading Linux 4.15.0-135-generic ...'
-                linux   /boot/vmlinuz-4.15.0-135-generic root=/dev/mapper/code--vg-root ro  
+                linux   /boot/vmlinuz-4.15.0-135-generic root=/dev/mapper/code--vg-root ro
                 echo    'Loading initial ramdisk ...'
                 initrd  /boot/initrd.img-4.15.0-135-generic
         }
@@ -196,7 +196,7 @@ submenu 'Advanced options for Ubuntu' $menuentry_id_option 'gnulinux-advanced-af
                   search --no-floppy --fs-uuid --set=root afad0891-8f09-4093-9520-d02a1fdf5726
                 fi
                 echo    'Loading Linux 4.15.0-135-generic ...'
-                linux   /boot/vmlinuz-4.15.0-135-generic root=/dev/mapper/code--vg-root ro recovery nomodeset dis_ucode_ldr 
+                linux   /boot/vmlinuz-4.15.0-135-generic root=/dev/mapper/code--vg-root ro recovery nomodeset dis_ucode_ldr
                 echo    'Loading initial ramdisk ...'
                 initrd  /boot/initrd.img-4.15.0-135-generic
         }
@@ -216,7 +216,7 @@ submenu 'Advanced options for Ubuntu' $menuentry_id_option 'gnulinux-advanced-af
                   search --no-floppy --fs-uuid --set=root afad0891-8f09-4093-9520-d02a1fdf5726
                 fi
                 echo    'Loading Linux 4.15.0-132-generic ...'
-                linux   /boot/vmlinuz-4.15.0-132-generic root=/dev/mapper/code--vg-root ro  
+                linux   /boot/vmlinuz-4.15.0-132-generic root=/dev/mapper/code--vg-root ro
                 echo    'Loading initial ramdisk ...'
                 initrd  /boot/initrd.img-4.15.0-132-generic
         }
@@ -235,7 +235,7 @@ submenu 'Advanced options for Ubuntu' $menuentry_id_option 'gnulinux-advanced-af
                   search --no-floppy --fs-uuid --set=root afad0891-8f09-4093-9520-d02a1fdf5726
                 fi
                 echo    'Loading Linux 4.15.0-132-generic ...'
-                linux   /boot/vmlinuz-4.15.0-132-generic root=/dev/mapper/code--vg-root ro recovery nomodeset dis_ucode_ldr 
+                linux   /boot/vmlinuz-4.15.0-132-generic root=/dev/mapper/code--vg-root ro recovery nomodeset dis_ucode_ldr
                 echo    'Loading initial ramdisk ...'
                 initrd  /boot/initrd.img-4.15.0-132-generic
         }
