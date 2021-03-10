@@ -1,7 +1,7 @@
 ---
 slug: shutdown
 name: shutdown
-tags: disk
+tags: network
 maintainers: Marky Jackson <marky.r.jackson@gmail.com>
 description: "This action makes use of the kexec function that should be compiled into the
 tink kernel for shutdown. This provides a faster alternative to rebooting, and allows an action to
