@@ -15,6 +15,7 @@ import (
 
 	"github.com/dustin/go-humanize"
 	log "github.com/sirupsen/logrus"
+	"golang.org/x/sys/unix"
 )
 
 var tick chan time.Time
@@ -213,5 +214,15 @@ func Write(sourceImage, destinationDevice string, compressed bool) error {
 	fmt.Printf("\n")
 
 	ticker.Stop()
+
+	// Do the equivalent of partprobe on the device
+	if err := fileOut.Sync(); err != nil {
+		return fmt.Errorf("Failed to sync the block device")
+	}
+
+	if err := unix.IoctlSetInt(int(fileOut.Fd()), unix.BLKRRPART, 0); err != nil {
+		return fmt.Errorf("Error re-probing the partitions for the specified device")
+	}
+
 	return nil
 }
