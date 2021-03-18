@@ -11,6 +11,7 @@ import (
 
 	diskfs "github.com/diskfs/go-diskfs"
 	"github.com/diskfs/go-diskfs/partition/gpt"
+	"github.com/diskfs/go-diskfs/partition/mbr"
 )
 
 const sectorSize = 512
@@ -90,6 +91,7 @@ func Partition(d types.Disk) error {
 				Start: sectorStart,
 				End:   sectorEnd,
 			}
+
 			sectorStart = sectorStart + sectorEnd
 
 			switch d.Partitions[x].Label {
@@ -107,6 +109,79 @@ func Partition(d types.Disk) error {
 			}
 
 			log.Infof("New Partition Name=%s Start=%d End=%d", newPartition.Name, newPartition.Start, newPartition.End)
+			table.Partitions = append(table.Partitions, newPartition)
+		}
+	}
+
+	err = disk.Partition(table)
+	if err != nil {
+		return err
+	}
+	log.Infoln("Flushing writes to new partition")
+	err = disk.File.Sync()
+	if err != nil {
+		return err
+	}
+	err = disk.File.Close()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// MBRPartition will create the partitions and write them to the disk
+func MBRPartition(d types.Disk) error {
+
+	table := &mbr.Table{
+		LogicalSectorSize:  sectorSize,
+		PhysicalSectorSize: sectorSize,
+	}
+	disk, err := diskfs.Open(d.Device)
+	if err != nil {
+		return err
+	}
+
+	// Build the table
+	partitionNumber := 1
+	var sectorStart uint32
+	sectorStart = 2048
+	for x := range d.Partitions {
+
+		// sector start is for bootloader
+		RemainingSectors := disk.Size/sectorSize - int64(sectorStart)
+
+		if d.Partitions[x].Number == partitionNumber {
+			partitionNumber++
+			newPartition := &mbr.Partition{
+				Start: sectorStart,
+				Size:  uint32(d.Partitions[x].Size),
+			}
+
+			sectorStart = sectorStart + uint32(d.Partitions[x].Size)
+
+			switch d.Partitions[x].Label {
+			case "SWAP":
+				newPartition.Type = 0x82
+			case "LINUX":
+				newPartition.Type = mbr.Linux
+			case "LINUX_ACTIVE":
+				newPartition.Type = mbr.Linux
+				newPartition.Bootable = true
+			case "FAT32":
+				newPartition.Type = mbr.Fat32LBA
+			case "FAT32_ACTIVE":
+				newPartition.Type = mbr.Fat32LBA
+				newPartition.Bootable = true
+			default:
+				newPartition.Type = mbr.Linux
+			}
+
+			// If this is set to 0 then use the remaining disk
+			if d.Partitions[x].Size == 0 {
+				newPartition.Size = uint32(RemainingSectors)
+			}
+
+			log.Infof("New Partition Name=%s Start=%d Size=%d", d.Partitions[x].Label, newPartition.Start, newPartition.Size)
 			table.Partitions = append(table.Partitions, newPartition)
 		}
 	}
