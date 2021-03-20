@@ -15,7 +15,7 @@ const mountAction = "/mountAction"
 func main() {
 
 	fmt.Printf("Archive2Disk - Cloud archive streamer\n------------------------\n")
-	blockDevice := os.Getenv("BLOCK_DEVICE")
+	blockDevice := os.Getenv("DEST_DISK")
 	filesystemType := os.Getenv("FS_TYPE")
 	path := os.Getenv("DEST_PATH")
 
@@ -23,7 +23,7 @@ func main() {
 	archiveType := os.Getenv("ARCHIVE_TYPE")
 
 	if blockDevice == "" {
-		log.Fatalf("No Block Device speified with Environment Variable [BLOCK_DEVICE]")
+		log.Fatalf("No Block Device speified with Environment Variable [DEST_DISK]")
 	}
 
 	// Create the /mountAction mountpoint (no folders exist previously in scratch container)
