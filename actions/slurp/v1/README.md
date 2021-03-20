@@ -16,7 +16,7 @@ a remote server.
 ```yaml
 actions:
   - name: "slurp_ubuntu"
-    image: quay.io/tinkerbell-actions/image2disk:v1.0.0
+    image: quay.io/tinkerbell-actions/slurp:v1.0.0
     timeout: 90
     environment:
       DEST_URL: http://192.168.1.2:3000/image
