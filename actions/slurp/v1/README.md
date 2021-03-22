@@ -10,6 +10,11 @@ version: v1.0.0
 createdAt: "2021-03-20T12:41:45.14Z"
 ---
 
+Slurp will read directly from a block device, it can compress this stream and will
+use the HTTP protocol to transmit the raw data to a listening server. The remote
+server needs to be able to handle `multipart` data (due to the size) and reform this
+to a disk image locally.
+
 The below example will stream a raw ubuntu installed on `/dev/sda` and uplopad it to
 a remote server.
 
