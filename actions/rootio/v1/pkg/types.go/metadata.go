@@ -88,7 +88,7 @@ func RetreieveData() (*Metadata, error) {
 
 	jsonErr := json.Unmarshal(body, &mdata)
 	if jsonErr != nil {
-		return nil, err
+		return nil, jsonErr
 	}
 
 	return &mdata, nil
