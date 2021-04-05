@@ -9,11 +9,13 @@ require (
 	github.com/docker/distribution v2.7.1+incompatible
 	github.com/genuinetools/img v0.5.11
 	github.com/google/go-cmp v0.4.1
+	github.com/klauspost/compress v1.11.12 // indirect
 	github.com/mattn/godown v0.0.0-20201027140031-2c7783b24de7
 	github.com/moby/buildkit v0.7.2
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.7.0 // indirect
 	github.com/spf13/cobra v1.1.1
+	github.com/ulikunitz/xz v0.5.10 // indirect
 	github.com/yuin/goldmark v1.2.1
 	github.com/yuin/goldmark-meta v1.0.0
 	go.uber.org/zap v1.16.0
