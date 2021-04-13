@@ -1,10 +1,12 @@
 package cmd
 
 import (
+	"os"
 	"path"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	"github.com/tinkerbell/actions/pkg/artifacthub"
 	"github.com/tinkerbell/actions/pkg/git"
 	"github.com/tinkerbell/actions/pkg/img"
 )
@@ -61,12 +63,24 @@ func runBuild(opts *buildOptions) error {
 			// I am not sure if we should run each action build in a go routine,
 			// because buildkit is already massively parallelized.
 			for _, action := range *modifiedActions {
+
 				actionContext := path.Join(actionsPath, action.Name, action.Version)
+
+				readmeFile, err := os.Open(path.Join(actionContext, "README.md"))
+				if err != nil {
+					return errors.Wrap(err, "error reading the README.md proposal")
+				}
+
+				manifest := &artifacthub.Manifest{}
+				if err := artifacthub.PopulateFromActionMarkdown(readmeFile, manifest); err != nil {
+					return errors.Wrap(err, "error converting the README.md to an ArtifactHub manifest")
+				}
+
 				actionDockerfile := path.Join(actionContext, "Dockerfile")
-				actionTag := opts.containerRepo + "/" + action.Name + ":" + action.Version
+				actionTag := opts.containerRepo + "/" + manifest.Name + ":v" + manifest.Version
 
 				// Build the container images for all modified actions with buildkit.
-				err := img.Build(&img.BuildConfig{
+				err = img.Build(&img.BuildConfig{
 					Context:    actionContext,
 					Dockerfile: actionDockerfile,
 					Tag:        actionTag,
