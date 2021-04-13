@@ -3,22 +3,31 @@ module github.com/tinkerbell/actions
 go 1.15
 
 require (
-	github.com/containerd/console v0.0.0-20191219165238-8375c3424e4d
-	github.com/containerd/containerd v1.4.1-0.20201117152358-0edc412565dc
+	github.com/Microsoft/hcsshim/test v0.0.0-20210408205431-da33ecd607e1 // indirect
+	github.com/containerd/console v1.0.1
+	github.com/containerd/containerd v1.5.0-beta.4
+	github.com/containerd/continuity v0.0.0-20201208142359-180525291bb7 // indirect
 	github.com/cyphar/filepath-securejoin v0.2.2
+	github.com/docker/cli v20.10.5+incompatible // indirect
 	github.com/docker/distribution v2.7.1+incompatible
+	github.com/docker/docker v17.12.0-ce-rc1.0.20200618181300-9dc6525e6118+incompatible // indirect
+	github.com/docker/docker-credential-helpers v0.6.3 // indirect
 	github.com/genuinetools/img v0.5.11
-	github.com/google/go-cmp v0.4.1
+	github.com/google/go-cmp v0.5.2
 	github.com/mattn/godown v0.0.0-20201027140031-2c7783b24de7
 	github.com/moby/buildkit v0.7.2
+	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/pkg/errors v0.9.1
-	github.com/sirupsen/logrus v1.7.0 // indirect
-	github.com/spf13/cobra v1.1.1
+	github.com/sirupsen/logrus v1.8.1 // indirect
+	github.com/spf13/cobra v1.1.3
+	github.com/stretchr/testify v1.7.0 // indirect
 	github.com/yuin/goldmark v1.2.1
 	github.com/yuin/goldmark-meta v1.0.0
 	go.uber.org/zap v1.16.0
-	golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208
+	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad // indirect
+	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a
 	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776
+	gotest.tools/v3 v3.0.3 // indirect
 )
 
 replace (
