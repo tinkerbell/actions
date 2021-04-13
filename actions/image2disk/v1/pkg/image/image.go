@@ -20,8 +20,6 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-var tick chan time.Time
-
 // WriteCounter counts the number of bytes written to it. It implements to the io.Writer interface
 // and we can pass this into io.TeeReader() which will report progress on each write cycle.
 type WriteCounter struct {
@@ -105,7 +103,7 @@ func Write(sourceImage, destinationDevice string, compressed bool) error {
 	count, err := io.Copy(fileOut, out)
 	if err != nil {
 		ticker.Stop()
-		return fmt.Errorf("Error writing %d bytes to disk [%s] -> %v", count, destinationDevice, err)
+		return fmt.Errorf("error writing %d bytes to disk [%s] -> %v", count, destinationDevice, err)
 	}
 	fmt.Printf("\n")
 
@@ -113,11 +111,11 @@ func Write(sourceImage, destinationDevice string, compressed bool) error {
 
 	// Do the equivalent of partprobe on the device
 	if err := fileOut.Sync(); err != nil {
-		return fmt.Errorf("Failed to sync the block device")
+		return fmt.Errorf("failed to sync the block device")
 	}
 
 	if err := unix.IoctlSetInt(int(fileOut.Fd()), unix.BLKRRPART, 0); err != nil {
-		return fmt.Errorf("Error re-probing the partitions for the specified device")
+		return fmt.Errorf("error re-probing the partitions for the specified device: %v", err)
 	}
 
 	return nil
