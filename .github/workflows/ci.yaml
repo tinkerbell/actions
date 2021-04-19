@@ -11,6 +11,11 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    # thi is here becauase I am missing something big
+    # https://github.com/actions/checkout/issues/477
+    - run: git fetch origin
     - run: env
     - uses: cachix/install-nix-action@v12
       with:
@@ -19,6 +24,9 @@ jobs:
       name: Generate Artifact Hub manifests
     - run: make ci
       name: Ci checks
+      env:
+        GITHUB_BASE_REF: ${{ github.base_ref }}
+        GITHUB_HEAD_REF: ${{ github.head_ref }}
     - name: Deploy
       if: ${{ startsWith(github.ref, 'refs/heads/main') }}
       uses: peaceiris/actions-gh-pages@v3
