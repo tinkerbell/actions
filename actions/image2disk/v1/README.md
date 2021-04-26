@@ -43,3 +43,10 @@ actions:
           DEST_DISK: /dev/sda
           COMPRESSED: true
 ```
+
+## Compression format supported:
+
+- bzip2 (`.bzip2`)
+- gzip (`.gz`)
+- xz (`.xz`)
+- xs (`.xs`)

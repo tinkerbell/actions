@@ -3,10 +3,10 @@ package image
 // This package handles the pulling and management of images
 
 import (
+	"compress/bzip2"
 	"compress/gzip"
 	"fmt"
 	"io"
-	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -14,7 +14,9 @@ import (
 	"time"
 
 	"github.com/dustin/go-humanize"
+	"github.com/klauspost/compress/zstd"
 	log "github.com/sirupsen/logrus"
+	"github.com/ulikunitz/xz"
 	"golang.org/x/sys/unix"
 )
 
@@ -38,105 +40,6 @@ func tickerProgress(byteCounter uint64) {
 	// Return again and print current status of download
 	// We use the humanize package to print the bytes in a meaningful way (e.g. 10 MB)
 	fmt.Printf("\rDownloading... %s complete", humanize.Bytes(byteCounter))
-}
-
-// Read - will take a local disk and copy an image to a remote server
-func Read(sourceDevice, destinationAddress, mac string, compressed bool) error {
-
-	var fileName string
-	if !compressed {
-		// raw image
-		fileName = fmt.Sprintf("%s.img", mac)
-	} else {
-		// compressed image
-		fileName = fmt.Sprintf("%s.zmg", mac)
-	}
-
-	fmt.Println("--------------------------------------------------------------------------------")
-
-	fmt.Printf("\nReading of disk [%s], and sending to [%s]\n", filepath.Base(sourceDevice), destinationAddress)
-	fmt.Println("--------------------------------------------------------------------------------")
-
-	client := &http.Client{}
-	_, err := UploadMultipartFile(client, destinationAddress, fileName, sourceDevice, compressed)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-//UploadMultipartFile -
-func UploadMultipartFile(client *http.Client, uri, key, path string, compressed bool) (*http.Response, error) {
-	body, writer := io.Pipe()
-
-	req, err := http.NewRequest(http.MethodPost, uri, body)
-	if err != nil {
-		return nil, err
-	}
-
-	mwriter := multipart.NewWriter(writer)
-	req.Header.Add("Content-Type", mwriter.FormDataContentType())
-
-	errchan := make(chan error)
-
-	// GO routine for the copy operation
-	go func() {
-		defer close(errchan)
-		defer writer.Close()
-		defer mwriter.Close()
-
-		// BootyImage is the key that the client will lookfor and
-		// key is the renamed file
-		w, err := mwriter.CreateFormFile("BootyImage", key)
-		if err != nil {
-			errchan <- err
-			return
-		}
-
-		diskIn, err := os.Open(path)
-		if err != nil {
-			errchan <- err
-			return
-		}
-
-		defer diskIn.Close()
-
-		if !compressed {
-			// Without compression read raw output
-			if written, err := io.Copy(w, diskIn); err != nil {
-				errchan <- fmt.Errorf("error copying %s (%d bytes written): %v", path, written, err)
-				return
-			}
-
-		} else {
-			// With compression run data through gzip writer
-			zipWriter := gzip.NewWriter(w)
-			// run an io.Copy on the disk into the zipWriter
-			if written, err := io.Copy(zipWriter, diskIn); err != nil {
-				errchan <- fmt.Errorf("error copying %s (%d bytes written): %v", path, written, err)
-				return
-			}
-			// Ensure we close our zipWriter (otherwise we will get "unexpected EOF")
-			err = zipWriter.Close()
-
-		}
-
-		if err := mwriter.Close(); err != nil {
-			errchan <- err
-			return
-		}
-
-	}()
-
-	resp, err := client.Do(req)
-	merr := <-errchan
-
-	if err != nil || merr != nil {
-		return resp, fmt.Errorf("http error: %v, multipart error: %v", err, merr)
-	}
-
-	return resp, nil
 }
 
 // Write will pull an image and write it to local storage device
@@ -175,13 +78,11 @@ func Write(sourceImage, destinationDevice string, compressed bool) error {
 		// Without compression send raw output
 		out = resp.Body
 	} else {
-		// With compression run data through gzip writer
-		zipOUT, err := gzip.NewReader(resp.Body)
+		// Find compression algorithim based upon extension
+		out, err = findDecompressor(sourceImage, resp.Body)
 		if err != nil {
-			fmt.Println("[ERROR] New gzip reader:", err)
+			return err
 		}
-		defer zipOUT.Close()
-		out = zipOUT
 	}
 
 	log.Infof("Beginning write of image [%s] to disk [%s]", filepath.Base(sourceImage), destinationDevice)
@@ -218,4 +119,42 @@ func Write(sourceImage, destinationDevice string, compressed bool) error {
 	}
 
 	return nil
+}
+
+func findDecompressor(imageURL string, r io.Reader) (out io.Reader, err error) {
+	switch filepath.Ext(imageURL) {
+	case ".bzip2":
+		// With compression run data through gzip writer
+		bzipOUT := bzip2.NewReader(r)
+		out = bzipOUT
+	case ".gz":
+		// With compression run data through gzip writer
+		zipOUT, gzErr := gzip.NewReader(r)
+		if gzErr != nil {
+			err = fmt.Errorf("[ERROR] New gzip reader: %v", gzErr)
+			return
+		}
+		defer zipOUT.Close()
+		out = zipOUT
+	case ".xz":
+		xzOUT, xzErr := xz.NewReader(r)
+		if xzErr != nil {
+			err = fmt.Errorf("[ERROR] New xz reader: %v", xzErr)
+			return
+		}
+		// The xz reader doesn't implement close()
+		//defer xzOUT.Close()
+		out = xzOUT
+	case ".zs":
+		zsOUT, zsErr := zstd.NewReader(r)
+		if zsErr != nil {
+			err = fmt.Errorf("[ERROR] New zs reader: %v", zsErr)
+			return
+		}
+		defer zsOUT.Close()
+		out = zsOUT
+	default:
+		err = fmt.Errorf("Unknown compression suffix [%s]", filepath.Ext(imageURL))
+	}
+	return
 }
