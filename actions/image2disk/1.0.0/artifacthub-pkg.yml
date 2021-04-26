@@ -50,6 +50,12 @@ readme: |+
               COMPRESSED: true
     ```
 
+    ## Compression format supported:
+
+    * bzip2 (`.bzip2`)
+    * gzip (`.gz`)
+    * xz (`.xz`)
+    * xs (`.xs`)
 
 provider:
     name: tinkerbell-community
