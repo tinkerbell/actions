@@ -1,6 +1,5 @@
-name: For each commit and PR
+name: For each pull request
 on:
-  push:
   pull_request:
 
 jobs:
@@ -9,13 +8,16 @@ jobs:
     env:
       CGO_ENABLED: 0
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
-    # thi is here becauase I am missing something big
-    # https://github.com/actions/checkout/issues/477
-    - run: git fetch origin
+    # I opened this issue and a case on GitHub support
+    # https://github.com/actions/checkout/issues/477 The support team answered
+    # that right now there is not a clean way to take a diff because the
+    # checkout action pulls the minimum it can.
+    # I am watching this PR because it will help
+    # https://github.com/actions/checkout/pull/155
+    - run: |
+        git clone -b ${{ github.head_ref }} ${{ github.event.pull_request.head.repo.html_url }} ${GITHUB_WORKSPACE}
+        git remote add upstream ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}
+        git fetch upstream
     - run: env
     - uses: cachix/install-nix-action@v12
       with:
@@ -25,8 +27,8 @@ jobs:
     - run: make ci
       name: Ci checks
       env:
-        GITHUB_BASE_REF: ${{ github.base_ref }}
-        GITHUB_HEAD_REF: ${{ github.head_ref }}
+        GITHUB_BASE_REF: ${ GITHUB_BASE_REF }
+        GITHUB_HEAD_REF: ${ GITHUB_HEAD_REF }
     - name: Deploy
       if: ${{ startsWith(github.ref, 'refs/heads/main') }}
       uses: peaceiris/actions-gh-pages@v3

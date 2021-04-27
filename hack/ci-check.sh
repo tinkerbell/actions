@@ -5,7 +5,6 @@
 set -eux
 
 failed=0
-
 if ! git ls-files '*.sh' | xargs shfmt -l -d; then
 	failed=1
 fi
@@ -32,4 +31,4 @@ if [[ -z $GITHUB_BASE_REF ]]; then
 	echo "Skipping: This should only run on pull_request."
 	exit 0
 fi
-go run cmd/hub/main.go build --dry-run --git-ref "origin/$GITHUB_HEAD_REF..origin/$GITHUB_BASE_REF"
+go run cmd/hub/main.go build --dry-run --git-ref "remotes/upstream/$GITHUB_BASE_REF..$GITHUB_HEAD_REF"
