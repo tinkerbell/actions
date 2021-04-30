@@ -24,11 +24,12 @@ go vet ./...
 
 go test -v ./...
 
-# We check the list of actions to rebuild only for the entire pull_request.
-# The push event does not have a GITHUB_BASE_REF set. That's why here we use
-# that environment variable to figure out if it is a PR event or a commit push
+GIT_REF="remotes/upstream/$GITHUB_BASE_REF..$GITHUB_HEAD_REF"
+
+# GITHUB_BASE_REF gets populated only for the event pull_request.
+# But this job runs for push as well. In that case we want to assert the current commit.
+# It means that HEAD..HEAD~1 is enough.
 if [[ -z $GITHUB_BASE_REF ]]; then
-	echo "Skipping: This should only run on pull_request."
-	exit 0
+	GIT_REF="HEAD..HEAD~1"
 fi
-sudo go run cmd/hub/main.go build --git-ref "remotes/upstream/$GITHUB_BASE_REF..$GITHUB_HEAD_REF"
+sudo go run cmd/hub/main.go build --git-ref ${GIT_REF}
