@@ -1,6 +1,7 @@
 name: For each pull request
 on:
   pull_request:
+  push:
 
 jobs:
   validation:
@@ -8,6 +9,14 @@ jobs:
     env:
       CGO_ENABLED: 0
     steps:
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v1
+      id: qemu
+      with:
+        image: tonistiigi/binfmt:latest
+        platforms: all
+    - name: Available platforms
+      run: echo ${{ steps.qemu.outputs.platforms }}
     # I opened this issue and a case on GitHub support
     # https://github.com/actions/checkout/issues/477 The support team answered
     # that right now there is not a clean way to take a diff because the

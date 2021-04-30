@@ -31,4 +31,4 @@ if [[ -z $GITHUB_BASE_REF ]]; then
 	echo "Skipping: This should only run on pull_request."
 	exit 0
 fi
-go run cmd/hub/main.go build --dry-run --git-ref "remotes/upstream/$GITHUB_BASE_REF..$GITHUB_HEAD_REF"
+sudo go run cmd/hub/main.go build --git-ref "remotes/upstream/$GITHUB_BASE_REF..$GITHUB_HEAD_REF"
