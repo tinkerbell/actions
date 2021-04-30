@@ -28,11 +28,11 @@ jobs:
     # I am watching this PR because it will help
     # https://github.com/actions/checkout/pull/155
     - name: fetch remote
+      if: github.event.pull_request
       run: |
         git fetch origin
         git remote add upstream ${{ github.event.pull_request.head.repo.html_url }}
         git fetch upstream
-        git branch -a
     - run: env
     - uses: cachix/install-nix-action@v12
       with:
