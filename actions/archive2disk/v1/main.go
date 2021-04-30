@@ -13,7 +13,6 @@ import (
 const mountAction = "/mountAction"
 
 func main() {
-
 	fmt.Printf("Archive2Disk - Cloud archive streamer\n------------------------\n")
 	blockDevice := os.Getenv("DEST_DISK")
 	filesystemType := os.Getenv("FS_TYPE")
