@@ -24,7 +24,7 @@ go vet ./...
 
 go test -v ./...
 
-GIT_REF="remotes/upstream/$GITHUB_BASE_REF..$GITHUB_HEAD_REF"
+GIT_REF="remotes/upstream/$GITHUB_HEAD_REF..remotes/origin/$GITHUB_BASE_REF"
 
 # GITHUB_BASE_REF gets populated only for the event pull_request.
 # But this job runs for push as well. In that case we want to assert the current commit.

@@ -17,16 +17,22 @@ jobs:
         platforms: all
     - name: Available platforms
       run: echo ${{ steps.qemu.outputs.platforms }}
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
     # I opened this issue and a case on GitHub support
     # https://github.com/actions/checkout/issues/477 The support team answered
     # that right now there is not a clean way to take a diff because the
     # checkout action pulls the minimum it can.
     # I am watching this PR because it will help
     # https://github.com/actions/checkout/pull/155
-    - run: |
-        git clone -b ${{ github.head_ref }} ${{ github.event.pull_request.head.repo.html_url }} ${GITHUB_WORKSPACE}
-        git remote add upstream ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}
+    - name: fetch remote
+      run: |
+        git fetch origin
+        git remote add upstream ${{ github.event.pull_request.head.repo.html_url }}
         git fetch upstream
+        git branch -a
     - run: env
     - uses: cachix/install-nix-action@v12
       with:
