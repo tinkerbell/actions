@@ -25,5 +25,7 @@ mkShell {
     shfmt
     shellcheck
     libseccomp
+    rootlesskit
+    runc
   ];
 }
