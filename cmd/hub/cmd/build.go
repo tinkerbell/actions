@@ -1,9 +1,11 @@
 package cmd
 
 import (
+	"context"
 	"os"
 	"path"
 
+	"github.com/moby/buildkit/util/appdefaults"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/tinkerbell/actions/pkg/artifacthub"
@@ -18,6 +20,8 @@ type buildOptions struct {
 	push          bool
 	gitRef        string
 	platforms     string
+	buildkitAddr  string
+	noCache       bool
 }
 
 var buildOpts = &buildOptions{}
@@ -26,7 +30,7 @@ var buildCmd = &cobra.Command{
 	Use:   "build [--context .] [--dry-run]",
 	Short: "Build and push action container images with changes",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return runBuild(buildOpts)
+		return runBuild(cmd.Context(), buildOpts)
 	},
 }
 
@@ -34,15 +38,17 @@ func init() {
 	buildCmd.PersistentFlags().StringVar(&buildOpts.context, "context", ".", "base path for the proposals repository in your local file system")
 	buildCmd.PersistentFlags().StringVar(&buildOpts.containerRepo, "container-repo", "quay.io/tinkerbell-actions", "repository to push the container images to")
 	buildCmd.PersistentFlags().BoolVar(&buildOpts.dryRun, "dry-run", false, "only show the modified actions")
+	buildCmd.PersistentFlags().BoolVar(&buildOpts.noCache, "no-cache", false, "Do not use cache when building the image")
 	buildCmd.PersistentFlags().BoolVar(&buildOpts.push, "push", false, "Push image to a registry")
 	buildCmd.PersistentFlags().StringVar(&buildOpts.gitRef, "git-ref", "HEAD^@", "the git commit or reference to compare to in the format of HEAD..<commit-id>")
+	buildCmd.PersistentFlags().StringVar(&buildOpts.buildkitAddr, "buildkit-addr", appdefaults.Address, "buildkit daemon address")
 	// FIXME: For some odd reason linux/arm/v6 takes forever to build (> 20min), so I excluded it by default.
 	buildCmd.PersistentFlags().StringVar(&buildOpts.platforms, "platforms", "linux/amd64,linux/arm64,linux/arm/v7", "the target os and cpu architecture platforms for the container images")
 
 	rootCmd.AddCommand(buildCmd)
 }
 
-func runBuild(opts *buildOptions) error {
+func runBuild(ctx context.Context, opts *buildOptions) error {
 	actionsPath := path.Join(opts.context, "actions")
 
 	// Find all modified actions.
@@ -82,13 +88,14 @@ func runBuild(opts *buildOptions) error {
 				actionTag := opts.containerRepo + "/" + manifest.Name + ":v" + manifest.Version
 
 				// Build the container images for all modified actions with buildkit.
-				err = img.Build(&img.BuildConfig{
-					Context:    actionContext,
-					Dockerfile: actionDockerfile,
-					Tag:        actionTag,
-					Platforms:  buildOpts.platforms,
-					Push:       opts.push,
-					NoConsole:  false,
+				err = img.Build(ctx, &img.BuildConfig{
+					Context:      actionContext,
+					Dockerfile:   actionDockerfile,
+					Tag:          actionTag,
+					Platforms:    buildOpts.platforms,
+					Push:         opts.push,
+					BuildKitAddr: opts.buildkitAddr,
+					NoCache:      opts.noCache,
 				})
 				if err != nil {
 					log.Error(err.Error())
