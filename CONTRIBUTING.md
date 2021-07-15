@@ -1,6 +1,6 @@
 ## Hello Contributors!
 
-Thx for your interest!
+Thanks for your interest!
 We're so glad you're here.
 
 ### Important Resources
@@ -9,11 +9,24 @@ We're so glad you're here.
 
 ### Code of Conduct
 
-Available via [https://github.com/tinkerbell/tink/blob/master/.github/CODE_OF_CONDUCT.md](https://github.com/tinkerbell/tink/blob/master/.github/CODE_OF_CONDUCT.md)
+Please read and understand the code of conduct found [here](https://github.com/tinkerbell/.github/blob/master/CODE_OF_CONDUCT.md).
 
 ### Environment Details
 
-[https://github.com/tinkerbell/tink/blob/master/Makefile](https://github.com/tinkerbell/tink/blob/master/Makefile)
+Building is handled by `make`, please see the [Makefile](Makefile) for available targets.
+
+#### Nix
+
+This repo's build environment can be reproduced using `nix`.
+
+##### Install Nix
+
+Follow the [Nix installation](https://nixos.org/download.html) guide to setup Nix on your box.
+
+##### Load Dependencies
+
+Loading build dependencies is as simple as running `nix-shell` or using [lorri](https://github.com/nix-community/lorri).
+If you have `direnv` installed the included `.envrc` will make that step automatic.
 
 ### How to Submit Change Requests
 
@@ -26,10 +39,3 @@ We'll try to add comments as soon as possible, though.
 Bugs are problems in code, in the functionality of an application or in its UI design; you can submit them through [Issues](https://github.com/tinkerbell/tink/issues).
 
 ## Code Style Guides
-
-#### Protobuf
-
-Please ensure protobuf related files are generated along with _any_ change to a protobuf file.
-CI will enforce this, but its best to commit the generated files along with the protobuf changes in the same commit.
-Handling of protobuf deps and generating the go files are both handled by the [protoc.sh](./protos/protoc.sh) script.
-Both go & protoc are required by protoc.sh, these are both installed and used if using nix-shell.
