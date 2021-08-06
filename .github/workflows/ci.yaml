@@ -15,12 +15,15 @@ jobs:
       with:
         image: tonistiigi/binfmt:latest
         platforms: all
-    - name: Available platforms
+
+    - name: Show available platforms
       run: echo ${{ steps.qemu.outputs.platforms }}
+
     - name: Checkout code
       uses: actions/checkout@v2
       with:
         fetch-depth: 0
+
     # I opened this issue and a case on GitHub support
     # https://github.com/actions/checkout/issues/477 The support team answered
     # that right now there is not a clean way to take a diff because the
@@ -33,17 +36,24 @@ jobs:
         git fetch origin
         git remote add upstream ${{ github.event.pull_request.head.repo.html_url }}
         git fetch upstream
-    - run: env
-    - uses: cachix/install-nix-action@v12
+
+    - name: Show env
+      run: env
+
+    - name: Install nix
+      uses: cachix/install-nix-action@v12
       with:
         nix_path: nixpkgs=channel:nixos-unstable
-    - run: make artifacthub/gen-manifests
-      name: Generate Artifact Hub manifests
-    - run: make ci
-      name: Ci checks
+
+    - name: Generate Artifact Hub manifests
+      run: make artifacthub/gen-manifests
+
+    - name: CI checks
+      run: make ci
       env:
         GITHUB_BASE_REF: ${ GITHUB_BASE_REF }
         GITHUB_HEAD_REF: ${ GITHUB_HEAD_REF }
+
     - name: Deploy
       if: ${{ startsWith(github.ref, 'refs/heads/main') }}
       uses: peaceiris/actions-gh-pages@v3

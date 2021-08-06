@@ -17,18 +17,27 @@ jobs:
       with:
         image: tonistiigi/binfmt:latest
         platforms: all
-    - name: Available platforms
+
+    - name: Show available platforms
       run: echo ${{ steps.qemu.outputs.platforms }}
-    - run: env
+
+    - name: Show env
+      run: env
+
     # The ./hack/action-build-and-deploy.sh runs as sudo. It means that root is the user who needs to be authenticated agains quay.
     # That's why we can't use the docker-login action here.
-    - run: echo "${{ secrets.QUAY_PWD }}" | sudo docker login -u ${{ secrets.QUAY_USER }} --password-stdin quay.io
+    - name: Log in to Quay.io
+      run: echo "${{ secrets.QUAY_PWD }}" | sudo docker login -u ${{ secrets.QUAY_USER }} --password-stdin quay.io
+
     - name: Checkout code
       uses: actions/checkout@v2
       with:
         fetch-depth: 0
-    - uses: cachix/install-nix-action@v12
+
+    - name: Install nix
+      uses: cachix/install-nix-action@v12
       with:
         nix_path: nixpkgs=channel:nixos-unstable
+
     - name: build and deploy
       run: ./hack/action-build-and-deploy.sh
