@@ -1,9 +1,6 @@
 name: Build and push new actions on Quay.io
 on:
   pull_request:
-  #push:
-  #  branches:
-  #    - main
 
 jobs:
   validation:
@@ -27,6 +24,7 @@ jobs:
     # The ./hack/action-build-and-deploy.sh runs as sudo. It means that root is the user who needs to be authenticated against quay.
     # That's why we can't use the docker-login action here.
     - name: Log in to Quay.io
+      if: ${{ startsWith(github.ref, 'refs/heads/main') }}
       run: echo "${{ secrets.QUAY_PWD }}" | sudo docker login -u ${{ secrets.QUAY_USER }} --password-stdin quay.io
 
     - name: Checkout code
