@@ -3,8 +3,8 @@
 # Build kexec
 FROM golang:1.15-alpine as kexec
 RUN apk add --no-cache git ca-certificates gcc linux-headers musl-dev
-COPY . /go/src/github.com/thebsdbox/kexec/
-WORKDIR /go/src/github.com/thebsdbox/kexec
+COPY . /go/src/github.com/tinkerbell/hub/actions/kexec/v1/kexec/
+WORKDIR /go/src/github.com/tinkerbell/hub/actions/kexec/v1/kexec
 ENV GO111MODULE=on
 RUN --mount=type=cache,sharing=locked,id=gomod,target=/go/pkg/mod/cache \
     --mount=type=cache,sharing=locked,id=goroot,target=/root/.cache/go-build \
@@ -12,5 +12,5 @@ RUN --mount=type=cache,sharing=locked,id=gomod,target=/go/pkg/mod/cache \
 
 # Build final image
 FROM scratch
-COPY --from=kexec /go/src/github.com/thebsdbox/kexec/kexec .
+COPY --from=kexec /go/src/github.com/tinkerbell/hub/actions/kexec/v1/kexec/kexec .
 ENTRYPOINT ["/kexec"]
