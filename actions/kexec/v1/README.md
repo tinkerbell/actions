@@ -33,7 +33,41 @@ actions:
           CMD_LINE: "root=/dev/sda3 ro"
 ```
 
-Troubleshooting:
+## Additional `kexec` options
+
+### ESXiBoot (Experimental)
+
+```yaml
+actions:
+    - name: "kexec ubuntu"
+      image: quay.io/tinkerbell-actions/kexec:v1.0.0
+      timeout: 90
+      pid: host
+      environment:
+          BLOCK_DEVICE: /dev/sda
+          ESXI_BOOT: true
+```
+
+The `ESXI_BOOT` will autodetect the ESXi "partition" (so specify the device, **not** the partition)
+it will then parse the esxi configuration and kexec into the esxi kernel.
+
+### UEFIBOOT (Super duper experimental)
+
+```yaml
+actions:
+    - name: "kexec ubuntu"
+      image: quay.io/tinkerbell-actions/kexec:v1.0.0
+      timeout: 90
+      pid: host
+      environment:
+          UEFI_DEBUG: true
+          UEFI_BOOT: true
+```
+
+This will use the uefiboot from the edk2 project, in probablility it wont work with your hardware just
+yet but YMMV.
+
+## Troubleshooting:
 
 `function not implemented` - If this error is reported and the `kexec` fails this is due to the kernel that tinkie is running, not supporting kexec.
 

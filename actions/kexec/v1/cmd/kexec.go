@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strconv"
 	"syscall"
 
 	"path/filepath"
@@ -11,6 +12,9 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/tinkerbell/hub/actions/kexec/v1/cmd/grub"
+	"github.com/tinkerbell/hub/actions/kexec/v1/pkg/esxiboot"
+	"github.com/tinkerbell/hub/actions/kexec/v1/pkg/uefiboot"
+
 	"golang.org/x/sys/unix"
 )
 
@@ -33,6 +37,30 @@ var kexecCmd = &cobra.Command{
 		kernelPath := os.Getenv("KERNEL_PATH")
 		initrdPath := os.Getenv("INITRD_PATH")
 		cmdLine := os.Getenv("CMD_LINE")
+
+		//Uefi configuration - more debug that you can imagine
+		uefiBoot := os.Getenv("UEFI_BOOT")
+		uefiboot.UEFIDebug = os.Getenv("UEFI_DEBUG")
+		uefiboot.UEFIBase = os.Getenv("UEFI_BASE")
+		uefiboot.UEFISerialAddr = os.Getenv("UEFI_SERIALADDR")
+		uefiboot.UEFISerialWidth = os.Getenv("UEFI_SERIALWIDTH")
+		uefiboot.UEFISerialHertz = os.Getenv("UEFI_SERIALHERTZ")
+		uefiboot.UEFISerialBaud = os.Getenv("UEFI_SERIALBAUD")
+
+		uefiEnable, _ := strconv.ParseBool(uefiBoot)
+
+		if uefiEnable {
+			// We never come back from here
+			uefiboot.Boot()
+		}
+
+		//Esxi boot - equally as debug as you can imagine
+		esxiBoot := os.Getenv("ESXI_BOOT")
+		esxienable, _ := strconv.ParseBool(esxiBoot)
+		if esxienable {
+			// We never come back from here
+			esxiboot.Boot(blockDevice, cmdLine)
+		}
 
 		// These two strings contain the updated paths including the mountAction path
 		var kernelMountPath, initrdMountPath string
