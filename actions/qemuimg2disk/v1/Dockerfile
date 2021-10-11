@@ -50,7 +50,7 @@ FROM scratch as collect
 COPY --from=builder /bin/qemu-img /bin/qemu-img
 COPY --from=builder /bin/sh /bin/sh
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
-COPY --from=builder /lib/ld-musl-x86_64.so.1  /lib/ld-musl-x86_64.so.1
+COPY --from=builder /lib/ld-musl*  /lib/
 COPY --from=partprobe /src/partprobe /bin/partprobe
 COPY entrypoint.sh /entrypoint.sh
 
