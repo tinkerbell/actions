@@ -14,6 +14,7 @@ import (
 
 var metadata *types.Instance
 
+
 // Release - this struct contains the release information populated when building rootio
 var Release struct {
 	Version string
