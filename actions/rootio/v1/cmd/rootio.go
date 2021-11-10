@@ -12,7 +12,7 @@ import (
 	"github.com/tinkerbell/hub/actions/rootio/v1/pkg/types.go"
 )
 
-var metadata *types.Metadata
+var metadata *types.Instance
 
 // Release - this struct contains the release information populated when building rootio
 var Release struct {
@@ -131,7 +131,7 @@ var rootioVersion = &cobra.Command{
 	},
 }
 
-func test() (*types.Metadata, error) {
+func test() (*types.Instance, error) {
 	// Open our jsonFile
 	jsonFile, err := os.Open(os.Getenv("JSON_FILE"))
 	// if we os.Open returns an error then handle it
@@ -145,7 +145,7 @@ func test() (*types.Metadata, error) {
 	byteValue, _ := ioutil.ReadAll(jsonFile)
 
 	// we initialize our Users array
-	var mdata types.Metadata
+	var mdata types.Instance
 
 	// we unmarshal our byteArray which contains our
 	// jsonFile's content into 'users' which we defined above
