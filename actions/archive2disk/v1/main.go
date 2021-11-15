@@ -20,6 +20,7 @@ func main() {
 
 	archiveURL := os.Getenv("ARCHIVE_URL")
 	archiveType := os.Getenv("ARCHIVE_TYPE")
+	archiveChecksum := os.Getenv("ARCHIVE_CHECKSUM")
 
 	if blockDevice == "" {
 		log.Fatalf("No Block Device speified with Environment Variable [DEST_DISK]")
@@ -39,7 +40,7 @@ func main() {
 	log.Infof("Mounted [%s] -> [%s]", blockDevice, mountAction)
 
 	// Write the image to disk
-	err = archive.Write(archiveURL, archiveType, filepath.Join(mountAction, path))
+	err = archive.Write(archiveURL, archiveType, filepath.Join(mountAction, path), archiveChecksum)
 	if err != nil {
 		log.Fatal(err)
 	}
