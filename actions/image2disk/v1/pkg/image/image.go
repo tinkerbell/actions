@@ -115,7 +115,8 @@ func Write(sourceImage, destinationDevice string, compressed bool) error {
 	}
 
 	if err := unix.IoctlSetInt(int(fileOut.Fd()), unix.BLKRRPART, 0); err != nil {
-		return fmt.Errorf("error re-probing the partitions for the specified device: %v", err)
+		// Ignore errors since it may be a partition, but log in case it's helpful
+		log.Errorf("error re-probing the partitions for the specified device: %v", err)
 	}
 
 	return nil
