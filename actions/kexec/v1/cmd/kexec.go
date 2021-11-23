@@ -93,6 +93,7 @@ var kexecCmd = &cobra.Command{
 			if bootConfig == nil {
 				log.Fatal("No Kernel configuration passed in [KERNEL_PATH] and unable to parse [/boot/grub/grub.conf]")
 			}
+			log.Infof("Loaded boot config: %#v", bootConfig)
 			kernelMountPath = filepath.Join(mountAction, bootConfig.Kernel)
 			initrdMountPath = filepath.Join(mountAction, bootConfig.Initramfs)
 			// Overwrite the cmdline with what is found in grub.conf, unless something specific is added
@@ -114,11 +115,13 @@ var kexecCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
+		log.Infof("Running Kexec: kernel: %s, initrd: %s, cmdLine: %v", kernelMountPath, initrdMountPath, cmdLine)
 		// Load the kernel configuration into memory
 		err = unix.KexecFileLoad(int(kernel.Fd()), int(initrd.Fd()), cmdLine, 0)
 		if err != nil {
 			log.Fatal(err)
 		}
+		log.Info("Rebooting system")
 		// Call the unix reboot command with the kexec functionality
 		unix.Reboot(unix.LINUX_REBOOT_CMD_KEXEC)
 	},
