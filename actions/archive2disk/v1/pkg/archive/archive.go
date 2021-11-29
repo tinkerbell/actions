@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"path/filepath"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -20,7 +21,9 @@ func Write(archiveURL, archiveType, path string, checksum string) error {
 		return err
 	}
 
-	resp, err := http.DefaultClient.Do(req)
+	client := &http.Client{Timeout: time.Second * 300}
+
+	resp, err := client.Do(req)
 	if err != nil {
 		return err
 	}
