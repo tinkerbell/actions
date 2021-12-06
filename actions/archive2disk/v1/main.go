@@ -13,15 +13,18 @@ import (
 const mountAction = "/mountAction"
 
 func main() {
-	fmt.Printf("Archive2Disk - Cloud archive streamer\n------------------------\n")
+	fmt.Printf("Archive2Disk - Archive streamer\n------------------------\n")
 	blockDevice := os.Getenv("DEST_DISK")
 	filesystemType := os.Getenv("FS_TYPE")
 	path := os.Getenv("DEST_PATH")
-
 	archiveURL := os.Getenv("ARCHIVE_URL")
 	archiveType := os.Getenv("ARCHIVE_TYPE")
-	archiveChecksum := os.Getenv("ARCHIVE_CHECKSUM")
-
+	//optional checksum to validate tarfile, must be of the format
+	//checksum name:checsum
+	//ex:
+	//sha256:shasum
+	//sha512:shasum	
+	archiveChecksum := os.Getenv("TARFILE_CHECKSUM")	
 	if blockDevice == "" {
 		log.Fatalf("No Block Device speified with Environment Variable [DEST_DISK]")
 	}

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"time"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -39,7 +40,7 @@ func Write(archiveURL, archiveType, path string, checksum string) error {
 
 	absPath, err := filepath.Abs(path)
 
-	switch archiveType {
+	switch strings.ToLower(archiveType) {
 	case "gz":
 		// With compression run data through gzip writer
 		// zipOUT, err := gzip.NewReader(resp.Body)
@@ -49,7 +50,7 @@ func Write(archiveURL, archiveType, path string, checksum string) error {
 		// defer zipOUT.Close()
 		// out = zipOUT
 	case "tar":
-		err := extractTarDirectory(absPath, resp.Body)
+		err := extractTarDirectory(absPath, checksum, resp.Body)
 		if err != nil {
 		 	log.Fatalf("[ERROR] New gzip reader:", err)
 		}
