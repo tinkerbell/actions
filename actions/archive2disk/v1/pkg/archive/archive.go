@@ -13,8 +13,7 @@ import (
 )
 
 // Write will pull an image and write it to local storage device
-// with compress set to true it will use gzip compression to expand the data before
-// writing to an underlying device
+// image must be a tar file or tar.gz file as set by archiveType
 func Write(archiveURL, archiveType, path string, checksum string) error {
 
 	req, err := http.NewRequest("GET", archiveURL, nil)
