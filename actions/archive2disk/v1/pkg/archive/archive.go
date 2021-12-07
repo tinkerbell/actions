@@ -21,6 +21,9 @@ func Write(archiveURL, archiveType, path string, checksum string) error {
 		return err
 	}
 
+	//timeout added due to clients timing out when provisioning
+	//multiple systems at once.  May want to add this as an
+	//input parameter
 	client := &http.Client{Timeout: time.Second * 300}
 
 	resp, err := client.Do(req)
