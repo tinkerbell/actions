@@ -4,17 +4,18 @@
 
 set -eux
 
-failed=0
+failed=false
+
 if ! git ls-files '*.sh' | xargs shfmt -l -d; then
-	failed=1
+	failed=true
 fi
 
 if ! git ls-files '*.sh' | xargs shellcheck; then
-	failed=1
+	failed=true
 fi
 
-if [[ "$failed" -eq 1 ]]; then
-	exit "$failed"
+if $failed; then
+	exit 1
 fi
 
 go mod tidy
