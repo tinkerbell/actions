@@ -3,3 +3,5 @@ ci:
 
 artifacthub/gen-manifests:
 	./hack/generate-artifacthub-manifests.sh
+
+include rules.mk
