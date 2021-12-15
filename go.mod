@@ -14,6 +14,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.7.0 // indirect
 	github.com/spf13/cobra v1.1.1
+	github.com/tinkerbell/lint-install v0.0.0-20211124222731-60117699c7e3
 	github.com/yuin/goldmark v1.4.1
 	github.com/yuin/goldmark-meta v1.0.0
 	go.uber.org/zap v1.16.0

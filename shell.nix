@@ -21,6 +21,8 @@ mkShell {
     shfmt
     shellcheck
     libseccomp
+    python3Packages.pip
+    python3Packages.setuptools
     rootlesskit
     runc
   ];
