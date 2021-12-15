@@ -14,12 +14,18 @@ if ! git ls-files '*.sh' | xargs shellcheck; then
 	failed=true
 fi
 
+if ! go mod tidy; then
+	failed=true
+fi
+
+# this actually shows the diff(s) that will cause the error exit which is nice because its helpful
+if ! git diff | (! grep .); then
+	failed=true
+fi
+
 if $failed; then
 	exit 1
 fi
-
-go mod tidy
-test -z "$(git status --porcelain go.mod go.sum)"
 
 go vet ./...
 
