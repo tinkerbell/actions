@@ -38,7 +38,7 @@ func runGenerate(opts *generateOptions) error {
 	if os.IsNotExist(err) {
 		return errors.Wrap(err, "we expect an actions directory inside the repository.")
 	}
-	if info.IsDir() == false {
+	if !info.IsDir() {
 		return errors.New("the expected actions directory has to be a directory, not a file")
 	}
 
@@ -48,7 +48,9 @@ func runGenerate(opts *generateOptions) error {
 	}
 
 	if _, err := os.Stat(generateOpts.output); os.IsNotExist(err) {
-		os.Mkdir(generateOpts.output, 0700)
+		if err := os.Mkdir(generateOpts.output, 0700); err != nil {
+			return err
+		}
 	}
 
 	// This is the manifest with all the pre-populated information. Ideally

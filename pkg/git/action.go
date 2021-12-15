@@ -49,7 +49,7 @@ func ModifiedActions(modifiedActions *[]TinkerbellAction, actionsPath string, co
 			action := NewTinkerbellAction(file)
 
 			// Deduplicate entries by checking if a modification for this action was already detected.
-			if detected[action.String()] == false {
+			if !detected[action.String()] {
 				detected[action.String()] = true
 				*modifiedActions = append(*modifiedActions, action)
 			}

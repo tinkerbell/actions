@@ -29,7 +29,6 @@ import (
 
 const (
 	defaultBackend        = "auto"
-	defaultDockerRegistry = "https://index.docker.io/v1/"
 	defaultDockerfileName = "Dockerfile"
 )
 

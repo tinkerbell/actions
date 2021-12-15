@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	fmt.Println("GRUB2Disk - GRUB streamer\n------------------------\n")
+	fmt.Print("GRUB2Disk - GRUB streamer\n------------------------\n\n")
 	grubInstallPath := os.Getenv("GRUB_INSTALL_PATH")
 	grubBlockDevice := os.Getenv("GRUB_DISK")
 	filesystemType := os.Getenv("FS_TYPE")

@@ -34,11 +34,20 @@ func syslinux386(disk, partition string) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	ReReadPartitionTable(blockOut)
-	defer blockOut.Close()
-
+	if err := ReReadPartitionTable(blockOut); err != nil {
+		log.Fatalln(err)
+	}
+	deferWithError := func(f func() error) {
+		if err := f(); err != nil {
+			log.Fatalln(err)
+		}
+	}
+	defer deferWithError(blockOut.Close)
 	mbrIn, err := os.OpenFile("/mbr.bin.386", os.O_RDONLY, 0644)
-	defer mbrIn.Close()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer deferWithError(mbrIn.Close)
 
 	_, err = io.Copy(blockOut, mbrIn)
 	if err != nil {

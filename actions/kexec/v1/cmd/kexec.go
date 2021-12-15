@@ -95,7 +95,10 @@ var kexecCmd = &cobra.Command{
 		}
 		log.Info("Rebooting system")
 		// Call the unix reboot command with the kexec functionality
-		unix.Reboot(unix.LINUX_REBOOT_CMD_KEXEC)
+		err = unix.Reboot(unix.LINUX_REBOOT_CMD_KEXEC)
+		if err != nil {
+			log.Fatal(err)
+		}
 	},
 }
 

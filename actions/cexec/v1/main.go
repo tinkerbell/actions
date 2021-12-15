@@ -11,12 +11,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// Release - this struct contains the release information populated when building kexec
-var Release struct {
-	Version string
-	Build   string
-}
-
 const mountAction = "/mountAction"
 
 func main() {
@@ -65,7 +59,7 @@ func main() {
 		// Split the interpreter by space, in the event that the default intprepretter has flags.
 		di := strings.Split(defaultInterpreter, " ")
 		if len(di) == 0 {
-			log.Fatalln("Error parsing [\"DEFAULT_INTERPETER\"] [%s]", defaultInterpreter)
+			log.Fatalf("Error parsing [\"DEFAULT_INTERPETER\"] [%s]", defaultInterpreter)
 		}
 		// Look for default shell interpreter
 		_, err = os.Stat(di[0])

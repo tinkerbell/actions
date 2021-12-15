@@ -40,7 +40,9 @@ func Write(archiveURL, archiveType, path string) error {
 
 	var out *tar.Reader
 	absPath, err := filepath.Abs(path)
-
+	if err != nil {
+		return err
+	}
 	switch archiveType {
 	case "gz":
 		// With compression run data through gzip writer
@@ -58,7 +60,7 @@ func Write(archiveURL, archiveType, path string) error {
 		// With compression run data through gzip writer
 		zipOUT, err := gzip.NewReader(resp.Body)
 		if err != nil {
-			log.Fatalf("[ERROR] New gzip reader:", err)
+			log.Fatal("[ERROR] New gzip reader:", err)
 		}
 		defer zipOUT.Close()
 		out = tar.NewReader(zipOUT)

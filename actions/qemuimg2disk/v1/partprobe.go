@@ -2,14 +2,19 @@ package main
 
 import (
 	"fmt"
-	"golang.org/x/sys/unix"
 	"os"
+
+	"golang.org/x/sys/unix"
 )
 
 func main() {
 	disk := os.Getenv("DEST_DISK")
 	fileOut, err := os.OpenFile(disk, os.O_CREATE|os.O_WRONLY, 0644)
-	defer fileOut.Close()
+	defer func() {
+		if err := fileOut.Close(); err != nil {
+			fmt.Fprint(os.Stderr, "error closing file: ", err)
+		}
+	}()
 	if err != nil {
 		fmt.Printf("unable to open the target disk %s: %v\n", disk, err)
 		return

@@ -133,7 +133,7 @@ func (d DiskImageStore) Writer(ctx context.Context, opts ...ctrcontent.WriterOpt
 			var (
 				err error
 			)
-			b := make([]byte, wOpts.Blocksize, wOpts.Blocksize)
+			b := make([]byte, wOpts.Blocksize)
 			_, err = io.CopyBuffer(w, r, b)
 			done <- err
 		}
@@ -147,7 +147,7 @@ func (d DiskImageStore) Writer(ctx context.Context, opts ...ctrcontent.WriterOpt
 				log.Fatalf(err.Error())
 				done <- err
 			} else {
-				b := make([]byte, wOpts.Blocksize, wOpts.Blocksize)
+				b := make([]byte, wOpts.Blocksize)
 				_, err = io.CopyBuffer(w, decompressReader, b)
 				done <- err
 			}

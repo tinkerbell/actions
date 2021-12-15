@@ -19,8 +19,6 @@ type WriteCounter struct {
 	Total uint64
 }
 
-var data []byte
-
 func (wc *WriteCounter) Write(p []byte) (int, error) {
 	n := len(p)
 	wc.Total += uint64(n)
@@ -44,16 +42,20 @@ func imageHandler(w http.ResponseWriter, r *http.Request) {
 
 	imageName := fmt.Sprintf("%s.img", r.RemoteAddr)
 
-	r.ParseMultipartForm(32 << 20)
+	if err := r.ParseMultipartForm(32 << 20); err != nil {
+		http.Error(w, "Error parsing multipart form", http.StatusInternalServerError)
+		return
+	}
 	file, _, err := r.FormFile("BootyImage")
 	if err != nil {
-		fmt.Println(err)
+		http.Error(w, "Error retrieving the file", http.StatusInternalServerError)
 		return
 	}
 	defer file.Close()
 
 	out, err := os.OpenFile(imageName, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
+		http.Error(w, "Error opening file", http.StatusInternalServerError)
 		log.Fatalf("%v", err)
 	}
 	defer out.Close()
@@ -67,10 +69,6 @@ func imageHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("Beginning write of image [%s] to disk", imageName)
 
 	w.WriteHeader(http.StatusOK)
-}
-
-func configHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write(data)
 }
 
 func main() {

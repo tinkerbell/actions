@@ -140,7 +140,11 @@ func test() (*types.Metadata, error) {
 	}
 	fmt.Println("Successfully Opened test data")
 	// defer the closing of our jsonFile so that we can parse it later on
-	defer jsonFile.Close()
+	defer func() {
+		if err := jsonFile.Close(); err != nil {
+			log.Error(err)
+		}
+	}()
 
 	byteValue, _ := ioutil.ReadAll(jsonFile)
 
@@ -149,7 +153,9 @@ func test() (*types.Metadata, error) {
 
 	// we unmarshal our byteArray which contains our
 	// jsonFile's content into 'users' which we defined above
-	json.Unmarshal(byteValue, &mdata)
-
+	err = json.Unmarshal(byteValue, &mdata)
+	if err != nil {
+		return nil, err
+	}
 	return &mdata, nil
 }

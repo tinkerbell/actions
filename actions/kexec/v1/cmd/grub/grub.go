@@ -108,24 +108,6 @@ func ParseGrubCfg(grubcfg string) (configs []Config, defaultConfig int64) {
 	return
 }
 
-type grubVersion int
-
-var (
-	grubV1 grubVersion = 1
-	grubV2 grubVersion = 2
-)
-
-func unquote(ver grubVersion, text string) string {
-	if ver == grubV2 {
-		// if grub2, unquote the string, as directives could be quoted
-		// https://www.gnu.org/software/grub/manual/grub/grub.html#Quoting
-		// TODO unquote everything, not just \$
-		return strings.Replace(text, `\$`, "$", -1)
-	}
-	// otherwise return the unmodified string
-	return text
-}
-
 func trimQuote(s string) string {
 	if len(s) > 0 && s[0] == '"' {
 		s = s[1:]
