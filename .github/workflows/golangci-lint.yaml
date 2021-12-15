@@ -1,0 +1,27 @@
+# https://github.com/golangci/golangci-lint/issues/828#issuecomment-658207652
+name: golangci-lint
+on: [push, pull_request]
+jobs:
+  resolve-modules:
+    name: Resolve Modules
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout Sources
+        uses: actions/checkout@v2
+      - id: set-matrix
+        run: ./hack/resolve-modules.sh
+  golangci:
+    name: Linter
+    needs: resolve-modules
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJson(needs.resolve-modules.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.43
+          working-directory: ${{ matrix.workdir }}
