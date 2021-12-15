@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	log "github.com/sirupsen/logrus"
-
 	"github.com/tinkerbell/hub/actions/oci2disk/v1/pkg/image"
 )
 

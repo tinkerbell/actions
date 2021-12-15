@@ -18,7 +18,6 @@ import (
 	"github.com/containerd/containerd/reference"
 	"github.com/containerd/containerd/remotes/docker"
 	"github.com/deislabs/oras/pkg/oras"
-
 	"github.com/dustin/go-humanize"
 	"github.com/klauspost/compress/zstd"
 	log "github.com/sirupsen/logrus"

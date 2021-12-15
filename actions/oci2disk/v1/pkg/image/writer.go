@@ -7,10 +7,9 @@ import (
 	"io/ioutil"
 	"log"
 
+	ctrcontent "github.com/containerd/containerd/content"
 	"github.com/deislabs/oras/pkg/content"
 	"github.com/opencontainers/go-digest"
-
-	ctrcontent "github.com/containerd/containerd/content"
 )
 
 // DiskImageStore -

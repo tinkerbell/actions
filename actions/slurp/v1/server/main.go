@@ -8,9 +8,8 @@ import (
 	"os"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
-
 	humanize "github.com/dustin/go-humanize"
+	log "github.com/sirupsen/logrus"
 )
 
 // WriteCounter counts the number of bytes written to it. It implements to the io.Writer interface

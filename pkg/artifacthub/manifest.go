@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/mattn/godown"
-
 	"github.com/pkg/errors"
 	"github.com/yuin/goldmark"
 	meta "github.com/yuin/goldmark-meta"

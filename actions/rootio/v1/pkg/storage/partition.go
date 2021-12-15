@@ -6,12 +6,11 @@ import (
 	"syscall"
 	"time"
 
-	log "github.com/sirupsen/logrus"
-	"github.com/tinkerbell/hub/actions/rootio/v1/pkg/types.go"
-
 	diskfs "github.com/diskfs/go-diskfs"
 	"github.com/diskfs/go-diskfs/partition/gpt"
 	"github.com/diskfs/go-diskfs/partition/mbr"
+	log "github.com/sirupsen/logrus"
+	"github.com/tinkerbell/hub/actions/rootio/v1/pkg/types.go"
 )
 
 const sectorSize = 512
