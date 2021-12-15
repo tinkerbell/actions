@@ -26,7 +26,6 @@ var rootioCmd = &cobra.Command{
 }
 
 func init() {
-
 	rootioCmd.AddCommand(rootioFormat)
 	rootioCmd.AddCommand(rootioPartition)
 	rootioCmd.AddCommand(rootioMount)
@@ -61,7 +60,6 @@ var rootioFormat = &cobra.Command{
 	Use:   "format",
 	Short: "Use rootio to format disks based upon metadata",
 	Run: func(cmd *cobra.Command, args []string) {
-
 		for fileSystem := range metadata.Storage.Filesystems {
 			err := storage.FileSystemCreate(metadata.Storage.Filesystems[fileSystem])
 			if err != nil {
@@ -75,7 +73,6 @@ var rootioMount = &cobra.Command{
 	Use:   "mount",
 	Short: "Use rootio to mount disks based upon metadata",
 	Run: func(cmd *cobra.Command, args []string) {
-
 		for fileSystem := range metadata.Storage.Filesystems {
 			err := storage.Mount(metadata.Storage.Filesystems[fileSystem])
 			if err != nil {
@@ -89,7 +86,6 @@ var rootioPartition = &cobra.Command{
 	Use:   "partition",
 	Short: "Use rootio to partition disks based upon metadata",
 	Run: func(cmd *cobra.Command, args []string) {
-
 		for disk := range metadata.Storage.Disks {
 			err := storage.VerifyBlockDevice(metadata.Storage.Disks[disk].Device)
 			if err != nil {

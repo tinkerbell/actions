@@ -7,9 +7,7 @@ import (
 )
 
 func main() {
-
 	fmt.Printf("ROOTIO - Disk Manager\n------------------------\n")
 	fmt.Println("Parsing MetaData")
 	cmd.Execute()
-
 }

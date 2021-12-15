@@ -11,7 +11,6 @@ import (
 )
 
 func main() {
-
 	fmt.Printf("IMAGE2DISK - Cloud image streamer\n------------------------\n")
 	disk := os.Getenv("DEST_DISK")
 	img := os.Getenv("IMG_URL")

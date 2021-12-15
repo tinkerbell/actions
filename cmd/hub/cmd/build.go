@@ -58,7 +58,6 @@ func runBuild(opts *buildOptions) error {
 				log.Info(action.String())
 			}
 		} else {
-
 			// TODO: Run binfmt_misc to enable building multi-arch images.
 			// cat /proc/sys/fs/binfmt_misc/qemu-arm | grep flags == "flags: OCF\n"
 

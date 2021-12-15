@@ -11,7 +11,6 @@ import (
 )
 
 func main() {
-
 	fmt.Printf("SLURP - Upload the contents of a block device\n------------------------\n")
 	sourceDisk := os.Getenv("SOURCE_DISK")
 	destinationURL := os.Getenv("DEST_URL")

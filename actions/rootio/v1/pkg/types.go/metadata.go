@@ -31,7 +31,7 @@ type Metadata struct {
 	} `json:"storage"`
 }
 
-//Filesystem defines the organisation of a filesystem
+// Filesystem defines the organisation of a filesystem
 type Filesystem struct {
 	Mount struct {
 		Create struct {
@@ -43,21 +43,21 @@ type Filesystem struct {
 	} `json:"mount"`
 }
 
-//Disk defines the configuration for a disk
+// Disk defines the configuration for a disk
 type Disk struct {
 	Device     string       `json:"device"`
 	Partitions []Partitions `json:"partitions"`
 	WipeTable  bool         `json:"wipe_table"`
 }
 
-//Partitions details the architecture
+// Partitions details the architecture
 type Partitions struct {
 	Label  string `json:"label"`
 	Number int    `json:"number"`
 	Size   uint64 `json:"size"`
 }
 
-//RetrieveData -
+// RetrieveData -
 func RetrieveData() (*Metadata, error) {
 	metadataURL := os.Getenv("MIRROR_HOST")
 	if metadataURL == "" {

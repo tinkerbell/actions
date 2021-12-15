@@ -110,7 +110,7 @@ func (d DiskImageStore) Writer(ctx context.Context, opts ...ctrcontent.WriterOpt
 		digester: digest.Canonical.Digester(),
 		// we take the OutputHash, since the InputHash goes to the passthrough writer,
 		// which then passes the processed output to us
-		//hash: wOpts.OutputHash,
+		// hash: wOpts.OutputHash,
 	}
 
 	// we have to reprocess the opts to find the desc
@@ -125,23 +125,18 @@ func (d DiskImageStore) Writer(ctx context.Context, opts ...ctrcontent.WriterOpt
 	fmt.Printf("%v\n", desc.Annotations["org.opencontainers.image.title"])
 	if desc.Annotations["org.opencontainers.image.title"] == "" {
 		return content.NewIoContentWriter(ioutil.Discard, content.WithOutputHash(desc.Digest)), nil
-
 	}
 	if !d.compressed {
 		// Without compression send raw output
 		f = func(r io.Reader, w io.Writer, done chan<- error) {
-			var (
-				err error
-			)
+			var err error
 			b := make([]byte, wOpts.Blocksize, wOpts.Blocksize)
 			_, err = io.CopyBuffer(w, r, b)
 			done <- err
 		}
 	} else {
 		f = func(r io.Reader, w io.Writer, done chan<- error) {
-			var (
-				err error
-			)
+			var err error
 			decompressReader, err := findDecompressor(d.sourceImage, r)
 			if err != nil {
 				log.Fatalf(err.Error())
@@ -152,11 +147,10 @@ func (d DiskImageStore) Writer(ctx context.Context, opts ...ctrcontent.WriterOpt
 				done <- err
 			}
 		}
-
 	}
 	writerOpts := []content.WriterOpt{}
 	return content.NewPassthroughWriter(di, f, writerOpts...), nil
-	//return nil, err
+	// return nil, err
 }
 
 // DiskImage -

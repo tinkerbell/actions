@@ -48,7 +48,7 @@ func runGenerate(opts *generateOptions) error {
 	}
 
 	if _, err := os.Stat(generateOpts.output); os.IsNotExist(err) {
-		os.Mkdir(generateOpts.output, 0700)
+		os.Mkdir(generateOpts.output, 0o700)
 	}
 
 	// This is the manifest with all the pre-populated information. Ideally

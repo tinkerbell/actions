@@ -11,7 +11,6 @@ import (
 )
 
 func main() {
-
 	fmt.Printf("OCI2DISK - OCI Container Disk image streamer\n------------------------\n")
 	disk := os.Getenv("DEST_DISK")
 	img := os.Getenv("IMG_URL")

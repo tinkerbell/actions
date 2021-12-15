@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"syscall"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/tinkerbell/hub/actions/archive2disk/v1/pkg/archive"
-	"strconv"
 )
 
 const mountAction = "/mountAction"
@@ -28,7 +28,7 @@ func main() {
 		if err != nil {
 			log.Fatalf("Parsing failed for environment variable [%s].  %v", httpClientTimeoutMinutesKey, err)
 		}
-	}	
+	}
 	checksumOverrideKey := "INSECURE_NO_TARFILE_CHECKSUM_VERIFICATION"
 	checksumOverride := false
 	if _, exists := os.LookupEnv(checksumOverrideKey); exists {
@@ -36,10 +36,10 @@ func main() {
 		if err != nil {
 			log.Fatalf("Parsing failed for environment variable [%s].  %v", checksumOverrideKey, err)
 		}
-	}	
-	//checksum to validate tarfile, must be of the format
-	//checksum name:checsum
-	//ex: sha256:shasum sha512:shasum	
+	}
+	// checksum to validate tarfile, must be of the format
+	// checksum name:checsum
+	// ex: sha256:shasum sha512:shasum
 	tarfileChecksum := ""
 	if !checksumOverride {
 		tarfileChecksum = os.Getenv("TARFILE_CHECKSUM")
