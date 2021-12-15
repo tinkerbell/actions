@@ -32,11 +32,14 @@ func syslinux386(disk, partition string) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	ReReadPartitionTable(blockOut)
+	_ = ReReadPartitionTable(blockOut)
 	defer blockOut.Close()
 
 	mbrIn, err := os.OpenFile("/mbr.bin.386", os.O_RDONLY, 0o644)
-	defer mbrIn.Close()
+	if err != nil {
+		log.Fatalln(err) //nolint:gocritic // this is fine
+	}
+	defer func() { _ = mbrIn.Close() }()
 
 	_, err = io.Copy(blockOut, mbrIn)
 	if err != nil {
@@ -72,7 +75,7 @@ func ReReadPartitionTable(d *os.File) error {
 	fd := d.Fd()
 	_, err := unix.IoctlGetInt(int(fd), BLKRRPART)
 	if err != nil {
-		return fmt.Errorf("Unable to re-read partition table: %v", err)
+		return fmt.Errorf("unable to re-read partition table: %w", err)
 	}
 	return nil
 }

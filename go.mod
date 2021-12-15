@@ -12,6 +12,7 @@ require (
 	github.com/mattn/godown v0.0.0-20201027140031-2c7783b24de7
 	github.com/moby/buildkit v0.7.2
 	github.com/pkg/errors v0.9.1
+	github.com/prometheus/common v0.4.0
 	github.com/sirupsen/logrus v1.7.0 // indirect
 	github.com/spf13/cobra v1.1.1
 	github.com/tinkerbell/lint-install v0.0.0-20211124222731-60117699c7e3

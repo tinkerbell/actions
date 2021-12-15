@@ -4,4 +4,5 @@ ci: bin/gofumpt
 artifacthub/gen-manifests:
 	./hack/generate-artifacthub-manifests.sh
 
+include lint.mk
 include rules.mk

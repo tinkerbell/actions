@@ -14,7 +14,7 @@ import (
 
 var metadata *types.Metadata
 
-// Release - this struct contains the release information populated when building rootio
+// Release - this struct contains the release information populated when building rootio.
 var Release struct {
 	Version string
 	Build   string
@@ -45,10 +45,10 @@ func init() {
 			log.Fatal(err)
 		}
 	}
-	fmt.Printf("Succesfully parsed the MetaData, Found [%d] Disks\n", len(metadata.Storage.Disks))
+	fmt.Printf("Successfully parsed the MetaData, Found [%d] Disks\n", len(metadata.Storage.Disks))
 }
 
-// Execute - starts the command parsing process
+// Execute - starts the command parsing process.
 func Execute() {
 	if err := rootioCmd.Execute(); err != nil {
 		fmt.Println(err)
@@ -144,7 +144,7 @@ func test() (*types.Metadata, error) {
 
 	// we unmarshal our byteArray which contains our
 	// jsonFile's content into 'users' which we defined above
-	json.Unmarshal(byteValue, &w)
+	_ = json.Unmarshal(byteValue, &w)
 
 	return &w.Metadata, nil
 }

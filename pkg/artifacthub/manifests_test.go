@@ -22,6 +22,7 @@ func TestPopulateFromActionMarkdown(t *testing.T) {
 			BaseManifest:     &artifacthub.Manifest{},
 			MarkdownFilePath: "./testdata/happy-path-disk-wipe.md",
 			Expect: func(t *testing.T, m *artifacthub.Manifest, err error) {
+				t.Helper()
 				if err != nil {
 					t.Error(errors.Wrap(err, "unexpected error, this test should not return errors"))
 				}

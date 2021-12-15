@@ -46,12 +46,12 @@ type Manifest struct {
 		URL  string `yaml:"url"`
 	} `yaml:"links,omitempty"`
 	Readme string `yaml:"readme,omitempty"`
-	//Install     string   `yaml:"install,omitempty"`
-	//Changes     []string `yaml:"changes,omitempty"`
-	//Maintainers []struct {
-	//Name  string `yaml:"name"`
-	//Email string `yaml:"email"`
-	//} `yaml:"maintainers,omitempty"`
+	// Install     string   `yaml:"install,omitempty"`
+	// Changes     []string `yaml:"changes,omitempty"`
+	// Maintainers []struct {
+	// Name  string `yaml:"name"`
+	// Email string `yaml:"email"`
+	// } `yaml:"maintainers,omitempty"`
 	Provider struct {
 		Name string `yaml:"name"`
 	} `yaml:"provider"`
@@ -84,13 +84,20 @@ func PopulateFromActionMarkdown(file io.Reader, m *Manifest) error {
 		return errors.Wrap(err, "error converting the readme back from html to markdown")
 	}
 
-	m.Name = metaData["slug"].(string)
-	m.DisplayName = metaData["name"].(string)
+	mustString := func(name string, i interface{}) string {
+		s, ok := i.(string)
+		if !ok {
+			panic(name + " is not a string!")
+		}
+		return s
+	}
+	m.Name = mustString("slug", metaData["slug"])
+	m.DisplayName = mustString("name", metaData["name"])
 	m.Readme = readmeBack.String()
-	m.Version = metaData["version"].(string)[1:]
+	m.Version = mustString("version", metaData["version"])[1:]
 	m.AppVersion = m.Version
-	m.Keywords = strings.Split(metaData["tags"].(string), ",")
-	m.Description = metaData["description"].(string)
+	m.Keywords = strings.Split(mustString("tags", metaData["tags"]), ",")
+	m.Description = mustString("description", metaData["description"])
 
 	m.ContainersImages = []struct {
 		Name  string `yaml:"name,omitempty"`
@@ -106,7 +113,7 @@ func PopulateFromActionMarkdown(file io.Reader, m *Manifest) error {
 	if _, err := time.Parse(time.RFC3339, metaData["createdAt"].(string)); err != nil {
 		println(fmt.Sprintf("action: %s error converting createdAt right format is \"2016-06-20T12:41:45.14Z\" got %s", m.Name, metaData["createdAt"].(string)))
 	} else {
-		m.CreatedAt = metaData["createdAt"].(string)
+		m.CreatedAt = mustString("createdAt", metaData["createdAt"])
 	}
 
 	return nil

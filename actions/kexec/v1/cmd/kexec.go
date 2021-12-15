@@ -13,7 +13,7 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-// Release - this struct contains the release information populated when building kexec
+// Release - this struct contains the release information populated when building kexec.
 var Release struct {
 	Version string
 	Build   string
@@ -93,11 +93,11 @@ var kexecCmd = &cobra.Command{
 		}
 		log.Info("Rebooting system")
 		// Call the unix reboot command with the kexec functionality
-		unix.Reboot(unix.LINUX_REBOOT_CMD_KEXEC)
+		_ = unix.Reboot(unix.LINUX_REBOOT_CMD_KEXEC)
 	},
 }
 
-// Execute - starts the command parsing process
+// Execute - starts the command parsing process.
 func Execute() {
 	if err := kexecCmd.Execute(); err != nil {
 		fmt.Println(err)

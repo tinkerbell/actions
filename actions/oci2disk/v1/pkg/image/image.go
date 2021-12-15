@@ -7,25 +7,21 @@ import (
 	"compress/gzip"
 	"context"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
-	"time"
 
 	"github.com/containerd/containerd/reference"
 	"github.com/containerd/containerd/remotes/docker"
 	"github.com/deislabs/oras/pkg/oras"
-	"github.com/dustin/go-humanize"
 	"github.com/klauspost/compress/zstd"
 	log "github.com/sirupsen/logrus"
 	"github.com/ulikunitz/xz"
 	"golang.org/x/sys/unix"
 )
-
-var tick chan time.Time
 
 // WriteCounter counts the number of bytes written to it. It implements to the io.Writer interface
 // and we can pass this into io.TeeReader() which will report progress on each write cycle.
@@ -39,26 +35,16 @@ func (wc *WriteCounter) Write(p []byte) (int, error) {
 	return n, nil
 }
 
-func tickerProgress(byteCounter uint64) {
-	// Clear the line by using a character return to go back to the start and remove
-	// the remaining characters by filling it with spaces
-	fmt.Printf("\r%s", strings.Repeat(" ", 35))
-
-	// Return again and print current status of download
-	// We use the humanize package to print the bytes in a meaningful way (e.g. 10 MB)
-	fmt.Printf("\rDownloading... %s complete", humanize.Bytes(byteCounter))
-}
-
 // Write will pull an image and write it to local storage device
 // with compress set to true it will use gzip compression to expand the data before
-// writing to an underlying device
+// writing to an underlying device.
 func Write(sourceImage, destinationDevice string, compressed bool) error {
 	ctx := context.Background()
 	client := http.DefaultClient
 	opts := docker.ResolverOptions{}
 	client.Transport = &http.Transport{
 		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: true,
+			InsecureSkipVerify: true, //nolint:gosec // GA402 TODO
 		},
 	}
 
@@ -83,7 +69,7 @@ func Write(sourceImage, destinationDevice string, compressed bool) error {
 	}
 	_, _, err = oras.Pull(ctx, resolver, sourceImage, f, pullOpts...)
 	if err != nil {
-		if err == reference.ErrObjectRequired {
+		if errors.Is(err, reference.ErrObjectRequired) {
 			return fmt.Errorf("image reference format is invalid. Please specify <name:tag|name@digest>")
 		}
 		return err
@@ -111,7 +97,7 @@ func findDecompressor(imageURL string, r io.Reader) (out io.Reader, err error) {
 		// With compression run data through gzip writer
 		zipOUT, gzErr := gzip.NewReader(r)
 		if gzErr != nil {
-			err = fmt.Errorf("[ERROR] New gzip reader: %v", gzErr)
+			err = fmt.Errorf("[ERROR] New gzip reader: %w", gzErr)
 			return
 		}
 		defer zipOUT.Close()
@@ -119,7 +105,7 @@ func findDecompressor(imageURL string, r io.Reader) (out io.Reader, err error) {
 	case ".xz":
 		xzOUT, xzErr := xz.NewReader(r)
 		if xzErr != nil {
-			err = fmt.Errorf("[ERROR] New xz reader: %v", xzErr)
+			err = fmt.Errorf("[ERROR] New xz reader: %w", xzErr)
 			return
 		}
 		// The xz reader doesn't implement close()
@@ -128,13 +114,13 @@ func findDecompressor(imageURL string, r io.Reader) (out io.Reader, err error) {
 	case ".zs":
 		zsOUT, zsErr := zstd.NewReader(r)
 		if zsErr != nil {
-			err = fmt.Errorf("[ERROR] New zs reader: %v", zsErr)
+			err = fmt.Errorf("[ERROR] New zs reader: %w", zsErr)
 			return
 		}
 		defer zsOUT.Close()
 		out = zsOUT
 	default:
-		err = fmt.Errorf("Unknown compression suffix [%s]", filepath.Ext(imageURL))
+		err = fmt.Errorf("unknown compression suffix [%s]", filepath.Ext(imageURL))
 	}
-	return
+	return out, err
 }

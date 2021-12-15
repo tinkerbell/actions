@@ -12,8 +12,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// Write will pull an image and write it to local storage device
-// image must be a tar file or tar.gz file as set by archiveType
+// Write will pull an image and write it to local storage device image must be a tar file or tar.gz file as set by archiveType.
 func Write(archiveURL, archiveType, path string, checksum string, httpTimeoutVal int) error {
 	req, err := http.NewRequest("GET", archiveURL, nil)
 	if err != nil {
@@ -43,7 +42,7 @@ func Write(archiveURL, archiveType, path string, checksum string, httpTimeoutVal
 	case "tar":
 		err := extractTarDirectory(absPath, checksum, resp.Body)
 		if err != nil {
-			log.Fatalf("[ERROR] New gzip reader:", err)
+			log.Fatalf("[ERROR] New gzip reader: %v", err) //nolint:gocritic,revive // body.Close not closing doesn't matter if we're exiting
 		}
 	case "targz":
 		err := extractTarGzip(absPath, checksum, resp.Body)

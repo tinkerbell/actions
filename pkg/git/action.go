@@ -26,10 +26,10 @@ func NewTinkerbellAction(file string) TinkerbellAction {
 	}
 }
 
-// ModifiedActions analyses the Git commit history and determines which actions have been modified
+// ModifiedActions analyses the Git commit history and determines which actions have been modified.
 func ModifiedActions(modifiedActions *[]TinkerbellAction, actionsPath string, context string, gitRef string) error {
 	// Check if Git is available in PATH.
-	if out, err := exec.Command("git", "version").Output(); err != nil || strings.HasPrefix("git version", string(out)) {
+	if out, err := exec.Command("git", "version").Output(); err != nil || !strings.HasPrefix(string(out), "git version") {
 		return errors.New("Failed to check git version. Do you have git installed?")
 	}
 
@@ -37,7 +37,10 @@ func ModifiedActions(modifiedActions *[]TinkerbellAction, actionsPath string, co
 	// ensures that merge commits return correct changes.
 	out, err := exec.Command("git", "diff-tree", "--no-commit-id", "--name-only", "-r", gitRef, context).Output()
 	if err != nil {
-		execErr := err.(*exec.ExitError)
+		execErr, ok := err.(*exec.ExitError)
+		if !ok {
+			panic("err was not an *exec.ExitError")
+		}
 		return errors.Wrap(err, strings.ReplaceAll(string(execErr.Stderr), "\n", " "))
 	}
 
@@ -49,7 +52,7 @@ func ModifiedActions(modifiedActions *[]TinkerbellAction, actionsPath string, co
 			action := NewTinkerbellAction(file)
 
 			// Deduplicate entries by checking if a modification for this action was already detected.
-			if detected[action.String()] == false {
+			if !detected[action.String()] {
 				detected[action.String()] = true
 				*modifiedActions = append(*modifiedActions, action)
 			}

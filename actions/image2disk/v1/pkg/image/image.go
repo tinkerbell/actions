@@ -5,6 +5,7 @@ package image
 import (
 	"compress/bzip2"
 	"compress/gzip"
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -44,9 +45,9 @@ func tickerProgress(byteCounter uint64) {
 
 // Write will pull an image and write it to local storage device
 // with compress set to true it will use gzip compression to expand the data before
-// writing to an underlying device
+// writing to an underlying device.
 func Write(sourceImage, destinationDevice string, compressed bool) error {
-	req, err := http.NewRequest("GET", sourceImage, nil)
+	req, err := http.NewRequestWithContext(context.TODO(), "GET", sourceImage, nil)
 	if err != nil {
 		return err
 	}
@@ -77,7 +78,7 @@ func Write(sourceImage, destinationDevice string, compressed bool) error {
 		// Without compression send raw output
 		out = resp.Body
 	} else {
-		// Find compression algorithim based upon extension
+		// Find compression algorithm based upon extension
 		out, err = findDecompressor(sourceImage, resp.Body)
 		if err != nil {
 			return err
@@ -102,7 +103,7 @@ func Write(sourceImage, destinationDevice string, compressed bool) error {
 	count, err := io.Copy(fileOut, out)
 	if err != nil {
 		ticker.Stop()
-		return fmt.Errorf("error writing %d bytes to disk [%s] -> %v", count, destinationDevice, err)
+		return fmt.Errorf("error writing %d bytes to disk [%s] -> %w", count, destinationDevice, err)
 	}
 	fmt.Printf("\n")
 
@@ -131,7 +132,7 @@ func findDecompressor(imageURL string, r io.Reader) (out io.Reader, err error) {
 		// With compression run data through gzip writer
 		zipOUT, gzErr := gzip.NewReader(r)
 		if gzErr != nil {
-			err = fmt.Errorf("[ERROR] New gzip reader: %v", gzErr)
+			err = fmt.Errorf("[ERROR] New gzip reader: %w", gzErr)
 			return
 		}
 		defer zipOUT.Close()
@@ -139,7 +140,7 @@ func findDecompressor(imageURL string, r io.Reader) (out io.Reader, err error) {
 	case ".xz":
 		xzOUT, xzErr := xz.NewReader(r)
 		if xzErr != nil {
-			err = fmt.Errorf("[ERROR] New xz reader: %v", xzErr)
+			err = fmt.Errorf("[ERROR] New xz reader: %w", xzErr)
 			return
 		}
 		// The xz reader doesn't implement close()
@@ -148,13 +149,13 @@ func findDecompressor(imageURL string, r io.Reader) (out io.Reader, err error) {
 	case ".zs":
 		zsOUT, zsErr := zstd.NewReader(r)
 		if zsErr != nil {
-			err = fmt.Errorf("[ERROR] New zs reader: %v", zsErr)
+			err = fmt.Errorf("[ERROR] New zs reader: %w", zsErr)
 			return
 		}
 		defer zsOUT.Close()
 		out = zsOUT
 	default:
-		err = fmt.Errorf("Unknown compression suffix [%s]", filepath.Ext(imageURL))
+		err = fmt.Errorf("unknown compression suffix [%s]", filepath.Ext(imageURL))
 	}
-	return
+	return out, err
 }

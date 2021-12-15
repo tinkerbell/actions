@@ -19,8 +19,7 @@ RUN apk add --update --upgrade \
     curl-dev curl-static nettle-dev nettle-static brotli-dev brotli-static nghttp2-dev nghttp2-static openssl-libs-static
 
 WORKDIR /work
-ADD ${QEMU_SRC_URL} /work
-RUN tar xf "$(basename ${QEMU_SRC_URL})"
+RUN wget "${QEMU_SRC_URL}" -O- | tar xJ
 WORKDIR /work/${QEMU_SRC_BASENAME}
 
 RUN ./configure \

@@ -5,6 +5,7 @@ import (
 	"path"
 
 	"github.com/pkg/errors"
+	"github.com/prometheus/common/log"
 	"github.com/spf13/cobra"
 	"github.com/tinkerbell/actions/pkg/artifacthub"
 	"github.com/tinkerbell/actions/pkg/git"
@@ -51,52 +52,52 @@ func runBuild(opts *buildOptions) error {
 		return errors.Wrap(err, "failed to scan for modified actions")
 	}
 
-	if len(*modifiedActions) > 0 {
-		if buildOpts.dryRun {
-			log.Info("The following actions were modified and need to be rebuilt:")
-			for _, action := range *modifiedActions {
-				log.Info(action.String())
-			}
-		} else {
-			// TODO: Run binfmt_misc to enable building multi-arch images.
-			// cat /proc/sys/fs/binfmt_misc/qemu-arm | grep flags == "flags: OCF\n"
-
-			// I am not sure if we should run each action build in a go routine,
-			// because buildkit is already massively parallelized.
-			for _, action := range *modifiedActions {
-
-				actionContext := path.Join(actionsPath, action.Name, action.Version)
-
-				readmeFile, err := os.Open(path.Join(actionContext, "README.md"))
-				if err != nil {
-					return errors.Wrap(err, "error reading the README.md proposal")
-				}
-
-				manifest := &artifacthub.Manifest{}
-				if err := artifacthub.PopulateFromActionMarkdown(readmeFile, manifest); err != nil {
-					return errors.Wrap(err, "error converting the README.md to an ArtifactHub manifest")
-				}
-
-				actionDockerfile := path.Join(actionContext, "Dockerfile")
-				actionTag := opts.containerRepo + "/" + manifest.Name + ":v" + manifest.Version
-
-				// Build the container images for all modified actions with buildkit.
-				err = img.Build(&img.BuildConfig{
-					Context:    actionContext,
-					Dockerfile: actionDockerfile,
-					Tag:        actionTag,
-					Platforms:  buildOpts.platforms,
-					Push:       opts.push,
-					NoConsole:  false,
-				})
-				if err != nil {
-					log.Error(err.Error())
-					return nil
-				}
-			}
-		}
-	} else {
+	if len(*modifiedActions) == 0 {
 		log.Info("No actions were modified since the provided git reference")
+		return nil
+	}
+	if buildOpts.dryRun {
+		log.Info("The following actions were modified and need to be rebuilt:")
+		for _, action := range *modifiedActions {
+			log.Info(action.String())
+		}
+		return nil
+	}
+
+	// TODO: Run binfmt_misc to enable building multi-arch images.
+	// cat /proc/sys/fs/binfmt_misc/qemu-arm | grep flags == "flags: OCF\n"
+
+	// I am not sure if we should run each action build in a go routine,
+	// because buildkit is already massively parallelized.
+	for _, action := range *modifiedActions {
+		actionContext := path.Join(actionsPath, action.Name, action.Version)
+
+		readmeFile, err := os.Open(path.Join(actionContext, "README.md"))
+		if err != nil {
+			return errors.Wrap(err, "error reading the README.md proposal")
+		}
+
+		manifest := &artifacthub.Manifest{}
+		if err := artifacthub.PopulateFromActionMarkdown(readmeFile, manifest); err != nil {
+			return errors.Wrap(err, "error converting the README.md to an ArtifactHub manifest")
+		}
+
+		actionDockerfile := path.Join(actionContext, "Dockerfile")
+		actionTag := opts.containerRepo + "/" + manifest.Name + ":v" + manifest.Version
+
+		// Build the container images for all modified actions with buildkit.
+		err = img.Build(&img.BuildConfig{
+			Context:    actionContext,
+			Dockerfile: actionDockerfile,
+			Tag:        actionTag,
+			Platforms:  buildOpts.platforms,
+			Push:       opts.push,
+			NoConsole:  false,
+		})
+		if err != nil {
+			log.Error(err.Error())
+			return nil
+		}
 	}
 
 	return nil

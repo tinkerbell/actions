@@ -10,13 +10,13 @@ import (
 )
 
 func main() {
-	fmt.Println("GRUB2Disk - GRUB streamer\n------------------------\n")
+	fmt.Printf("GRUB2Disk - GRUB streamer\n------------------------\n")
 	grubInstallPath := os.Getenv("GRUB_INSTALL_PATH")
 	grubBlockDevice := os.Getenv("GRUB_DISK")
 	filesystemType := os.Getenv("FS_TYPE")
 
 	if _, err := exec.Command("/bin/sh", "-c", "apk add grub grub-bios").Output(); err != nil {
-		log.Fatal(fmt.Errorf("failed to install grub-install with error %s", err))
+		log.Fatal(fmt.Errorf("failed to install grub-install with error %w", err))
 	}
 	if err := grub.MountGrub(grubInstallPath, grubBlockDevice, filesystemType); err != nil {
 		log.Fatal(err)
