@@ -22,7 +22,7 @@ func main() {
 	archiveType := os.Getenv("ARCHIVE_TYPE")
 
 	if blockDevice == "" {
-		log.Fatalf("No Block Device speified with Environment Variable [DEST_DISK]")
+		log.Fatalf("No Block Device specified with Environment Variable [DEST_DISK]")
 	}
 
 	// Create the /mountAction mountpoint (no folders exist previously in scratch container)

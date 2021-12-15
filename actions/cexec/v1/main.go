@@ -33,7 +33,7 @@ func main() {
 	var exitChroot func() error
 
 	if blockDevice == "" {
-		log.Fatalf("No Block Device speified with Environment Variable [BLOCK_DEVICE]")
+		log.Fatalf("No Block Device specified with Environment Variable [BLOCK_DEVICE]")
 	}
 
 	// Create the /mountAction mountpoint (no folders exist previously in scratch container)
@@ -67,7 +67,7 @@ func main() {
 		if len(di) == 0 {
 			log.Fatalln("Error parsing [\"DEFAULT_INTERPETER\"] [%s]", defaultInterpreter)
 		}
-		// Look for default shell intepreter
+		// Look for default shell interpreter
 		_, err = os.Stat(di[0])
 		if os.IsNotExist(err) {
 			log.Fatalf("Unable to find the [\"DEFAULT_INTERPETER\"] [%s], check chroot and interpreter path", defaultInterpreter)
@@ -85,7 +85,7 @@ func main() {
 			log.Fatalf("Error running [%s] [%v]", debugCMD, err)
 		}
 	} else {
-		// Format the cmdLine string into seperate execution tasks
+		// Format the cmdLine string into separate execution tasks
 		commandLines := strings.Split(cmdLine, ";")
 		for x := range commandLines {
 			command := strings.Split(commandLines[x], " ")

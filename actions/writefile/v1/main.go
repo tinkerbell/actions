@@ -30,7 +30,7 @@ func main() {
 
 	// Validate inputs
 	if blockDevice == "" {
-		log.Fatalf("No Block Device speified with Environment Variable [DEST_DISK]")
+		log.Fatalf("No Block Device specified with Environment Variable [DEST_DISK]")
 	}
 
 	if !filepath.IsAbs(filePath) {
@@ -163,7 +163,7 @@ func ensureDir(mountPath, path string, mode os.FileMode, uid, gid int) error {
 		return fmt.Errorf("failed to set ownership of directory %s to %d:%d: %w", path, uid, gid, err)
 	}
 
-	log.Infof("Successfully set ownernership of directory %s to %d:%d", path, uid, gid)
+	log.Infof("Successfully set ownership of directory %s to %d:%d", path, uid, gid)
 
 	return nil
 }
