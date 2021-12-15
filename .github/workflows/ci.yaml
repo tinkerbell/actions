@@ -49,7 +49,7 @@ jobs:
       run: make artifacthub/gen-manifests
 
     - name: CI checks
-      run: make ci
+      run: nix-shell --run 'make ci'
       env:
         GITHUB_BASE_REF: ${ GITHUB_BASE_REF }
         GITHUB_HEAD_REF: ${ GITHUB_HEAD_REF }

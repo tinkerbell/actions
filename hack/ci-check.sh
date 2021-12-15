@@ -18,6 +18,10 @@ if ! nixfmt shell.nix; then
 	failed=true
 fi
 
+if ! git ls-files '*.go' | xargs -I% sh -c 'sed -i "/^import (/,/^)/ { /^\s*$/ d }" % && gofumpt -w %'; then
+	failed=true
+fi
+
 if ! go mod tidy; then
 	failed=true
 fi

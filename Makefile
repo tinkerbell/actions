@@ -1,4 +1,4 @@
-ci:
+ci: bin/gofumpt
 	./hack/ci-check.sh
 
 artifacthub/gen-manifests:
