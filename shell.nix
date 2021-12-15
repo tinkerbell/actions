@@ -17,6 +17,7 @@ mkShell {
     go
     gotools
     jq
+    nixfmt
     shfmt
     shellcheck
     libseccomp

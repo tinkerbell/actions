@@ -14,6 +14,10 @@ if ! git ls-files '*.sh' | xargs shellcheck; then
 	failed=true
 fi
 
+if ! nixfmt shell.nix; then
+	failed=true
+fi
+
 if ! go mod tidy; then
 	failed=true
 fi
