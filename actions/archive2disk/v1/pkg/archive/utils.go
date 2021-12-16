@@ -103,8 +103,5 @@ func extractTarGzip(root string, checksum string, g io.Reader) error {
 	}
 	defer zr.Close()
 	var r io.Reader = zr
-	if err := extractTarDirectory(root, checksum, r); err != nil {
-		return err
-	}
-	return nil
+	return extractTarDirectory(root, checksum, r)
 }
