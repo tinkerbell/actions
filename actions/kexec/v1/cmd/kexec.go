@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"syscall"
-
 	"path/filepath"
+	"syscall"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -26,7 +25,6 @@ var kexecCmd = &cobra.Command{
 	Use:   "kexec",
 	Short: "This is an action for performing a kexec into a new kernel/ramdisk",
 	Run: func(cmd *cobra.Command, args []string) {
-
 		// Parse the environment variables that are passed into the action
 		blockDevice := os.Getenv("BLOCK_DEVICE")
 		filesystemType := os.Getenv("FS_TYPE")

@@ -9,7 +9,7 @@ import (
 
 func main() {
 	disk := os.Getenv("DEST_DISK")
-	fileOut, err := os.OpenFile(disk, os.O_CREATE|os.O_WRONLY, 0644)
+	fileOut, err := os.OpenFile(disk, os.O_CREATE|os.O_WRONLY, 0o644)
 	defer func() {
 		if err := fileOut.Close(); err != nil {
 			fmt.Fprint(os.Stderr, "error closing file: ", err)

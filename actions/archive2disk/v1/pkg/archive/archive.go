@@ -18,7 +18,6 @@ import (
 // with compress set to true it will use gzip compression to expand the data before
 // writing to an underlying device
 func Write(archiveURL, archiveType, path string) error {
-
 	req, err := http.NewRequest("GET", archiveURL, nil)
 	if err != nil {
 		return err
@@ -55,7 +54,7 @@ func Write(archiveURL, archiveType, path string) error {
 	case "tar":
 		// With compression run data through gzip writer
 		out = tar.NewReader(resp.Body)
-		//out = tarOUT
+		// out = tarOUT
 	case "targz":
 		// With compression run data through gzip writer
 		zipOUT, err := gzip.NewReader(resp.Body)
@@ -64,7 +63,7 @@ func Write(archiveURL, archiveType, path string) error {
 		}
 		defer zipOUT.Close()
 		out = tar.NewReader(zipOUT)
-		//out = tarOUT
+		// out = tarOUT
 	default:
 
 	}
@@ -83,7 +82,7 @@ func Write(archiveURL, archiveType, path string) error {
 		absFileName := filepath.Join(absPath, fileName)
 		// if a dir, create it, then go to next segment
 		if finfo.Mode().IsDir() {
-			if err := os.MkdirAll(absFileName, 0755); err != nil {
+			if err := os.MkdirAll(absFileName, 0o755); err != nil {
 				return err
 			}
 			continue

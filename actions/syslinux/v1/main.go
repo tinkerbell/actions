@@ -11,7 +11,6 @@ import (
 )
 
 func main() {
-
 	fmt.Printf("SYSLINUX - Boot Loader Installation\n------------------------\n")
 	disk := os.Getenv("DEST_DISK")
 	partition := os.Getenv("DEST_PARTITION")
@@ -24,13 +23,12 @@ func main() {
 	default:
 		log.Fatalf("Unknown syslinux version [%s]", ver)
 	}
-
 }
 
 func syslinux386(disk, partition string) {
 	log.Infof("Writing mbr to [%s] and installing boot loader to [%s]", disk, partition)
 	// Open the block device and write the Master boot record
-	blockOut, err := os.OpenFile(disk, os.O_CREATE|os.O_WRONLY, 0644)
+	blockOut, err := os.OpenFile(disk, os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -43,7 +41,7 @@ func syslinux386(disk, partition string) {
 		}
 	}
 	defer deferWithError(blockOut.Close)
-	mbrIn, err := os.OpenFile("/mbr.bin.386", os.O_RDONLY, 0644)
+	mbrIn, err := os.OpenFile("/mbr.bin.386", os.O_RDONLY, 0o644)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -69,7 +67,6 @@ func syslinux386(disk, partition string) {
 	if err != nil {
 		log.Fatalf("Error running [%v]", err)
 	}
-
 }
 
 const (

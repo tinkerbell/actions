@@ -26,7 +26,6 @@ func (wc *WriteCounter) Write(p []byte) (int, error) {
 
 // Read - will take a local disk and copy an image to a remote server
 func Read(sourceDevice, destinationAddress, name string, compressed bool) error {
-
 	var fileName string
 	if !compressed {
 		// raw image
@@ -50,7 +49,7 @@ func Read(sourceDevice, destinationAddress, name string, compressed bool) error 
 	return nil
 }
 
-//UploadMultipartFile -
+// UploadMultipartFile -
 func UploadMultipartFile(client *http.Client, uri, key, path string, compressed bool) (*http.Response, error) {
 	body, writer := io.Pipe()
 
@@ -92,7 +91,6 @@ func UploadMultipartFile(client *http.Client, uri, key, path string, compressed 
 				errchan <- fmt.Errorf("error copying %s (%d bytes written): %v", path, written, err)
 				return
 			}
-
 		} else {
 			// With compression run data through gzip writer
 			zipWriter := gzip.NewWriter(w)
@@ -119,7 +117,6 @@ func UploadMultipartFile(client *http.Client, uri, key, path string, compressed 
 			errchan <- err
 			return
 		}
-
 	}()
 
 	resp, err := client.Do(req)

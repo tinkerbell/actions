@@ -14,7 +14,6 @@ import (
 const mountAction = "/mountAction"
 
 func main() {
-
 	fmt.Printf("CEXEC - Chroot Exec\n------------------------\n")
 
 	// Parse the environment variables that are passed into the action
@@ -69,7 +68,7 @@ func main() {
 		di = append(di, cmdLine)
 		cmd := exec.Command(di[0], di[1:]...)
 		cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
-		var debugCMD = fmt.Sprintf("%s %v", di[0], di[1:])
+		debugCMD := fmt.Sprintf("%s %v", di[0], di[1:])
 		err = cmd.Start()
 		if err != nil {
 			log.Fatalf("Error starting [%s] [%v]", debugCMD, err)
@@ -85,7 +84,7 @@ func main() {
 			command := strings.Split(commandLines[x], " ")
 			cmd := exec.Command(command[0], command[1:]...)
 			cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
-			var debugCMD = fmt.Sprintf("%s %v", command[0], command[1:])
+			debugCMD := fmt.Sprintf("%s %v", command[0], command[1:])
 			err = cmd.Start()
 			if err != nil {
 				log.Fatalf("Error starting [%s] [%v]", debugCMD, err)

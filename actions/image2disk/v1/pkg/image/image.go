@@ -46,7 +46,6 @@ func tickerProgress(byteCounter uint64) {
 // with compress set to true it will use gzip compression to expand the data before
 // writing to an underlying device
 func Write(sourceImage, destinationDevice string, compressed bool) error {
-
 	req, err := http.NewRequest("GET", sourceImage, nil)
 	if err != nil {
 		return err
@@ -68,7 +67,7 @@ func Write(sourceImage, destinationDevice string, compressed bool) error {
 
 	var out io.Reader
 
-	fileOut, err := os.OpenFile(destinationDevice, os.O_CREATE|os.O_WRONLY, 0644)
+	fileOut, err := os.OpenFile(destinationDevice, os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
 		return err
 	}
@@ -144,7 +143,7 @@ func findDecompressor(imageURL string, r io.Reader) (out io.Reader, err error) {
 			return
 		}
 		// The xz reader doesn't implement close()
-		//defer xzOUT.Close()
+		// defer xzOUT.Close()
 		out = xzOUT
 	case ".zs":
 		zsOUT, zsErr := zstd.NewReader(r)

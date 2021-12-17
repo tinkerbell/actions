@@ -65,7 +65,6 @@ func ExamineDisk(d types.Disk) error {
 
 // Partition will create the partitions and write them to the disk
 func Partition(d types.Disk) error {
-
 	table := &gpt.Table{
 		ProtectiveMBR:      true,
 		LogicalSectorSize:  sectorSize,
@@ -131,7 +130,6 @@ func Partition(d types.Disk) error {
 
 // MBRPartition will create the partitions and write them to the disk
 func MBRPartition(d types.Disk) error {
-
 	table := &mbr.Table{
 		LogicalSectorSize:  sectorSize,
 		PhysicalSectorSize: sectorSize,
@@ -204,7 +202,7 @@ func MBRPartition(d types.Disk) error {
 
 // Wipe will clean the table from a disk
 func Wipe(d types.Disk) error {
-	disk, err := os.OpenFile(d.Device, os.O_CREATE|os.O_WRONLY, 0644)
+	disk, err := os.OpenFile(d.Device, os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
 		return err
 	}

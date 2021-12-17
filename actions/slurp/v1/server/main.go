@@ -26,7 +26,7 @@ func (wc *WriteCounter) Write(p []byte) (int, error) {
 	return n, nil
 }
 
-//PrintProgress - provides UX information about the writing of the image locally.
+// PrintProgress - provides UX information about the writing of the image locally.
 func (wc WriteCounter) PrintProgress() {
 	// Clear the line by using a character return to go back to the start and remove
 	// the remaining characters by filling it with spaces
@@ -39,7 +39,6 @@ func (wc WriteCounter) PrintProgress() {
 }
 
 func imageHandler(w http.ResponseWriter, r *http.Request) {
-
 	imageName := fmt.Sprintf("%s.img", r.RemoteAddr)
 
 	if err := r.ParseMultipartForm(32 << 20); err != nil {
@@ -53,7 +52,7 @@ func imageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
-	out, err := os.OpenFile(imageName, os.O_CREATE|os.O_WRONLY, 0644)
+	out, err := os.OpenFile(imageName, os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
 		http.Error(w, "Error opening file", http.StatusInternalServerError)
 		log.Fatalf("%v", err)
@@ -72,7 +71,6 @@ func imageHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-
 	// // Server port
 	port := flag.Int("port", 3000, "The port the server will listen on")
 
@@ -84,5 +82,4 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 }
