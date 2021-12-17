@@ -26,7 +26,7 @@ func NewTinkerbellAction(file string) TinkerbellAction {
 	}
 }
 
-// ModifiedActions analyses the Git commit history and determines which actions have been modified
+// ModifiedActions analyses the Git commit history and determines which actions have been modified.
 func ModifiedActions(modifiedActions *[]TinkerbellAction, actionsPath string, context string, gitRef string) error {
 	// Check if Git is available in PATH.
 	if out, err := exec.Command("git", "version").Output(); err != nil || strings.HasPrefix("git version", string(out)) {

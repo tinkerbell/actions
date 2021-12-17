@@ -5,11 +5,13 @@ import (
 	"go.uber.org/zap"
 )
 
-var log *zap.Logger
-var rootCmd = &cobra.Command{
-	Use:  "hub",
-	Long: ``,
-}
+var (
+	log     *zap.Logger
+	rootCmd = &cobra.Command{
+		Use:  "hub",
+		Long: ``,
+	}
+)
 
 // Execute starts the command line interface.
 func Execute(zap *zap.Logger) {

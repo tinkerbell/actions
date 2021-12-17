@@ -35,12 +35,12 @@ type Manifest struct {
 	ContainersImages []struct {
 		Name  string `yaml:"name,omitempty"`
 		Image string `yaml:"image,omitempty"`
-		//Whitelisted string `yaml:"whitelisted,omitempty"`
+		// Whitelisted string `yaml:"whitelisted,omitempty"`
 	} `yaml:"containersImages,omitempty"`
-	//ContainsSecurityUpdates string   `yaml:"containsSecurityUpdates,omitempty"`
-	//Operator                string   `yaml:"operator,omitempty"`
-	//Deprecated              string   `yaml:"deprecated,omitempty"`
-	//Prerelease              string   `yaml:"prerelease,omitempty"`
+	// ContainsSecurityUpdates string   `yaml:"containsSecurityUpdates,omitempty"`
+	// Operator                string   `yaml:"operator,omitempty"`
+	// Deprecated              string   `yaml:"deprecated,omitempty"`
+	// Prerelease              string   `yaml:"prerelease,omitempty"`
 	Keywords []string `yaml:"keywords,omitempty"`
 	Links    []struct {
 		Name string `yaml:"name"`
@@ -56,7 +56,7 @@ type Manifest struct {
 	Provider struct {
 		Name string `yaml:"name"`
 	} `yaml:"provider"`
-	//Ignore []string `yaml:"ignore"`
+	// Ignore []string `yaml:"ignore"`
 }
 
 func PopulateFromActionMarkdown(file io.Reader, m *Manifest) error {
@@ -83,7 +83,6 @@ func PopulateFromActionMarkdown(file io.Reader, m *Manifest) error {
 	readmeBack := bytes.NewBuffer([]byte{})
 	if err := godown.Convert(readmeBack, &buf, nil); err != nil {
 		return errors.Wrap(err, "error converting the readme back from html to markdown")
-
 	}
 
 	m.Name = metaData["slug"].(string)
@@ -97,7 +96,7 @@ func PopulateFromActionMarkdown(file io.Reader, m *Manifest) error {
 	m.ContainersImages = []struct {
 		Name  string `yaml:"name,omitempty"`
 		Image string `yaml:"image,omitempty"`
-		//Whitelisted string `yaml:"whitelisted,omitempty"`
+		// Whitelisted string `yaml:"whitelisted,omitempty"`
 	}{
 		{
 			Name:  m.Name,
@@ -121,13 +120,13 @@ func WriteToFile(manifest *Manifest, dst string) error {
 	if err != nil {
 		return errors.Wrap(err, "error marshalling manifest to yaml")
 	}
-	if err := os.MkdirAll(path.Join(dst, manifest.Name, manifest.Version), 0700); err != nil {
+	if err := os.MkdirAll(path.Join(dst, manifest.Name, manifest.Version), 0o700); err != nil {
 		return errors.Wrap(err, "error creating directory")
 	}
 	dstFile, err := os.OpenFile(
 		path.Join(dst, manifest.Name, manifest.Version, "artifacthub-pkg.yml"),
 		os.O_CREATE|os.O_WRONLY,
-		0644)
+		0o644)
 	if err != nil {
 		return errors.Wrap(err, "error creating manifest file")
 	}

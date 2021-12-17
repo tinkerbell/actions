@@ -48,7 +48,7 @@ func runGenerate(opts *generateOptions) error {
 	}
 
 	if _, err := os.Stat(generateOpts.output); os.IsNotExist(err) {
-		if err := os.Mkdir(generateOpts.output, 0700); err != nil {
+		if err := os.Mkdir(generateOpts.output, 0o700); err != nil {
 			return err
 		}
 	}

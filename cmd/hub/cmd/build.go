@@ -58,14 +58,12 @@ func runBuild(opts *buildOptions) error {
 				log.Info(action.String())
 			}
 		} else {
-
 			// TODO: Run binfmt_misc to enable building multi-arch images.
 			// cat /proc/sys/fs/binfmt_misc/qemu-arm | grep flags == "flags: OCF\n"
 
 			// I am not sure if we should run each action build in a go routine,
 			// because buildkit is already massively parallelized.
 			for _, action := range *modifiedActions {
-
 				actionContext := path.Join(actionsPath, action.Name, action.Version)
 
 				readmeFile, err := os.Open(path.Join(actionContext, "README.md"))
