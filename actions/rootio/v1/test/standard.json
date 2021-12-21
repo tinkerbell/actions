@@ -1,57 +1,59 @@
 {
-  "crypted_root_password": "$6$password$u/Cn/tSGIYFtqv4AwZ9tjP1gMxjlvLHt3KO8zbK6ZnMn8anv6tSCo.XidktlU0MdRjWe3./lahF9FTMcnja9q.",
-  "hostname": "server001",
-  "operating_system_version": {
-    "distro": "debian",
-    "os_codename": "bullseye",
-    "os_slug": "debian_11",
-    "version": "11"
-  },
-  "storage": {
-    "disks": [
-      {
-        "device": "/dev/sdb",
-        "partitions": [
-          {
-            "label": "BIOS",
-            "number": 1,
-            "size": 4096
-          },
-          {
-            "label": "SWAP",
-            "number": 2,
-            "size": 3993600
-          },
-          {
-            "label": "ROOT",
-            "number": 3,
-            "size": 0
+  "metadata": {
+    "crypted_root_password": "$6$password$u/Cn/tSGIYFtqv4AwZ9tjP1gMxjlvLHt3KO8zbK6ZnMn8anv6tSCo.XidktlU0MdRjWe3./lahF9FTMcnja9q.",
+    "hostname": "server001",
+    "operating_system_version": {
+      "distro": "debian",
+      "os_codename": "bullseye",
+      "os_slug": "debian_11",
+      "version": "11"
+    },
+    "storage": {
+      "disks": [
+        {
+          "device": "/dev/sdb",
+          "partitions": [
+            {
+              "label": "BIOS",
+              "number": 1,
+              "size": 4096
+            },
+            {
+              "label": "SWAP",
+              "number": 2,
+              "size": 3993600
+            },
+            {
+              "label": "ROOT",
+              "number": 3,
+              "size": 0
+            }
+          ],
+          "wipe_table": true
+        }
+      ],
+      "filesystems": [
+        {
+          "mount": {
+            "create": {
+              "options": ["-L", "ROOT"]
+            },
+            "device": "/dev/sdb3",
+            "format": "ext4",
+            "point": "/"
           }
-        ],
-        "wipe_table": true
-      }
-    ],
-    "filesystems": [
-      {
-        "mount": {
-          "create": {
-            "options": ["-L", "ROOT"]
-          },
-          "device": "/dev/sdb3",
-          "format": "ext4",
-          "point": "/"
+        },
+        {
+          "mount": {
+            "create": {
+              "options": ["-L", "SWAP"]
+            },
+            "device": "/dev/sdb2",
+            "format": "swap",
+            "point": "none"
+          }
         }
-      },
-      {
-        "mount": {
-          "create": {
-            "options": ["-L", "SWAP"]
-          },
-          "device": "/dev/sdb2",
-          "format": "swap",
-          "point": "none"
-        }
-      }
-    ]
+      ]
+    }
   }
 }

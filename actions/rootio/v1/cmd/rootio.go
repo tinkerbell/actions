@@ -41,13 +41,12 @@ func init() {
 			log.Fatal(err)
 		}
 	} else {
-		metadata, err = types.RetreieveData()
+		metadata, err = types.RetrieveData()
 		if err != nil {
 			log.Fatal(err)
 		}
 	}
 	fmt.Printf("Succesfully parsed the MetaData, Found [%d] Disks\n", len(metadata.Storage.Disks))
-
 }
 
 // Execute - starts the command parsing process
@@ -145,11 +144,11 @@ func test() (*types.Metadata, error) {
 	byteValue, _ := ioutil.ReadAll(jsonFile)
 
 	// we initialize our Users array
-	var mdata types.Metadata
+	var w types.Wrapper
 
 	// we unmarshal our byteArray which contains our
 	// jsonFile's content into 'users' which we defined above
-	json.Unmarshal(byteValue, &mdata)
+	json.Unmarshal(byteValue, &w)
 
-	return &mdata, nil
+	return &w.Metadata, nil
 }

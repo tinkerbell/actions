@@ -9,6 +9,11 @@ import (
 	"time"
 )
 
+// Wrapper is a top level struct to unmarshal the metadata.
+type Wrapper struct {
+	Metadata Metadata `json:"metadata"`
+}
+
 // Metadata struct
 // This is an auto generated struct taken from a metadata request
 type Metadata struct {
@@ -52,8 +57,8 @@ type Partitions struct {
 	Size   uint64 `json:"size"`
 }
 
-//RetreieveData -
-func RetreieveData() (*Metadata, error) {
+//RetrieveData -
+func RetrieveData() (*Metadata, error) {
 	metadataURL := os.Getenv("MIRROR_HOST")
 	if metadataURL == "" {
 		return nil, fmt.Errorf("Unable to discover the metadata server from environment variable [MIRROR_HOST]")
@@ -84,12 +89,13 @@ func RetreieveData() (*Metadata, error) {
 		return nil, err
 	}
 
-	var mdata Metadata
+	var w Wrapper
 
-	jsonErr := json.Unmarshal(body, &mdata)
+	jsonErr := json.Unmarshal(body, &w)
 	if jsonErr != nil {
 		return nil, jsonErr
 	}
+	mdata := w.Metadata
 
 	return &mdata, nil
 }
