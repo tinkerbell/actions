@@ -12,6 +12,7 @@ import (
 	digest "github.com/opencontainers/go-digest"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"fmt"
 )
 
 func extractTarDirectory(root string, checksum string, r io.Reader) error {
@@ -20,7 +21,7 @@ func extractTarDirectory(root string, checksum string, r io.Reader) error {
 		log.Infof("checksum validation during untar [%s]", checksum)		
 		digest, err := digest.Parse(checksum)
 		if err != nil {
-			return errors.New("failed to parse digest")
+			return fmt.Errorf("failed to parse digest - %w", err)
 		}
 		verifier = digest.Verifier()
 		r = io.TeeReader(r, verifier)

@@ -14,18 +14,16 @@ import (
 
 // Write will pull an image and write it to local storage device
 // image must be a tar file or tar.gz file as set by archiveType
-func Write(archiveURL, archiveType, path string, checksum string) error {
+func Write(archiveURL, archiveType, path string, checksum string, httpTimeoutVal int) error {
 
 	req, err := http.NewRequest("GET", archiveURL, nil)
 	if err != nil {
 		return err
 	}
 
-	//timeout added due to clients timing out when provisioning
-	//multiple systems at once.  May want to add this as an
-	//input parameter
-	client := &http.Client{Timeout: time.Second * 300}
-
+	var timeout = time.Duration(httpTimeoutVal) * time.Minute
+	client := &http.Client{Timeout:  timeout}
+	log.Infof("httpTimeoutVal [%d]", timeout)
 	resp, err := client.Do(req)
 	if err != nil {
 		return err
@@ -43,14 +41,6 @@ func Write(archiveURL, archiveType, path string, checksum string) error {
 	absPath, err := filepath.Abs(path)
 
 	switch strings.ToLower(archiveType) {
-	case "gz":
-		// With compression run data through gzip writer
-		// zipOUT, err := gzip.NewReader(resp.Body)
-		// if err != nil {
-		// 	fmt.Println("[ERROR] New gzip reader:", err)
-		// }
-		// defer zipOUT.Close()
-		// out = zipOUT
 	case "tar":
 		err := extractTarDirectory(absPath, checksum, resp.Body)
 		if err != nil {
