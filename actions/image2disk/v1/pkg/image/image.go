@@ -68,7 +68,7 @@ func Write(sourceImage, destinationDevice string, compressed bool) error {
 
 	var out io.Reader
 
-	fileOut, err := os.OpenFile(destinationDevice, os.O_CREATE|os.O_WRONLY, 0644)
+	fileOut, err := os.OpenFile(destinationDevice, os.O_WRONLY, 0644)
 	if err != nil {
 		return err
 	}
