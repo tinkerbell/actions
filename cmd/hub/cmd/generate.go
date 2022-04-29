@@ -19,7 +19,7 @@ var generateOpts = &generateOptions{}
 
 var generateCmd = &cobra.Command{
 	Use:   "generate [--context .]",
-	Short: "Generate the static webiste",
+	Short: "Generate the static website",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return runGenerate(generateOpts)
 	},

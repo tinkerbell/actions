@@ -142,7 +142,7 @@ func Chroot(path string) (func() error, error) {
 	}, nil
 }
 
-// MountSpecialDirs ensures that /dev /proc exist in the chroot
+// MountSpecialDirs ensures that /dev /proc /sys exist in the chroot
 func MountSpecialDirs() error {
 	// Mount dev
 	dev := filepath.Join(mountAction, "dev")
@@ -156,6 +156,13 @@ func MountSpecialDirs() error {
 
 	if err := syscall.Mount("none", proc, "proc", syscall.MS_RDONLY, ""); err != nil {
 		return fmt.Errorf("Couldn't mount /proc to %v: %v", proc, err)
+	}
+
+	// Mount sys
+	sys := filepath.Join(mountAction, "sys")
+
+	if err := syscall.Mount("none", sys, "sysfs", syscall.MS_RDONLY, ""); err != nil {
+		return fmt.Errorf("Couldn't mount /sys to %v: %v", sys, err)
 	}
 
 	return nil
