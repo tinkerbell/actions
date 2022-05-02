@@ -14,7 +14,7 @@ mkShell {
     git
     gnumake
     gnused
-    go
+    go_1_17
     gotools
     jq
     nixfmt
