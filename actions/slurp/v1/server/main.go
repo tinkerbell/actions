@@ -8,9 +8,8 @@ import (
 	"os"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
-
 	humanize "github.com/dustin/go-humanize"
+	log "github.com/sirupsen/logrus"
 )
 
 // WriteCounter counts the number of bytes written to it. It implements to the io.Writer interface
@@ -19,8 +18,6 @@ type WriteCounter struct {
 	Total uint64
 }
 
-var data []byte
-
 func (wc *WriteCounter) Write(p []byte) (int, error) {
 	n := len(p)
 	wc.Total += uint64(n)
@@ -28,7 +25,7 @@ func (wc *WriteCounter) Write(p []byte) (int, error) {
 	return n, nil
 }
 
-//PrintProgress - provides UX information about the writing of the image locally.
+// PrintProgress - provides UX information about the writing of the image locally.
 func (wc WriteCounter) PrintProgress() {
 	// Clear the line by using a character return to go back to the start and remove
 	// the remaining characters by filling it with spaces
@@ -41,10 +38,9 @@ func (wc WriteCounter) PrintProgress() {
 }
 
 func imageHandler(w http.ResponseWriter, r *http.Request) {
-
 	imageName := fmt.Sprintf("%s.img", r.RemoteAddr)
 
-	r.ParseMultipartForm(32 << 20)
+	_ = r.ParseMultipartForm(32 << 20)
 	file, _, err := r.FormFile("BootyImage")
 	if err != nil {
 		fmt.Println(err)
@@ -52,9 +48,9 @@ func imageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
-	out, err := os.OpenFile(imageName, os.O_CREATE|os.O_WRONLY, 0644)
+	out, err := os.OpenFile(imageName, os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
-		log.Fatalf("%v", err)
+		log.Fatalf("%v", err) //nolint:gocritic // file.Close not closing doesn't matter if we're exiting
 	}
 	defer out.Close()
 
@@ -69,12 +65,7 @@ func imageHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func configHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write(data)
-}
-
 func main() {
-
 	// // Server port
 	port := flag.Int("port", 3000, "The port the server will listen on")
 
@@ -86,5 +77,4 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 }

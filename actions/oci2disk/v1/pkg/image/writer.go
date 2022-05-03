@@ -7,20 +7,19 @@ import (
 	"io/ioutil"
 	"log"
 
+	ctrcontent "github.com/containerd/containerd/content"
 	"github.com/deislabs/oras/pkg/content"
 	"github.com/opencontainers/go-digest"
-
-	ctrcontent "github.com/containerd/containerd/content"
 )
 
-// DiskImageStore -
+// DiskImageStore -.
 type DiskImageStore struct {
 	sourceImage string
 	writer      io.Writer
 	compressed  bool
 }
 
-// NewDiskImageStore -
+// NewDiskImageStore -.
 func NewDiskImageStore(sourceImage string, compressed bool, w io.Writer) DiskImageStore {
 	// we have to reprocess the opts to find the blocksize
 	// var wOpts := content.DefaultWriterOpts()
@@ -33,8 +32,8 @@ func NewDiskImageStore(sourceImage string, compressed bool, w io.Writer) DiskIma
 	return DiskImageStore{sourceImage: sourceImage, writer: w, compressed: compressed}
 }
 
-// Writer get a writer
-func (d DiskImageStore) Writer(ctx context.Context, opts ...ctrcontent.WriterOpt) (ctrcontent.Writer, error) {
+// Writer get a writer.
+func (d DiskImageStore) Writer(_ context.Context, opts ...ctrcontent.WriterOpt) (ctrcontent.Writer, error) {
 	// the logic is straightforward:
 	// - if there is a desc in the opts, and the mediatype is tar or tar+gzip, then pass the correct decompress writer
 	// - else, pass the regular writer
@@ -110,7 +109,7 @@ func (d DiskImageStore) Writer(ctx context.Context, opts ...ctrcontent.WriterOpt
 		digester: digest.Canonical.Digester(),
 		// we take the OutputHash, since the InputHash goes to the passthrough writer,
 		// which then passes the processed output to us
-		//hash: wOpts.OutputHash,
+		// hash: wOpts.OutputHash,
 	}
 
 	// we have to reprocess the opts to find the desc
@@ -125,41 +124,33 @@ func (d DiskImageStore) Writer(ctx context.Context, opts ...ctrcontent.WriterOpt
 	fmt.Printf("%v\n", desc.Annotations["org.opencontainers.image.title"])
 	if desc.Annotations["org.opencontainers.image.title"] == "" {
 		return content.NewIoContentWriter(ioutil.Discard, content.WithOutputHash(desc.Digest)), nil
-
 	}
 	if !d.compressed {
 		// Without compression send raw output
 		f = func(r io.Reader, w io.Writer, done chan<- error) {
-			var (
-				err error
-			)
-			b := make([]byte, wOpts.Blocksize, wOpts.Blocksize)
+			var err error
+			b := make([]byte, wOpts.Blocksize)
 			_, err = io.CopyBuffer(w, r, b)
 			done <- err
 		}
 	} else {
 		f = func(r io.Reader, w io.Writer, done chan<- error) {
-			var (
-				err error
-			)
+			var err error
 			decompressReader, err := findDecompressor(d.sourceImage, r)
 			if err != nil {
-				log.Fatalf(err.Error())
-				done <- err
-			} else {
-				b := make([]byte, wOpts.Blocksize, wOpts.Blocksize)
-				_, err = io.CopyBuffer(w, decompressReader, b)
-				done <- err
+				log.Fatalf(err.Error()) //nolint:revive // this is fine
 			}
+			b := make([]byte, wOpts.Blocksize)
+			_, err = io.CopyBuffer(w, decompressReader, b)
+			done <- err
 		}
-
 	}
 	writerOpts := []content.WriterOpt{}
 	return content.NewPassthroughWriter(di, f, writerOpts...), nil
-	//return nil, err
+	// return nil, err
 }
 
-// DiskImage -
+// DiskImage -.
 type DiskImage struct {
 	writer   io.Writer
 	digester digest.Digester
@@ -179,7 +170,7 @@ func (w *DiskImage) Write(p []byte) (n int, err error) {
 	return
 }
 
-// Close -
+// Close -.
 func (w *DiskImage) Close() error {
 	return nil
 }
@@ -193,16 +184,16 @@ func (w *DiskImage) Digest() digest.Digest {
 // size and expected can be zero-value when unknown.
 // Commit always closes the writer, even on error.
 // ErrAlreadyExists aborts the writer.
-func (w *DiskImage) Commit(ctx context.Context, size int64, expected digest.Digest, opts ...ctrcontent.Opt) error {
+func (w *DiskImage) Commit(context.Context, int64, digest.Digest, ...ctrcontent.Opt) error {
 	return nil
 }
 
-// Status returns the current state of write
+// Status returns the current state of write.
 func (w *DiskImage) Status() (ctrcontent.Status, error) {
 	return ctrcontent.Status{}, nil
 }
 
-// Truncate updates the size of the target blob
-func (w *DiskImage) Truncate(size int64) error {
+// Truncate updates the size of the target blob.
+func (w *DiskImage) Truncate(int64) error {
 	return nil
 }

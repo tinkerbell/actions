@@ -11,7 +11,6 @@ import (
 )
 
 func main() {
-
 	fmt.Printf("SYSLINUX - Boot Loader Installation\n------------------------\n")
 	disk := os.Getenv("DEST_DISK")
 	partition := os.Getenv("DEST_PARTITION")
@@ -24,21 +23,23 @@ func main() {
 	default:
 		log.Fatalf("Unknown syslinux version [%s]", ver)
 	}
-
 }
 
 func syslinux386(disk, partition string) {
 	log.Infof("Writing mbr to [%s] and installing boot loader to [%s]", disk, partition)
 	// Open the block device and write the Master boot record
-	blockOut, err := os.OpenFile(disk, os.O_CREATE|os.O_WRONLY, 0644)
+	blockOut, err := os.OpenFile(disk, os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	ReReadPartitionTable(blockOut)
+	_ = ReReadPartitionTable(blockOut)
 	defer blockOut.Close()
 
-	mbrIn, err := os.OpenFile("/mbr.bin.386", os.O_RDONLY, 0644)
-	defer mbrIn.Close()
+	mbrIn, err := os.OpenFile("/mbr.bin.386", os.O_RDONLY, 0o644)
+	if err != nil {
+		log.Fatalln(err) //nolint:gocritic // this is fine
+	}
+	defer func() { _ = mbrIn.Close() }()
 
 	_, err = io.Copy(blockOut, mbrIn)
 	if err != nil {
@@ -60,7 +61,6 @@ func syslinux386(disk, partition string) {
 	if err != nil {
 		log.Fatalf("Error running [%v]", err)
 	}
-
 }
 
 const (
@@ -75,7 +75,7 @@ func ReReadPartitionTable(d *os.File) error {
 	fd := d.Fd()
 	_, err := unix.IoctlGetInt(int(fd), BLKRRPART)
 	if err != nil {
-		return fmt.Errorf("Unable to re-read partition table: %v", err)
+		return fmt.Errorf("unable to re-read partition table: %w", err)
 	}
 	return nil
 }

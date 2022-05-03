@@ -14,7 +14,7 @@ import (
 
 var metadata *types.Metadata
 
-// Release - this struct contains the release information populated when building rootio
+// Release - this struct contains the release information populated when building rootio.
 var Release struct {
 	Version string
 	Build   string
@@ -26,7 +26,6 @@ var rootioCmd = &cobra.Command{
 }
 
 func init() {
-
 	rootioCmd.AddCommand(rootioFormat)
 	rootioCmd.AddCommand(rootioPartition)
 	rootioCmd.AddCommand(rootioMount)
@@ -46,10 +45,10 @@ func init() {
 			log.Fatal(err)
 		}
 	}
-	fmt.Printf("Succesfully parsed the MetaData, Found [%d] Disks\n", len(metadata.Storage.Disks))
+	fmt.Printf("Successfully parsed the MetaData, Found [%d] Disks\n", len(metadata.Storage.Disks))
 }
 
-// Execute - starts the command parsing process
+// Execute - starts the command parsing process.
 func Execute() {
 	if err := rootioCmd.Execute(); err != nil {
 		fmt.Println(err)
@@ -61,7 +60,6 @@ var rootioFormat = &cobra.Command{
 	Use:   "format",
 	Short: "Use rootio to format disks based upon metadata",
 	Run: func(cmd *cobra.Command, args []string) {
-
 		for fileSystem := range metadata.Storage.Filesystems {
 			err := storage.FileSystemCreate(metadata.Storage.Filesystems[fileSystem])
 			if err != nil {
@@ -75,7 +73,6 @@ var rootioMount = &cobra.Command{
 	Use:   "mount",
 	Short: "Use rootio to mount disks based upon metadata",
 	Run: func(cmd *cobra.Command, args []string) {
-
 		for fileSystem := range metadata.Storage.Filesystems {
 			err := storage.Mount(metadata.Storage.Filesystems[fileSystem])
 			if err != nil {
@@ -89,7 +86,6 @@ var rootioPartition = &cobra.Command{
 	Use:   "partition",
 	Short: "Use rootio to partition disks based upon metadata",
 	Run: func(cmd *cobra.Command, args []string) {
-
 		for disk := range metadata.Storage.Disks {
 			err := storage.VerifyBlockDevice(metadata.Storage.Disks[disk].Device)
 			if err != nil {
@@ -148,7 +144,7 @@ func test() (*types.Metadata, error) {
 
 	// we unmarshal our byteArray which contains our
 	// jsonFile's content into 'users' which we defined above
-	json.Unmarshal(byteValue, &w)
+	_ = json.Unmarshal(byteValue, &w)
 
 	return &w.Metadata, nil
 }

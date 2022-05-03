@@ -3,7 +3,6 @@ package img
 import (
 	"context"
 	"encoding/json"
-
 	"os"
 	"path/filepath"
 	"strings"
@@ -29,7 +28,6 @@ import (
 
 const (
 	defaultBackend        = "auto"
-	defaultDockerRegistry = "https://index.docker.io/v1/"
 	defaultDockerfileName = "Dockerfile"
 )
 
@@ -169,11 +167,9 @@ func Build(config *BuildConfig) error {
 	eg.Go(func() error {
 		return showProgress(ch, config.NoConsole)
 	})
-	if err := eg.Wait(); err != nil {
-		return err
-	}
 
-	return nil
+	err = eg.Wait()
+	return err
 }
 
 // validateTag checks if the given image name can be resolved, and ensures the latest tag is added if it is missing.
@@ -195,8 +191,7 @@ func stateDirectory() string {
 		dirs := strings.Split(xdgDataHome, ":")
 		return filepath.Join(dirs[0], "img")
 	}
-	home := os.Getenv("HOME")
-	if home != "" {
+	if home := os.Getenv("HOME"); home != "" {
 		return filepath.Join(home, ".local", "share", "img")
 	}
 	return "/tmp/img"

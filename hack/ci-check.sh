@@ -4,21 +4,36 @@
 
 set -eux
 
-failed=0
+failed=false
+
 if ! git ls-files '*.sh' | xargs shfmt -l -d; then
-	failed=1
+	failed=true
 fi
 
 if ! git ls-files '*.sh' | xargs shellcheck; then
-	failed=1
+	failed=true
 fi
 
-if [[ "$failed" -eq 1 ]]; then
-	exit "$failed"
+if ! nixfmt shell.nix; then
+	failed=true
 fi
 
-go mod tidy
-test -z "$(git status --porcelain go.mod go.sum)"
+if ! git ls-files '*.go' | xargs -I% sh -c 'sed -i "/^import (/,/^)/ { /^\s*$/ d }" % && gofumpt -w %'; then
+	failed=true
+fi
+
+if ! go mod tidy; then
+	failed=true
+fi
+
+# this actually shows the diff(s) that will cause the error exit which is nice because its helpful
+if ! git diff | (! grep .); then
+	failed=true
+fi
+
+if $failed; then
+	exit 1
+fi
 
 go vet ./...
 
@@ -32,4 +47,5 @@ GIT_REF="remotes/upstream/$GITHUB_HEAD_REF..remotes/origin/$GITHUB_BASE_REF"
 if [[ -z $GITHUB_BASE_REF ]]; then
 	GIT_REF="HEAD..HEAD~1"
 fi
-sudo go run cmd/hub/main.go build --git-ref ${GIT_REF}
+
+go run cmd/hub/main.go build --git-ref ${GIT_REF}

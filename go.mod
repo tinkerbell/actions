@@ -8,17 +8,20 @@ require (
 	github.com/cyphar/filepath-securejoin v0.2.2
 	github.com/docker/distribution v2.7.1+incompatible
 	github.com/genuinetools/img v0.5.11
-	github.com/google/go-cmp v0.4.1
+	github.com/google/go-cmp v0.5.6
 	github.com/mattn/godown v0.0.0-20201027140031-2c7783b24de7
 	github.com/moby/buildkit v0.7.2
 	github.com/pkg/errors v0.9.1
+	github.com/prometheus/common v0.4.0
 	github.com/sirupsen/logrus v1.7.0 // indirect
 	github.com/spf13/cobra v1.1.1
-	github.com/yuin/goldmark v1.2.1
+	github.com/tinkerbell/lint-install v0.0.0-20211124222731-60117699c7e3
+	github.com/yuin/goldmark v1.4.1
 	github.com/yuin/goldmark-meta v1.0.0
 	go.uber.org/zap v1.16.0
-	golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208
+	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776
+	mvdan.cc/gofumpt v0.2.0
 )
 
 replace (

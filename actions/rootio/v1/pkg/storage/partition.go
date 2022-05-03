@@ -6,17 +6,16 @@ import (
 	"syscall"
 	"time"
 
-	log "github.com/sirupsen/logrus"
-	"github.com/tinkerbell/hub/actions/rootio/v1/pkg/types.go"
-
 	diskfs "github.com/diskfs/go-diskfs"
 	"github.com/diskfs/go-diskfs/partition/gpt"
 	"github.com/diskfs/go-diskfs/partition/mbr"
+	log "github.com/sirupsen/logrus"
+	"github.com/tinkerbell/hub/actions/rootio/v1/pkg/types.go"
 )
 
 const sectorSize = 512
 
-// VerifyBlockDevice will check that the device actually exists and is a block device
+// VerifyBlockDevice will check that the device actually exists and is a block device.
 func VerifyBlockDevice(device string) error {
 	d, err := os.Stat(device)
 	if os.IsNotExist(err) {
@@ -36,7 +35,7 @@ func isBlockDevice(d *os.FileInfo) bool {
 	return (mode & syscall.S_IFMT) == syscall.S_IFBLK
 }
 
-// ExamineDisk will look at the configuration of a disk
+// ExamineDisk will look at the configuration of a disk.
 func ExamineDisk(d types.Disk) error {
 	disk, err := diskfs.Open(d.Device)
 	if err != nil {
@@ -63,9 +62,8 @@ func ExamineDisk(d types.Disk) error {
 	return nil
 }
 
-// Partition will create the partitions and write them to the disk
+// Partition will create the partitions and write them to the disk.
 func Partition(d types.Disk) error {
-
 	table := &gpt.Table{
 		ProtectiveMBR:      true,
 		LogicalSectorSize:  sectorSize,
@@ -82,7 +80,7 @@ func Partition(d types.Disk) error {
 	sectorStart = 2048
 	for x := range d.Partitions {
 		// Calculate the end sector by adding the starting sec
-		sectorEnd := sectorStart + uint64(d.Partitions[x].Size)
+		sectorEnd := sectorStart + d.Partitions[x].Size
 
 		if d.Partitions[x].Number == partitionNumber {
 			partitionNumber++
@@ -92,7 +90,7 @@ func Partition(d types.Disk) error {
 				End:   sectorEnd,
 			}
 
-			sectorStart = sectorStart + sectorEnd
+			sectorStart += sectorEnd
 
 			switch d.Partitions[x].Label {
 			case "SWAP":
@@ -129,9 +127,8 @@ func Partition(d types.Disk) error {
 	return nil
 }
 
-// MBRPartition will create the partitions and write them to the disk
+// MBRPartition will create the partitions and write them to the disk.
 func MBRPartition(d types.Disk) error {
-
 	table := &mbr.Table{
 		LogicalSectorSize:  sectorSize,
 		PhysicalSectorSize: sectorSize,
@@ -146,9 +143,8 @@ func MBRPartition(d types.Disk) error {
 	var sectorStart uint32
 	sectorStart = 2048
 	for x := range d.Partitions {
-
 		// sector start is for bootloader
-		RemainingSectors := disk.Size/sectorSize - int64(sectorStart)
+		remainingSectors := disk.Size/sectorSize - int64(sectorStart)
 
 		if d.Partitions[x].Number == partitionNumber {
 			partitionNumber++
@@ -157,7 +153,7 @@ func MBRPartition(d types.Disk) error {
 				Size:  uint32(d.Partitions[x].Size),
 			}
 
-			sectorStart = sectorStart + uint32(d.Partitions[x].Size)
+			sectorStart += uint32(d.Partitions[x].Size)
 
 			switch d.Partitions[x].Label {
 			case "SWAP":
@@ -178,7 +174,7 @@ func MBRPartition(d types.Disk) error {
 
 			// If this is set to 0 then use the remaining disk
 			if d.Partitions[x].Size == 0 {
-				newPartition.Size = uint32(RemainingSectors)
+				newPartition.Size = uint32(remainingSectors)
 			}
 
 			log.Infof("New Partition Name=%s Start=%d Size=%d", d.Partitions[x].Label, newPartition.Start, newPartition.Size)
@@ -202,9 +198,9 @@ func MBRPartition(d types.Disk) error {
 	return nil
 }
 
-// Wipe will clean the table from a disk
+// Wipe will clean the table from a disk.
 func Wipe(d types.Disk) error {
-	disk, err := os.OpenFile(d.Device, os.O_CREATE|os.O_WRONLY, 0644)
+	disk, err := os.OpenFile(d.Device, os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
 		return err
 	}

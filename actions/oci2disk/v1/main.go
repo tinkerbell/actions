@@ -6,12 +6,10 @@ import (
 	"strconv"
 
 	log "github.com/sirupsen/logrus"
-
 	"github.com/tinkerbell/hub/actions/oci2disk/v1/pkg/image"
 )
 
 func main() {
-
 	fmt.Printf("OCI2DISK - OCI Container Disk image streamer\n------------------------\n")
 	disk := os.Getenv("DEST_DISK")
 	img := os.Getenv("IMG_URL")

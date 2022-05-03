@@ -6,12 +6,10 @@ import (
 	"strconv"
 
 	log "github.com/sirupsen/logrus"
-
 	"github.com/tinkerbell/hub/actions/image2disk/v1/pkg/image"
 )
 
 func main() {
-
 	fmt.Printf("IMAGE2DISK - Cloud image streamer\n------------------------\n")
 	disk := os.Getenv("DEST_DISK")
 	img := os.Getenv("IMG_URL")

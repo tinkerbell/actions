@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"syscall"
-
 	"path/filepath"
+	"syscall"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -14,7 +13,7 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-// Release - this struct contains the release information populated when building kexec
+// Release - this struct contains the release information populated when building kexec.
 var Release struct {
 	Version string
 	Build   string
@@ -26,7 +25,6 @@ var kexecCmd = &cobra.Command{
 	Use:   "kexec",
 	Short: "This is an action for performing a kexec into a new kernel/ramdisk",
 	Run: func(cmd *cobra.Command, args []string) {
-
 		// Parse the environment variables that are passed into the action
 		blockDevice := os.Getenv("BLOCK_DEVICE")
 		filesystemType := os.Getenv("FS_TYPE")
@@ -95,11 +93,11 @@ var kexecCmd = &cobra.Command{
 		}
 		log.Info("Rebooting system")
 		// Call the unix reboot command with the kexec functionality
-		unix.Reboot(unix.LINUX_REBOOT_CMD_KEXEC)
+		_ = unix.Reboot(unix.LINUX_REBOOT_CMD_KEXEC)
 	},
 }
 
-// Execute - starts the command parsing process
+// Execute - starts the command parsing process.
 func Execute() {
 	if err := kexecCmd.Execute(); err != nil {
 		fmt.Println(err)

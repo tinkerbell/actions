@@ -1,2 +1,6 @@
 actions/rootio/v1/v1
-hub
+/bin/
+/cmd/hub/hub
+
+# added by lint-install
+out/

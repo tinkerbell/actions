@@ -7,6 +7,6 @@ import (
 
 func main() {
 	logger, _ := zap.NewProduction()
-	defer logger.Sync() // flushes buffer, if any
 	cmd.Execute(logger)
+	_ = logger.Sync() // flushes buffer, if any
 }

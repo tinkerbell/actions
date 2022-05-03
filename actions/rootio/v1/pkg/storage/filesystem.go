@@ -9,7 +9,7 @@ import (
 	"github.com/tinkerbell/hub/actions/rootio/v1/pkg/types.go"
 )
 
-// FileSystemCreate handles the creation of filesystems
+// FileSystemCreate handles the creation of filesystems.
 func FileSystemCreate(f types.Filesystem) error {
 	var cmd *exec.Cmd
 	var debugCMD string
@@ -38,17 +38,17 @@ func FileSystemCreate(f types.Filesystem) error {
 		cmd = exec.Command("/sbin/mkfs.fat", f.Mount.Device)
 		debugCMD = fmt.Sprintf("%s %s", "/sbin/mkfs.fat", f.Mount.Device)
 	default:
-		log.Warnf("Unknown filesystem type [%s]", f.Mount.Format)
+		log.Warnf("unknown filesystem type [%s]", f.Mount.Format)
 	}
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 
 	err := cmd.Start()
 	if err != nil {
-		return fmt.Errorf("Command [%s] Filesystem [%v]", debugCMD, err)
+		return fmt.Errorf("command [%s] Filesystem [%w]", debugCMD, err)
 	}
 	err = cmd.Wait()
 	if err != nil {
-		return fmt.Errorf("Command [%s] Filesystem [%v]", debugCMD, err)
+		return fmt.Errorf("command [%s] Filesystem [%w]", debugCMD, err)
 	}
 
 	return nil

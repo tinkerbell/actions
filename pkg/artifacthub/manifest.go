@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/mattn/godown"
-
 	"github.com/pkg/errors"
 	"github.com/yuin/goldmark"
 	meta "github.com/yuin/goldmark-meta"
@@ -35,28 +34,28 @@ type Manifest struct {
 	ContainersImages []struct {
 		Name  string `yaml:"name,omitempty"`
 		Image string `yaml:"image,omitempty"`
-		//Whitelisted string `yaml:"whitelisted,omitempty"`
+		// Whitelisted string `yaml:"whitelisted,omitempty"`
 	} `yaml:"containersImages,omitempty"`
-	//ContainsSecurityUpdates string   `yaml:"containsSecurityUpdates,omitempty"`
-	//Operator                string   `yaml:"operator,omitempty"`
-	//Deprecated              string   `yaml:"deprecated,omitempty"`
-	//Prerelease              string   `yaml:"prerelease,omitempty"`
+	// ContainsSecurityUpdates string   `yaml:"containsSecurityUpdates,omitempty"`
+	// Operator                string   `yaml:"operator,omitempty"`
+	// Deprecated              string   `yaml:"deprecated,omitempty"`
+	// Prerelease              string   `yaml:"prerelease,omitempty"`
 	Keywords []string `yaml:"keywords,omitempty"`
 	Links    []struct {
 		Name string `yaml:"name"`
 		URL  string `yaml:"url"`
 	} `yaml:"links,omitempty"`
 	Readme string `yaml:"readme,omitempty"`
-	//Install     string   `yaml:"install,omitempty"`
-	//Changes     []string `yaml:"changes,omitempty"`
-	//Maintainers []struct {
-	//Name  string `yaml:"name"`
-	//Email string `yaml:"email"`
-	//} `yaml:"maintainers,omitempty"`
+	// Install     string   `yaml:"install,omitempty"`
+	// Changes     []string `yaml:"changes,omitempty"`
+	// Maintainers []struct {
+	// Name  string `yaml:"name"`
+	// Email string `yaml:"email"`
+	// } `yaml:"maintainers,omitempty"`
 	Provider struct {
 		Name string `yaml:"name"`
 	} `yaml:"provider"`
-	//Ignore []string `yaml:"ignore"`
+	// Ignore []string `yaml:"ignore"`
 }
 
 func PopulateFromActionMarkdown(file io.Reader, m *Manifest) error {
@@ -83,21 +82,27 @@ func PopulateFromActionMarkdown(file io.Reader, m *Manifest) error {
 	readmeBack := bytes.NewBuffer([]byte{})
 	if err := godown.Convert(readmeBack, &buf, nil); err != nil {
 		return errors.Wrap(err, "error converting the readme back from html to markdown")
-
 	}
 
-	m.Name = metaData["slug"].(string)
-	m.DisplayName = metaData["name"].(string)
+	mustString := func(name string, i interface{}) string {
+		s, ok := i.(string)
+		if !ok {
+			panic(name + " is not a string!")
+		}
+		return s
+	}
+	m.Name = mustString("slug", metaData["slug"])
+	m.DisplayName = mustString("name", metaData["name"])
 	m.Readme = readmeBack.String()
-	m.Version = metaData["version"].(string)[1:]
+	m.Version = mustString("version", metaData["version"])[1:]
 	m.AppVersion = m.Version
-	m.Keywords = strings.Split(metaData["tags"].(string), ",")
-	m.Description = metaData["description"].(string)
+	m.Keywords = strings.Split(mustString("tags", metaData["tags"]), ",")
+	m.Description = mustString("description", metaData["description"])
 
 	m.ContainersImages = []struct {
 		Name  string `yaml:"name,omitempty"`
 		Image string `yaml:"image,omitempty"`
-		//Whitelisted string `yaml:"whitelisted,omitempty"`
+		// Whitelisted string `yaml:"whitelisted,omitempty"`
 	}{
 		{
 			Name:  m.Name,
@@ -108,7 +113,7 @@ func PopulateFromActionMarkdown(file io.Reader, m *Manifest) error {
 	if _, err := time.Parse(time.RFC3339, metaData["createdAt"].(string)); err != nil {
 		println(fmt.Sprintf("action: %s error converting createdAt right format is \"2016-06-20T12:41:45.14Z\" got %s", m.Name, metaData["createdAt"].(string)))
 	} else {
-		m.CreatedAt = metaData["createdAt"].(string)
+		m.CreatedAt = mustString("createdAt", metaData["createdAt"])
 	}
 
 	return nil
@@ -121,13 +126,13 @@ func WriteToFile(manifest *Manifest, dst string) error {
 	if err != nil {
 		return errors.Wrap(err, "error marshalling manifest to yaml")
 	}
-	if err := os.MkdirAll(path.Join(dst, manifest.Name, manifest.Version), 0700); err != nil {
+	if err := os.MkdirAll(path.Join(dst, manifest.Name, manifest.Version), 0o700); err != nil {
 		return errors.Wrap(err, "error creating directory")
 	}
 	dstFile, err := os.OpenFile(
 		path.Join(dst, manifest.Name, manifest.Version, "artifacthub-pkg.yml"),
 		os.O_CREATE|os.O_WRONLY,
-		0644)
+		0o644)
 	if err != nil {
 		return errors.Wrap(err, "error creating manifest file")
 	}

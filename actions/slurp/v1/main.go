@@ -6,12 +6,10 @@ import (
 	"strconv"
 
 	log "github.com/sirupsen/logrus"
-
 	"github.com/tinkerbell/hub/actions/slurp/v1/pkg/image"
 )
 
 func main() {
-
 	fmt.Printf("SLURP - Upload the contents of a block device\n------------------------\n")
 	sourceDisk := os.Getenv("SOURCE_DISK")
 	destinationURL := os.Getenv("DEST_URL")

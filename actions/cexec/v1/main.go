@@ -11,16 +11,9 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// Release - this struct contains the release information populated when building kexec
-var Release struct {
-	Version string
-	Build   string
-}
-
 const mountAction = "/mountAction"
 
 func main() {
-
 	fmt.Printf("CEXEC - Chroot Exec\n------------------------\n")
 
 	// Parse the environment variables that are passed into the action
@@ -65,7 +58,7 @@ func main() {
 		// Split the interpreter by space, in the event that the default intprepretter has flags.
 		di := strings.Split(defaultInterpreter, " ")
 		if len(di) == 0 {
-			log.Fatalln("Error parsing [\"DEFAULT_INTERPETER\"] [%s]", defaultInterpreter)
+			log.Fatalf("Error parsing [\"DEFAULT_INTERPETER\"] [%s]\n", defaultInterpreter)
 		}
 		// Look for default shell intepreter
 		_, err = os.Stat(di[0])
@@ -75,7 +68,7 @@ func main() {
 		di = append(di, cmdLine)
 		cmd := exec.Command(di[0], di[1:]...)
 		cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
-		var debugCMD = fmt.Sprintf("%s %v", di[0], di[1:])
+		debugCMD := fmt.Sprintf("%s %v", di[0], di[1:])
 		err = cmd.Start()
 		if err != nil {
 			log.Fatalf("Error starting [%s] [%v]", debugCMD, err)
@@ -85,13 +78,13 @@ func main() {
 			log.Fatalf("Error running [%s] [%v]", debugCMD, err)
 		}
 	} else {
-		// Format the cmdLine string into seperate execution tasks
+		// Format the cmdLine string into separate execution tasks
 		commandLines := strings.Split(cmdLine, ";")
 		for x := range commandLines {
 			command := strings.Split(commandLines[x], " ")
 			cmd := exec.Command(command[0], command[1:]...)
 			cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
-			var debugCMD = fmt.Sprintf("%s %v", command[0], command[1:])
+			debugCMD := fmt.Sprintf("%s %v", command[0], command[1:])
 			err = cmd.Start()
 			if err != nil {
 				log.Fatalf("Error starting [%s] [%v]", debugCMD, err)
@@ -111,7 +104,7 @@ func main() {
 	}
 }
 
-// Chroot handles changing the root, and returning a function to return back to the present directory
+// Chroot handles changing the root, and returning a function to return back to the present directory.
 func Chroot(path string) (func() error, error) {
 	cwd, err := os.Getwd()
 	if err != nil {
@@ -142,27 +135,27 @@ func Chroot(path string) (func() error, error) {
 	}, nil
 }
 
-// MountSpecialDirs ensures that /dev /proc /sys exist in the chroot
+// MountSpecialDirs ensures that /dev /proc /sys exist in the chroot.
 func MountSpecialDirs() error {
 	// Mount dev
 	dev := filepath.Join(mountAction, "dev")
 
 	if err := syscall.Mount("none", dev, "devtmpfs", syscall.MS_RDONLY, ""); err != nil {
-		return fmt.Errorf("Couldn't mount /dev to %v: %v", dev, err)
+		return fmt.Errorf("couldn't mount /dev to %v: %w", dev, err)
 	}
 
 	// Mount proc
 	proc := filepath.Join(mountAction, "proc")
 
 	if err := syscall.Mount("none", proc, "proc", syscall.MS_RDONLY, ""); err != nil {
-		return fmt.Errorf("Couldn't mount /proc to %v: %v", proc, err)
+		return fmt.Errorf("couldn't mount /proc to %v: %w", proc, err)
 	}
 
 	// Mount sys
 	sys := filepath.Join(mountAction, "sys")
 
 	if err := syscall.Mount("none", sys, "sysfs", syscall.MS_RDONLY, ""); err != nil {
-		return fmt.Errorf("Couldn't mount /sys to %v: %v", sys, err)
+		return fmt.Errorf("couldn't mount /sys to %v: %w", sys, err)
 	}
 
 	return nil

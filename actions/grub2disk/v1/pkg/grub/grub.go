@@ -15,7 +15,7 @@ func makeDirAndMount(devicePath string, mountPoint string, filesystemType string
 		return err
 	}
 
-	//if err = syscall.Mount(devicePath, mountPoint, filesystemType, flag, ""); err != nil {
+	// if err = syscall.Mount(devicePath, mountPoint, filesystemType, flag, ""); err != nil {
 	var params string
 	if filesystemType != "" {
 		params = "-t " + filesystemType

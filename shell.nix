@@ -1,20 +1,15 @@
 let _pkgs = import <nixpkgs> { };
-in
-{ pkgs ?
-  import
-    (_pkgs.fetchFromGitHub {
-      owner = "NixOS";
-      repo = "nixpkgs-channels";
-      #branch@date: nixpkgs-unstable@2020-12-17
-      rev = "00941cd747e9bc1c3326d1362dbc7e9cfe18cf53";
-      sha256 = "12mjfar2ir561jxa1xvw6b1whbqs1rq59byc87icql399zal5z4a";
-    }) { }
-}:
+in { pkgs ? import (_pkgs.fetchFromGitHub {
+  owner = "NixOS";
+  repo = "nixpkgs";
+  #branch@date: 21.11@2021-12-02
+  rev = "21.11";
+  sha256 = "sha256-AjhmbT4UBlJWqxY0ea8a6GU2C2HdKUREkG43oRr3TZg=";
+}) { } }:
 
 with pkgs;
 
 mkShell {
-  GOROOT = "";
   buildInputs = [
     git
     gnumake
@@ -22,9 +17,12 @@ mkShell {
     go
     gotools
     jq
+    nixfmt
     shfmt
     shellcheck
     libseccomp
+    python3Packages.pip
+    python3Packages.setuptools
     rootlesskit
     runc
   ];

@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// Config details the configuration for grub
+// Config details the configuration for grub.
 type Config struct {
 	Name          string   `json:"name,omitempty"`
 	Kernel        string   `json:"kernel"`
@@ -16,7 +16,7 @@ type Config struct {
 	Modules       []string `json:"multiboot_modules,omitempty"`
 }
 
-// GetDefaultConfig - will find the grub configuration that will be booted by default
+// GetDefaultConfig - will find the grub configuration that will be booted by default.
 func GetDefaultConfig(grubcfg string) (cfg *Config) {
 	configs, index := ParseGrubCfg(grubcfg)
 	if configs == nil {
@@ -25,7 +25,7 @@ func GetDefaultConfig(grubcfg string) (cfg *Config) {
 	return &configs[index]
 }
 
-// ParseGrubCfg will do a line-by-line examination of the grub config
+// ParseGrubCfg will do a line-by-line examination of the grub config.
 func ParseGrubCfg(grubcfg string) (configs []Config, defaultConfig int64) {
 	var err error
 	inMenuEntry := false
@@ -64,40 +64,44 @@ func ParseGrubCfg(grubcfg string) (configs []Config, defaultConfig int64) {
 			name := ""
 			if len(sline) > 1 {
 				name = strings.Join(sline[1:], " ")
-				name = strings.Replace(name, `\$`, "$", -1)
+				name = strings.ReplaceAll(name, `\$`, "$")
 				name = strings.Split(name, "--")[0]
 			}
 			cfg.Name = name
-		} else if inMenuEntry {
+			continue
+		}
+		if inMenuEntry {
 			// otherwise look for kernel and initramfs configuration
 			if len(sline) < 2 {
 				// surely not a valid linux or initrd directive, skip it
 				continue
 			}
-			if sline[0] == "linux" || sline[0] == "linux16" || sline[0] == "linuxefi" {
+			switch sline[0] {
+			case "linux", "linux16", "linuxefi":
 				kernel := sline[1]
 				cmdline := strings.Join(sline[2:], " ")
-				cmdline = strings.Replace(cmdline, `\$`, "$", -1)
+				cmdline = strings.ReplaceAll(cmdline, `\$`, "$")
 				cfg.Kernel = kernel
 				cfg.KernelArgs = cmdline
-			} else if sline[0] == "initrd" || sline[0] == "initrd16" || sline[0] == "initrdefi" {
+			case "initrd", "initrd16", "initrdefi":
 				initrd := sline[1]
 				cfg.Initramfs = initrd
-			} else if sline[0] == "multiboot" || sline[0] == "multiboot2" {
+			case "multiboot", "multiboot2":
 				multiboot := sline[1]
 				cmdline := strings.Join(sline[2:], " ")
-				cmdline = strings.Replace(cmdline, `\$`, "$", -1)
+				cmdline = strings.ReplaceAll(cmdline, `\$`, "$")
 				cfg.Multiboot = multiboot
 				cfg.MultibootArgs = cmdline
-			} else if sline[0] == "module" || sline[0] == "module2" {
+			case "module", "module2":
 				module := sline[1]
 				cmdline := strings.Join(sline[2:], " ")
-				cmdline = strings.Replace(cmdline, `\$`, "$", -1)
+				cmdline = strings.ReplaceAll(cmdline, `\$`, "$")
 				if cmdline != "" {
 					module = module + " " + cmdline
 				}
 				cfg.Modules = append(cfg.Modules, module)
 			}
+			continue
 		}
 	}
 
@@ -105,25 +109,7 @@ func ParseGrubCfg(grubcfg string) (configs []Config, defaultConfig int64) {
 	if inMenuEntry && cfg.Kernel != "" && cfg.Initramfs != "" {
 		configs = append(configs, *cfg)
 	}
-	return
-}
-
-type grubVersion int
-
-var (
-	grubV1 grubVersion = 1
-	grubV2 grubVersion = 2
-)
-
-func unquote(ver grubVersion, text string) string {
-	if ver == grubV2 {
-		// if grub2, unquote the string, as directives could be quoted
-		// https://www.gnu.org/software/grub/manual/grub/grub.html#Quoting
-		// TODO unquote everything, not just \$
-		return strings.Replace(text, `\$`, "$", -1)
-	}
-	// otherwise return the unmodified string
-	return text
+	return configs, defaultConfig
 }
 
 func trimQuote(s string) string {

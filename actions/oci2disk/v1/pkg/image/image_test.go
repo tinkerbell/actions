@@ -4,35 +4,38 @@ import (
 	"bytes"
 	"compress/gzip"
 	"io"
-	"log"
 	"strings"
 	"testing"
 
 	"github.com/ulikunitz/xz"
 )
 
-func gzipReader() io.Reader {
+func gzipReader(t *testing.T) io.Reader {
+	t.Helper()
+
 	var b bytes.Buffer
 	gzW := gzip.NewWriter(&b)
 	if _, err := gzW.Write([]byte("YourDataHere")); err != nil {
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 	if err := gzW.Close(); err != nil {
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 	rdata := strings.NewReader(b.String())
 
 	return rdata
 }
 
-func xzReader() io.Reader {
+func xzReader(t *testing.T) io.Reader {
+	t.Helper()
+
 	var b bytes.Buffer
 	xzW, _ := xz.NewWriter(&b)
 	if _, err := xzW.Write([]byte("YourDataHere")); err != nil {
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 	if err := xzW.Close(); err != nil {
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 	rdata := strings.NewReader(b.String())
 
@@ -40,37 +43,38 @@ func xzReader() io.Reader {
 }
 
 func Test_findDecompressor(t *testing.T) {
-	type args struct {
-		imageURL string
-		r        io.Reader
-	}
 	tests := []struct {
-		name    string
-		args    args
-		wantOut io.Reader
-		wantErr bool
+		name     string
+		imageURL string
+		reader   func(*testing.T) io.Reader
+		wantOut  io.Reader
+		wantErr  bool
 	}{
 		{
 			"tar gzip",
-			args{imageURL: "http://192.168.0.1/a.tar.gz", r: gzipReader()},
+			"http://192.168.0.1/a.tar.gz",
+			gzipReader,
 			nil,
 			false,
 		},
 		{
 			"broken gzip",
-			args{imageURL: "http://192.168.0.1/a.gz", r: xzReader()},
+			"http://192.168.0.1/a.gz",
+			xzReader,
 			nil,
 			true,
 		},
 		{
 			"xz",
-			args{imageURL: "http://192.168.0.1/a.xz", r: xzReader()},
+			"http://192.168.0.1/a.xz",
+			xzReader,
 			nil,
 			false,
 		},
 		{
 			"unknown",
-			args{imageURL: "http://192.168.0.1/a.abc", r: xzReader()},
+			"http://192.168.0.1/a.abc",
+			xzReader,
 			nil,
 			true,
 		},
@@ -78,8 +82,7 @@ func Test_findDecompressor(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
-			_, err := findDecompressor(tt.args.imageURL, tt.args.r)
+			_, err := findDecompressor(tt.imageURL, tt.reader(t))
 			if (err != nil) != tt.wantErr {
 				t.Errorf("findDecompressor() error = %v, wantErr %v", err, tt.wantErr)
 				return
