@@ -45,6 +45,9 @@ jobs:
         with:
           nix_path: nixpkgs=channel:nixos-unstable
 
+      - name: Fetch all the deps!
+        run: nix-shell --run 'go get ./...'
+
       - name: Generate Artifact Hub manifests
         run: make artifacthub/gen-manifests
 

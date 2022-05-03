@@ -37,5 +37,8 @@ jobs:
         with:
           nix_path: nixpkgs=channel:nixos-unstable
 
+      - name: Fetch all the deps!
+        run: nix-shell --run 'go get ./...'
+
       - name: build and deploy
         run: ./hack/action-build-and-deploy.sh
