@@ -28,12 +28,12 @@ jobs:
       run: echo "${{ secrets.QUAY_PWD }}" | sudo docker login -u ${{ secrets.QUAY_USER }} --password-stdin quay.io
 
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         fetch-depth: 0
 
     - name: Install nix
-      uses: cachix/install-nix-action@v12
+      uses: cachix/install-nix-action@v17
       with:
         nix_path: nixpkgs=channel:nixos-unstable
 
