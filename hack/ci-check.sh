@@ -32,4 +32,5 @@ GIT_REF="remotes/upstream/$GITHUB_HEAD_REF..remotes/origin/$GITHUB_BASE_REF"
 if [[ -z $GITHUB_BASE_REF ]]; then
 	GIT_REF="HEAD..HEAD~1"
 fi
-sudo go run cmd/hub/main.go build --git-ref ${GIT_REF}
+
+go run cmd/hub/main.go build --git-ref ${GIT_REF}

@@ -4,4 +4,4 @@
 
 set -eux
 
-sudo go run cmd/hub/main.go build --push --git-ref "HEAD..HEAD~1"
+go run cmd/hub/main.go build --push --git-ref "HEAD..HEAD~1"
