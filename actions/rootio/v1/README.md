@@ -6,7 +6,7 @@ maintainers: Dan Finneran <daniel.finneran@gmail.com>
 description: "This action can be used in a variety of ways, however its core functionality
 is the management of disks. The action parses the metadata and will partition, format and
 mount disks"
-version: v1.0.0
+version: v1.0.1
 createdAt: "2021-01-20T12:41:45.14Z"
 ---
 
@@ -18,19 +18,19 @@ have their actions determined by the contents of the storage section in the meta
 ```yaml
 actions:
   - name: "disk-wipe-partition"
-    image: quay.io/tinkerbell-actions/rootio:v1.0.0
+    image: quay.io/tinkerbell-actions/rootio:v1.0.1
     timeout: 90
     command: ["partition"]
     environment:
       MIRROR_HOST: 192.168.1.2
   - name: "format"
-    image: quay.io/tinkerbell-actions/rootio:v1.0.0
+    image: quay.io/tinkerbell-actions/rootio:v1.0.1
     timeout: 90
     command: ["format"]
     environment:
       MIRROR_HOST: 192.168.1.2
   - name: "mount"
-    image: quay.io/tinkerbell-actions/rootio:v1.0.0
+    image: quay.io/tinkerbell-actions/rootio:v1.0.1
     timeout: 90
     command: ["mount"]
     environment:
@@ -46,7 +46,7 @@ an environment variable to rootio for `partition` options.
 ```yaml
 actions:
   - name: "disk-wipe-partition"
-    image: quay.io/tinkerbell-actions/rootio:v1.0.0
+    image: quay.io/tinkerbell-actions/rootio:v1.0.1
     timeout: 90
     command: ["partition"]
     environment:
