@@ -16,9 +16,13 @@ type Wrapper struct {
 	Metadata Metadata `json:"metadata"`
 }
 
-// Metadata struct
-// This is an auto generated struct taken from a metadata request.
+// Metadata is an auto generated struct taken from a metadata request.
 type Metadata struct {
+	Instance Instance `json:"instance"`
+}
+
+// Instance is a dervied struct taken from a metadata request.
+type Instance struct {
 	CryptedRootPassword    string `json:"crypted_root_password"`
 	Hostname               string `json:"hostname"`
 	OperatingSystemVersion struct {
