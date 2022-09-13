@@ -96,7 +96,7 @@ func runBuild(opts *buildOptions) error {
 		})
 		if err != nil {
 			log.Error(err.Error())
-			return nil
+			return err
 		}
 	}
 
