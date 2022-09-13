@@ -45,7 +45,7 @@ func init() {
 			log.Fatal(err)
 		}
 	}
-	fmt.Printf("Successfully parsed the MetaData, Found [%d] Disks\n", len(metadata.Storage.Disks))
+	fmt.Printf("Successfully parsed the MetaData, Found [%d] Disks\n", len(metadata.Instance.Storage.Disks))
 }
 
 // Execute - starts the command parsing process.
@@ -60,8 +60,8 @@ var rootioFormat = &cobra.Command{
 	Use:   "format",
 	Short: "Use rootio to format disks based upon metadata",
 	Run: func(cmd *cobra.Command, args []string) {
-		for fileSystem := range metadata.Storage.Filesystems {
-			err := storage.FileSystemCreate(metadata.Storage.Filesystems[fileSystem])
+		for fileSystem := range metadata.Instance.Storage.Filesystems {
+			err := storage.FileSystemCreate(metadata.Instance.Storage.Filesystems[fileSystem])
 			if err != nil {
 				log.Error(err)
 			}
@@ -73,8 +73,8 @@ var rootioMount = &cobra.Command{
 	Use:   "mount",
 	Short: "Use rootio to mount disks based upon metadata",
 	Run: func(cmd *cobra.Command, args []string) {
-		for fileSystem := range metadata.Storage.Filesystems {
-			err := storage.Mount(metadata.Storage.Filesystems[fileSystem])
+		for fileSystem := range metadata.Instance.Storage.Filesystems {
+			err := storage.Mount(metadata.Instance.Storage.Filesystems[fileSystem])
 			if err != nil {
 				log.Error(err)
 			}
@@ -86,18 +86,18 @@ var rootioPartition = &cobra.Command{
 	Use:   "partition",
 	Short: "Use rootio to partition disks based upon metadata",
 	Run: func(cmd *cobra.Command, args []string) {
-		for disk := range metadata.Storage.Disks {
-			err := storage.VerifyBlockDevice(metadata.Storage.Disks[disk].Device)
+		for disk := range metadata.Instance.Storage.Disks {
+			err := storage.VerifyBlockDevice(metadata.Instance.Storage.Disks[disk].Device)
 			if err != nil {
 				log.Error(err)
 			}
-			err = storage.ExamineDisk(metadata.Storage.Disks[disk])
+			err = storage.ExamineDisk(metadata.Instance.Storage.Disks[disk])
 			if err != nil {
 				log.Error(err)
 			}
 
-			if metadata.Storage.Disks[disk].WipeTable {
-				err = storage.Wipe(metadata.Storage.Disks[disk])
+			if metadata.Instance.Storage.Disks[disk].WipeTable {
+				err = storage.Wipe(metadata.Instance.Storage.Disks[disk])
 				log.Infoln("Wiping")
 				if err != nil {
 					log.Error(err)
@@ -105,9 +105,9 @@ var rootioPartition = &cobra.Command{
 			}
 			log.Infoln("Partitioning")
 			if os.Getenv("MBR") != "" {
-				err = storage.MBRPartition(metadata.Storage.Disks[disk])
+				err = storage.MBRPartition(metadata.Instance.Storage.Disks[disk])
 			} else {
-				err = storage.Partition(metadata.Storage.Disks[disk])
+				err = storage.Partition(metadata.Instance.Storage.Disks[disk])
 			}
 			if err != nil {
 				log.Error(err)
@@ -144,7 +144,9 @@ func test() (*types.Metadata, error) {
 
 	// we unmarshal our byteArray which contains our
 	// jsonFile's content into 'users' which we defined above
-	_ = json.Unmarshal(byteValue, &w)
+	if err := json.Unmarshal(byteValue, &w); err != nil {
+		return nil, err
+	}
 
 	return &w.Metadata, nil
 }
