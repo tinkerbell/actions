@@ -26,6 +26,7 @@ var rootioCmd = &cobra.Command{
 }
 
 func init() {
+	rootioCmd.AddCommand(rootioWipe)
 	rootioCmd.AddCommand(rootioFormat)
 	rootioCmd.AddCommand(rootioPartition)
 	rootioCmd.AddCommand(rootioMount)
@@ -109,6 +110,29 @@ var rootioPartition = &cobra.Command{
 			} else {
 				err = storage.Partition(metadata.Instance.Storage.Disks[disk])
 			}
+			if err != nil {
+				log.Error(err)
+			}
+		}
+	},
+}
+
+var rootioWipe = &cobra.Command{
+	Use:   "wipe",
+	Short: "Use rootio to wipe disks based upon metadata",
+	Run: func(cmd *cobra.Command, args []string) {
+		for disk := range metadata.Instance.Storage.Disks {
+			err := storage.VerifyBlockDevice(metadata.Instance.Storage.Disks[disk].Device)
+			if err != nil {
+				log.Error(err)
+			}
+			err = storage.ExamineDisk(metadata.Instance.Storage.Disks[disk])
+			if err != nil {
+				log.Error(err)
+			}
+
+			err = storage.Wipe(metadata.Instance.Storage.Disks[disk])
+			log.Infoln("Wiping")
 			if err != nil {
 				log.Error(err)
 			}
