@@ -21,6 +21,8 @@ var Release struct {
 
 const mountAction = "/mountAction"
 
+var possibleGrubFilePaths = []string{"/boot/grub/grub.cfg", "/boot/grub2/grub.cfg"}
+
 var kexecCmd = &cobra.Command{
 	Use:   "kexec",
 	Short: "This is an action for performing a kexec into a new kernel/ramdisk",
@@ -55,13 +57,17 @@ var kexecCmd = &cobra.Command{
 		// If we specify no kernelPath then we will fallback to autodetect and ignore the initrd and cmdline that may be passed
 		// by environment variables
 		if kernelPath == "" {
-			grubFile, err := ioutil.ReadFile(fmt.Sprintf("%s/boot/grub/grub.cfg", mountAction))
+			grubFilePath, err := GetGrubFilePath()
+			if err != nil {
+				log.Fatal(err)
+			}
+			grubFile, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", mountAction, grubFilePath))
 			if err != nil {
 				log.Fatal(err)
 			}
 			bootConfig := grub.GetDefaultConfig(string(grubFile))
 			if bootConfig == nil {
-				log.Fatal("No Kernel configuration passed in [KERNEL_PATH] and unable to parse [/boot/grub/grub.conf]")
+				log.Fatal("No Kernel configuration passed in [KERNEL_PATH] and unable to parse [" + grubFilePath + "]")
 			}
 			log.Infof("Loaded boot config: %#v", bootConfig)
 			kernelMountPath = filepath.Join(mountAction, bootConfig.Kernel)
@@ -95,6 +101,15 @@ var kexecCmd = &cobra.Command{
 		// Call the unix reboot command with the kexec functionality
 		_ = unix.Reboot(unix.LINUX_REBOOT_CMD_KEXEC)
 	},
+}
+
+func GetGrubFilePath() (string, error) {
+	for _, grubFilePath := range possibleGrubFilePaths {
+		if _, err := os.Stat(grubFilePath); err == nil {
+			return grubFilePath, nil
+		}
+	}
+	return "", fmt.Errorf("failed to find grub.cfg: %s", possibleGrubFilePaths)
 }
 
 // Execute - starts the command parsing process.
