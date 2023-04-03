@@ -100,7 +100,6 @@ func findDecompressor(imageURL string, r io.Reader) (out io.Reader, err error) {
 			err = fmt.Errorf("[ERROR] New gzip reader: %w", gzErr)
 			return
 		}
-		defer zipOUT.Close()
 		out = zipOUT
 	case ".xz":
 		xzOUT, xzErr := xz.NewReader(r)
@@ -108,8 +107,6 @@ func findDecompressor(imageURL string, r io.Reader) (out io.Reader, err error) {
 			err = fmt.Errorf("[ERROR] New xz reader: %w", xzErr)
 			return
 		}
-		// The xz reader doesn't implement close()
-		// defer xzOUT.Close()
 		out = xzOUT
 	case ".zs":
 		zsOUT, zsErr := zstd.NewReader(r)
@@ -117,7 +114,6 @@ func findDecompressor(imageURL string, r io.Reader) (out io.Reader, err error) {
 			err = fmt.Errorf("[ERROR] New zs reader: %w", zsErr)
 			return
 		}
-		defer zsOUT.Close()
 		out = zsOUT
 	default:
 		err = fmt.Errorf("unknown compression suffix [%s]", filepath.Ext(imageURL))
