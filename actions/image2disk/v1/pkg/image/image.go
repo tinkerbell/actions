@@ -8,6 +8,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -79,10 +80,12 @@ func Write(sourceImage, destinationDevice string, compressed bool) error {
 		out = resp.Body
 	} else {
 		// Find compression algorithm based upon extension
-		out, err = findDecompressor(sourceImage, resp.Body)
+		decompressor, err := findDecompressor(sourceImage, resp.Body)
 		if err != nil {
 			return err
 		}
+		defer decompressor.Close()
+		out = decompressor
 	}
 
 	log.Infof("Beginning write of image [%s] to disk [%s]", filepath.Base(sourceImage), destinationDevice)
@@ -122,12 +125,23 @@ func Write(sourceImage, destinationDevice string, compressed bool) error {
 	return nil
 }
 
-func findDecompressor(imageURL string, r io.Reader) (out io.Reader, err error) {
+type zsReadCloser struct {
+	decoder *zstd.Decoder
+}
+func (d zsReadCloser) Read(p []byte) (n int, err error) {
+	return d.decoder.Read(p)
+}
+func (d zsReadCloser) Close() error {
+	d.decoder.Close()
+	return nil
+}
+
+func findDecompressor(imageURL string, r io.Reader) (out io.ReadCloser, err error) {
 	switch filepath.Ext(imageURL) {
 	case ".bzip2":
 		// With compression run data through gzip writer
 		bzipOUT := bzip2.NewReader(r)
-		out = bzipOUT
+		out = ioutil.NopCloser(bzipOUT)
 	case ".gz":
 		// With compression run data through gzip writer
 		zipOUT, gzErr := gzip.NewReader(r)
@@ -142,14 +156,17 @@ func findDecompressor(imageURL string, r io.Reader) (out io.Reader, err error) {
 			err = fmt.Errorf("[ERROR] New xz reader: %w", xzErr)
 			return
 		}
-		out = xzOUT
+		out = ioutil.NopCloser(xzOUT)
 	case ".zs":
 		zsOUT, zsErr := zstd.NewReader(r)
 		if zsErr != nil {
 			err = fmt.Errorf("[ERROR] New zs reader: %w", zsErr)
 			return
 		}
-		out = zsOUT
+
+		out = zsReadCloser {
+			decoder: zsOUT,
+		}
 	default:
 		err = fmt.Errorf("unknown compression suffix [%s]", filepath.Ext(imageURL))
 	}
