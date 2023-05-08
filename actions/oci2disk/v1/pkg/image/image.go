@@ -87,36 +87,29 @@ func Write(sourceImage, destinationDevice string, compressed bool) error {
 	return nil
 }
 
-func findDecompressor(imageURL string, r io.Reader) (out io.Reader, err error) {
+func findDecompressor(imageURL string, r io.Reader) (io.ReadCloser, error) {
 	switch filepath.Ext(imageURL) {
 	case ".bzip2":
-		// With compression run data through gzip writer
-		bzipOUT := bzip2.NewReader(r)
-		out = bzipOUT
+		return io.NopCloser(bzip2.NewReader(r)), nil
 	case ".gz":
-		// With compression run data through gzip writer
-		zipOUT, gzErr := gzip.NewReader(r)
-		if gzErr != nil {
-			err = fmt.Errorf("[ERROR] New gzip reader: %w", gzErr)
-			return
+		reader, err := gzip.NewReader(r)
+		if err != nil {
+			return nil, fmt.Errorf("[ERROR] New gzip reader: %w", err)
 		}
-		out = zipOUT
+		return reader, nil
 	case ".xz":
-		xzOUT, xzErr := xz.NewReader(r)
-		if xzErr != nil {
-			err = fmt.Errorf("[ERROR] New xz reader: %w", xzErr)
-			return
+		reader, err := xz.NewReader(r)
+		if err != nil {
+			return nil, fmt.Errorf("[ERROR] New xz reader: %w", err)
 		}
-		out = xzOUT
+		return io.NopCloser(reader), nil
 	case ".zs":
-		zsOUT, zsErr := zstd.NewReader(r)
-		if zsErr != nil {
-			err = fmt.Errorf("[ERROR] New zs reader: %w", zsErr)
-			return
+		reader, err := zstd.NewReader(r)
+		if err != nil {
+			return nil, fmt.Errorf("[ERROR] New zs reader: %w", err)
 		}
-		out = zsOUT
-	default:
-		err = fmt.Errorf("unknown compression suffix [%s]", filepath.Ext(imageURL))
+		return reader.IOReadCloser(), nil
 	}
-	return out, err
+
+	return nil, fmt.Errorf("unknown compression suffix [%s]", filepath.Ext(imageURL))
 }

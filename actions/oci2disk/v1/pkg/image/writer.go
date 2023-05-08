@@ -135,11 +135,11 @@ func (d DiskImageStore) Writer(_ context.Context, opts ...ctrcontent.WriterOpt) 
 		}
 	} else {
 		f = func(r io.Reader, w io.Writer, done chan<- error) {
-			var err error
 			decompressReader, err := findDecompressor(d.sourceImage, r)
 			if err != nil {
 				log.Fatalf(err.Error()) //nolint:revive // this is fine
 			}
+			defer decompressReader.Close()
 			b := make([]byte, wOpts.Blocksize)
 			_, err = io.CopyBuffer(w, decompressReader, b)
 			done <- err
