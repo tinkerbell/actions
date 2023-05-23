@@ -86,12 +86,16 @@ func RetrieveData() (*Metadata, error) {
 	if metadataURL == "" {
 		return nil, errors.New("unable to discover the metadata server from environment variable [MIRROR_HOST]")
 	}
+	port, exist := os.LookupEnv("ROOTIO_PORT")
+	if !exist {
+		port = "50061"
+	}
 
 	metadataClient := http.Client{
 		Timeout: time.Second * 60, // Timeout after 60 seconds (seems massively long is this dial-up?)
 	}
 
-	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, fmt.Sprintf("http://%s:50061/metadata", metadataURL), nil)
+	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, fmt.Sprintf("http://%s:%s/metadata", metadataURL, port), nil)
 	if err != nil {
 		return nil, err
 	}
