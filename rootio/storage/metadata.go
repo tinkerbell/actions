@@ -86,7 +86,7 @@ func RetrieveData() (*Metadata, error) {
 	if metadataURL == "" {
 		return nil, errors.New("unable to discover the metadata server from environment variable [MIRROR_HOST]")
 	}
-	port, exist := os.LookupEnv("ROOTIO_PORT")
+	port, exist := os.LookupEnv("METADATA_SERVICE_PORT")
 	if !exist {
 		port = "50061"
 	}
