@@ -46,6 +46,21 @@ func FileSystemCreate(f types.Filesystem) error {
 		for i := range f.Mount.Create.Options {
 			debugCMD = fmt.Sprintf("%s %s", debugCMD, f.Mount.Create.Options[i])
 		}
+	case "xfs":
+		// Add force
+		f.Mount.Create.Options = append(f.Mount.Create.Options, "-f")
+
+		// Add Device to formate
+		f.Mount.Create.Options = append(f.Mount.Create.Options, f.Mount.Device)
+
+		// Format disk
+		cmd = exec.Command("/sbin/mkfs.xfs", f.Mount.Create.Options...)
+
+		// Build command for error message
+		debugCMD := "/sbin/mkfs.xfs"
+		for i := range f.Mount.Create.Options {
+			debugCMD = fmt.Sprintf("%s %s", debugCMD, f.Mount.Create.Options[i])
+		}
 	default:
 		log.Warnf("unknown filesystem type [%s]", f.Mount.Format)
 	}
