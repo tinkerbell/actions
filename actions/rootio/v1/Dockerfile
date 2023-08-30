@@ -35,7 +35,8 @@ RUN ./autogen.sh; ./configure
 RUN make LDFLAGS="--static"
 
 # Build final image
-FROM scratch
+FROM alpine
+RUN apk add lvm2
 COPY --from=mke2fs /e2fsprogs-1.45.6/misc/mke2fs.static /sbin/mke2fs
 COPY --from=swap util-linux/swapon /sbin/swapon
 COPY --from=swap util-linux/mkswap /sbin/mkswap
