@@ -34,12 +34,16 @@ WORKDIR /dosfstools/
 RUN ./autogen.sh; ./configure
 RUN make LDFLAGS="--static"
 
+# build lvm2 as static
+FROM alpine as lvm
+RUN apk update && apk add lvm2-static=2.03.21-r3
+
 # Build final image
-FROM alpine
-RUN apk add lvm2
+FROM scratch
 COPY --from=mke2fs /e2fsprogs-1.45.6/misc/mke2fs.static /sbin/mke2fs
 COPY --from=swap util-linux/swapon /sbin/swapon
 COPY --from=swap util-linux/mkswap /sbin/mkswap
 COPY --from=fattools dosfstools/src/mkfs.fat /sbin/mkfs.fat
+COPY --from=lvm /usr/sbin/lvm.static /sbin/lvm
 COPY --from=rootio /go/src/github.com/thebsdbox/rootio/rootio .
 ENTRYPOINT ["/rootio"]

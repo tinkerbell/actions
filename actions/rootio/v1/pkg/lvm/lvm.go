@@ -20,7 +20,7 @@ type VolumeGroup struct {
 
 // CreatePhysicalVolume creates a physical volume of the given device.
 func CreatePhysicalVolume(dev string) error {
-	if err := run("pvcreate", dev); err != nil {
+	if err := run("lvm", "pvcreate", dev); err != nil {
 		return fmt.Errorf("lvm: CreatePhysicalVolume: %v", err)
 	}
 	return nil
@@ -30,22 +30,22 @@ func CreatePhysicalVolume(dev string) error {
 // device at `dev` and adds it to the LVM metadata cache if `lvmetad`
 // is running. If `dev` is an empty string, it scans all devices.
 func PVScan(dev string) error {
-	args := []string{"--cache"}
+	args := []string{"pvscan", "--cache"}
 	if dev != "" {
 		args = append(args, dev)
 	}
-	return run("pvscan", args...)
+	return run("lvm", args...)
 }
 
 // VGScan runs the `vgscan --cache <name>` command. It scans for the
 // volume group and adds it to the LVM metadata cache if `lvmetad`
 // is running. If `name` is an empty string, it scans all volume groups.
 func VGScan(name string) error {
-	args := []string{"--cache"}
+	args := []string{"vgscan", "--cache"}
 	if name != "" {
 		args = append(args, name)
 	}
-	return run("vgscan", args...)
+	return run("lvm", args...)
 }
 
 // ValidateVolumeGroupName validates a volume group name. A valid volume group
@@ -77,7 +77,7 @@ func ValidateTag(tag string) error {
 
 // CreateVolumeGroup creates a new volume group.
 func CreateVolumeGroup(name string, pvs []string, tags []string) (*VolumeGroup, error) {
-	var args []string
+	args := []string{"vgcreate"}
 
 	if err := ValidateVolumeGroupName(name); err != nil {
 		return nil, err
@@ -97,7 +97,7 @@ func CreateVolumeGroup(name string, pvs []string, tags []string) (*VolumeGroup, 
 		args = append(args, pv)
 	}
 
-	if err := run("vgcreate", args...); err != nil {
+	if err := run("lvm", args...); err != nil {
 		return nil, err
 	}
 
@@ -137,7 +137,7 @@ func (vg *VolumeGroup) CreateLogicalVolume(name string, sizeInBytes uint64, tags
 	}
 
 	// Validate the tag.
-	var args []string
+	args := []string{"lvcreate"}
 	for _, tag := range tags {
 		if tag != "" {
 			if err := ValidateTag(tag); err != nil {
@@ -146,12 +146,18 @@ func (vg *VolumeGroup) CreateLogicalVolume(name string, sizeInBytes uint64, tags
 			args = append(args, "--add-tag="+tag)
 		}
 	}
-	args = append(args, fmt.Sprintf("--size=%db", sizeInBytes))
+
+	if sizeInBytes == 0 {
+		args = append(args, "-l", "100%FREE")
+	} else {
+		args = append(args, fmt.Sprintf("--size=%db", sizeInBytes))
+	}
+
 	args = append(args, "--name="+name)
 	args = append(args, vg.name)
 	args = append(args, opts...)
 
-	if err := run("lvcreate", args...); err != nil {
+	if err := run("lvm", args...); err != nil {
 		if isInsufficientSpace(err) {
 			return fmt.Errorf("lvm: not enough free space")
 		}
