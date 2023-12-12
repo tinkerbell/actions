@@ -127,7 +127,7 @@ func Write(sourceImage, destinationDevice string, compressed bool) error {
 
 func findDecompressor(imageURL string, r io.Reader) (io.ReadCloser, error) {
 	switch filepath.Ext(imageURL) {
-	case ".bzip2":
+	case ".bzip2", ".bz2":
 		return ioutil.NopCloser(bzip2.NewReader(r)), nil
 	case ".gz":
 		reader, err := gzip.NewReader(r)
