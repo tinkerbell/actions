@@ -11,7 +11,14 @@ import (
 
 func main() {
 	fmt.Printf("IMAGE2DISK - Cloud image streamer\n------------------------\n")
-	disk := os.Getenv("DEST_DISK")
+	disk, err := image.DriveDetection()
+	if err != nil {
+		log.Error(err)
+		return
+	}
+	log.Infof("detected drive")
+	log.Infof(disk)
+
 	img := os.Getenv("IMG_URL")
 	compressedEnv := os.Getenv("COMPRESSED")
 
@@ -19,7 +26,7 @@ func main() {
 	cmp, _ := strconv.ParseBool(compressedEnv)
 
 	// Write the image to disk
-	err := image.Write(img, disk, cmp)
+	err = image.Write(img, disk, cmp)
 	if err != nil {
 		log.Fatal(err)
 	}
