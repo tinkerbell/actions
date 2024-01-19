@@ -13,7 +13,7 @@ createdAt: "2021-01-20T12:41:45.14Z"
 The below example will use the same action in three ways, to "partition" followed by "formating" and
 finally mounting the disks. All of the different commands below `partition`/`format`/`mount`, will
 have their actions determined by the contents of the storage section in the metadata refer to the
-[Customer Partitioning and RAID](https://metal.equinix.com/developers/docs/servers/custom-partitioning-raid/) documentation for more information.
+[Customer Partitioning and RAID](https://deploy.equinix.com/developers/docs/metal/storage/custom-partitioning-raid/) documentation for more information.
 
 ```yaml
 actions:
