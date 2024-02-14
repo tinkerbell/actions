@@ -52,6 +52,12 @@ func main() {
 		if err != nil {
 			log.Fatalf("Error changing root to [%s]", mountAction)
 		}
+		// Change /dev/null file permission to 0666
+		err := os.Chmod("/dev/null", 0666)
+		if err != nil {
+			fmt.Println("Error occurred while changing /dev/null to 0666:", err)
+			return
+		}
 	}
 
 	if defaultInterpreter != "" {
@@ -135,12 +141,12 @@ func Chroot(path string) (func() error, error) {
 	}, nil
 }
 
-// MountSpecialDirs ensures that /dev /proc /sys exist in the chroot.
+// MountSpecialDirs ensures that /dev /proc /sys /dev/pts exist in the chroot.
 func MountSpecialDirs() error {
-	// Mount dev
+	// Mount dev in RW mode to be able to fix /dev/null permissions
 	dev := filepath.Join(mountAction, "dev")
 
-	if err := syscall.Mount("none", dev, "devtmpfs", syscall.MS_RDONLY, ""); err != nil {
+	if err := syscall.Mount("none", dev, "devtmpfs", uintptr(0), ""); err != nil {
 		return fmt.Errorf("couldn't mount /dev to %v: %w", dev, err)
 	}
 
@@ -156,6 +162,13 @@ func MountSpecialDirs() error {
 
 	if err := syscall.Mount("none", sys, "sysfs", syscall.MS_RDONLY, ""); err != nil {
 		return fmt.Errorf("couldn't mount /sys to %v: %w", sys, err)
+	}
+
+	// Mount /dev/pts
+	devPts := filepath.Join(mountAction, "dev/pts")
+
+	if err := syscall.Mount("none", devPts, "devpts", syscall.MS_NOSUID|syscall.MS_NOEXEC, ""); err != nil {
+		return fmt.Errorf("couldn't mount /dev/pts to %v: %w", sys, err)
 	}
 
 	return nil
