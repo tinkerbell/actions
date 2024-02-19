@@ -32,8 +32,9 @@ type Instance struct {
 		Version    string `json:"version"`
 	} `json:"operating_system_version"`
 	Storage struct {
-		Disks       []Disk       `json:"disks"`
-		Filesystems []Filesystem `json:"filesystems"`
+		Disks        []Disk        `json:"disks"`
+		Filesystems  []Filesystem  `json:"filesystems"`
+		VolumeGroups []VolumeGroup `json:"volume_groups"`
 	} `json:"storage"`
 }
 
@@ -61,6 +62,22 @@ type Partitions struct {
 	Label  string `json:"label"`
 	Number int    `json:"number"`
 	Size   uint64 `json:"size"`
+}
+
+// VolumeGroup defines the configuration of a volume group
+type VolumeGroup struct {
+	Name            string          `json:"name"`
+	PhysicalVolumes []string        `json:"physical_volumes"`
+	LogicalVolumes  []LogicalVolume `json:"logical_volumes"`
+	Tags            []string        `json:"tags"`
+}
+
+// LogicalVolume defines the configuration of a logical volume.
+type LogicalVolume struct {
+	Name string   `json:"name"`
+	Size uint64   `json:"size"`
+	Tags []string `json:"tags"`
+	Opts []string `json:"opts"`
 }
 
 // RetrieveData retrieves metadata from Hegel.

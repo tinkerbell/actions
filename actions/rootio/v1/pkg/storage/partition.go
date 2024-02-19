@@ -90,7 +90,7 @@ func Partition(d types.Disk) error {
 				End:   sectorEnd,
 			}
 
-			sectorStart += sectorEnd
+			sectorStart = sectorEnd + 1
 
 			switch d.Partitions[x].Label {
 			case "SWAP":

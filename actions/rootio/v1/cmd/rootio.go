@@ -114,6 +114,16 @@ var rootioPartition = &cobra.Command{
 				log.Error(err)
 			}
 		}
+
+		if len(metadata.Instance.Storage.VolumeGroups) > 0 {
+			log.Infoln("Creating Volume Groups")
+		}
+
+		for _, vg := range metadata.Instance.Storage.VolumeGroups {
+			if err := storage.CreateVolumeGroup(vg); err != nil {
+				log.Error(err)
+			}
+		}
 	},
 }
 
