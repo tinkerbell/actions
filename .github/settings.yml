@@ -4,22 +4,13 @@ collaborators:
   # Maintainers, should also be added to the .github/CODEOWNERS file as owners of this settings.yml file.
   - username: nshalman
     permission: maintain
-  - username: thebsdbox
-    permission: maintain
   - username: chrisdoherty4
     permission: maintain
-  # Approvers
-  - username: displague
-    permission: push
-  - username: mmlb
-    permission: push
-  # Reviewers
-  - username: alienninja
-    permission: triage
   - username: jacobweinstock
-    permission: triage
-  - username: stephen-fox
-    permission: triage
+    permission: maintain
+  # Approvers
+  # Reviewers
+
 
   # Note: `permission` is only valid on organization-owned repositories.
   # The permission to grant the collaborator. Can be one of:

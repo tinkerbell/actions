@@ -1,14 +1,14 @@
 go 1.20
 
 use (
-	actions/archive2disk/v1
-	actions/cexec/v1
-	actions/grub2disk/v1
-	actions/image2disk/v1
-	actions/oci2disk/v1
-	actions/qemuimg2disk/v1
-	actions/rootio/v1
-	actions/slurp/v1
-	actions/syslinux/v1
-	actions/writefile/v1
+	archive2disk
+	cexec
+	grub2disk
+	image2disk
+	oci2disk
+	qemuimg2disk
+	rootio
+	slurp
+	syslinux
+	writefile
 )
