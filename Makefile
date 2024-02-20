@@ -6,7 +6,7 @@ all: $(BINS)
 $(BINS):
 	make -C $@
 
-ci: bin/gofumpt
+gofumpt: bin/gofumpt
 	git ls-files '*.go' | xargs -I% sh -c 'sed -i "/^import (/,/^)/ { /^\s*$$/ d }" % && bin/gofumpt -w %'
 
 tidy-all:
