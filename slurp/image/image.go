@@ -121,7 +121,7 @@ func UploadMultipartFile(client *http.Client, uri, key, path string, compressed 
 	merr := <-errchan
 
 	if err != nil || merr != nil {
-		return resp, fmt.Errorf("http error: %v, multipart error: %w", err, merr)
+		return resp, fmt.Errorf("http error: %w, multipart error: %w", err, merr)
 	}
 
 	return resp, nil

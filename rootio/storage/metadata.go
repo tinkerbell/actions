@@ -64,7 +64,7 @@ type Partitions struct {
 	Size   uint64 `json:"size"`
 }
 
-// VolumeGroup defines the configuration of a volume group
+// VolumeGroup defines the configuration of a volume group.
 type VolumeGroup struct {
 	Name            string          `json:"name"`
 	PhysicalVolumes []string        `json:"physical_volumes"`
