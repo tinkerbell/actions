@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+
 	// See https://github.com/opencontainers/go-digest#usage
 	_ "crypto/sha256"
 	_ "crypto/sha512"
