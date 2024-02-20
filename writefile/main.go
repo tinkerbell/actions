@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -84,7 +83,7 @@ func main() {
 
 	fqFilePath := filepath.Join(mountAction, filePath)
 	// Write the file to disk
-	if err := ioutil.WriteFile(fqFilePath, []byte(contents), fileMode); err != nil {
+	if err := os.WriteFile(fqFilePath, []byte(contents), fileMode); err != nil {
 		log.Fatalf("Could not write file %s: %v", filePath, err)
 	}
 
