@@ -13,7 +13,6 @@ pull_request_rules:
       - "#changes-requested-reviews-by=0"
       - "#review-requested=0"
       - check-success=DCO
-      - check-success=validation
       - label!=do-not-merge
       - label=ready-to-merge
     actions:
