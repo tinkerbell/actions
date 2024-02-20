@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
-
 	log "github.com/sirupsen/logrus"
 )
 

@@ -6,7 +6,6 @@ import (
 	"io"
 	"strings"
 	"testing"
-
 	"github.com/ulikunitz/xz"
 )
 

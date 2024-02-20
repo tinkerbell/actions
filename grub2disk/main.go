@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-
 	log "github.com/sirupsen/logrus"
 	"github.com/tinkerbell/hub/grub2disk/grub"
 )

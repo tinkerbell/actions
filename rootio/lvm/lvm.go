@@ -6,7 +6,6 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
-
 	log "github.com/sirupsen/logrus"
 )
 

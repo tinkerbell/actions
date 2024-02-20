@@ -1,4 +1,4 @@
-go 1.20
+go 1.21
 
 use (
 	archive2disk
@@ -10,5 +10,6 @@ use (
 	rootio
 	slurp
 	syslinux
+	tools
 	writefile
 )

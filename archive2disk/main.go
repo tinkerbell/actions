@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"strconv"
 	"syscall"
-
 	log "github.com/sirupsen/logrus"
 	"github.com/tinkerbell/hub/archive2disk/archive"
 )

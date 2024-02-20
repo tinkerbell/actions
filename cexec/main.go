@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"strings"
 	"syscall"
-
 	log "github.com/sirupsen/logrus"
 )
 

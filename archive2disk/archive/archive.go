@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
-
 	log "github.com/sirupsen/logrus"
 )
 

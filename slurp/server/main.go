@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-
 	humanize "github.com/dustin/go-humanize"
 	log "github.com/sirupsen/logrus"
 )

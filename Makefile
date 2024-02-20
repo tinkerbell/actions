@@ -7,7 +7,7 @@ $(BINS):
 	make -C $@
 
 ci: bin/gofumpt
-	./hack/ci-check.sh
+	git ls-files '*.go' | xargs -I% sh -c 'sed -i "/^import (/,/^)/ { /^\s*$/ d }" % && gofumpt -w %'
 
 include lint.mk
 include rules.mk

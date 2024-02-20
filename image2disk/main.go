@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-
 	log "github.com/sirupsen/logrus"
 	"github.com/tinkerbell/hub/image2disk/image"
 )
