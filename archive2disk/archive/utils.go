@@ -10,6 +10,7 @@ import (
 	_ "crypto/sha256"
 	_ "crypto/sha512"
 	"fmt"
+
 	digest "github.com/opencontainers/go-digest"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"

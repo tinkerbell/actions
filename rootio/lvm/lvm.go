@@ -6,12 +6,15 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
+
 	log "github.com/sirupsen/logrus"
 )
 
-var lvNameRegexp = regexp.MustCompile("^[A-Za-z0-9_+.][A-Za-z0-9_+.-]*$")
-var vgNameRegexp = regexp.MustCompile("^[A-Za-z0-9_+.][A-Za-z0-9_+.-]*$")
-var tagRegexp = regexp.MustCompile("^[A-Za-z0-9_+.][A-Za-z0-9_+.-]*$")
+var (
+	lvNameRegexp = regexp.MustCompile("^[A-Za-z0-9_+.][A-Za-z0-9_+.-]*$")
+	vgNameRegexp = regexp.MustCompile("^[A-Za-z0-9_+.][A-Za-z0-9_+.-]*$")
+	tagRegexp    = regexp.MustCompile("^[A-Za-z0-9_+.][A-Za-z0-9_+.-]*$")
+)
 
 type VolumeGroup struct {
 	name string

@@ -5,6 +5,7 @@ import (
 	"os"
 	"syscall"
 	"time"
+
 	diskfs "github.com/diskfs/go-diskfs"
 	"github.com/diskfs/go-diskfs/partition/gpt"
 	"github.com/diskfs/go-diskfs/partition/mbr"
