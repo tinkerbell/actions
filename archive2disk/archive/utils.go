@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+
 	// See https://github.com/opencontainers/go-digest#usage
 	_ "crypto/sha256"
 	_ "crypto/sha512"
@@ -20,11 +21,11 @@ func extractTarDirectory(root string, checksum string, r io.Reader) error {
 	var verifier digest.Verifier
 	if checksum != "" {
 		log.Infof("checksum validation during untar [%s]", checksum)
-		digest, err := digest.Parse(checksum)
+		dd, err := digest.Parse(checksum)
 		if err != nil {
 			return fmt.Errorf("failed to parse digest - %w", err)
 		}
-		verifier = digest.Verifier()
+		verifier = dd.Verifier()
 		r = io.TeeReader(r, verifier)
 	}
 	hardLinks := make(map[string]string)

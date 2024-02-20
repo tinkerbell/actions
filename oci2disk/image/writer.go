@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 
 	ctrcontent "github.com/containerd/containerd/content"
@@ -123,7 +122,7 @@ func (d DiskImageStore) Writer(_ context.Context, opts ...ctrcontent.WriterOpt) 
 	desc := wOpts1.Desc
 	fmt.Printf("%v\n", desc.Annotations["org.opencontainers.image.title"])
 	if desc.Annotations["org.opencontainers.image.title"] == "" {
-		return content.NewIoContentWriter(ioutil.Discard, content.WithOutputHash(desc.Digest)), nil
+		return content.NewIoContentWriter(io.Discard, content.WithOutputHash(desc.Digest)), nil
 	}
 	if !d.compressed {
 		// Without compression send raw output

@@ -3,7 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 
 	log "github.com/sirupsen/logrus"
@@ -59,7 +59,7 @@ func Execute() {
 var rootioFormat = &cobra.Command{
 	Use:   "format",
 	Short: "Use rootio to format disks based upon metadata",
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		for fileSystem := range metadata.Instance.Storage.Filesystems {
 			err := storage.FileSystemCreate(metadata.Instance.Storage.Filesystems[fileSystem])
 			if err != nil {
@@ -72,7 +72,7 @@ var rootioFormat = &cobra.Command{
 var rootioMount = &cobra.Command{
 	Use:   "mount",
 	Short: "Use rootio to mount disks based upon metadata",
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		for fileSystem := range metadata.Instance.Storage.Filesystems {
 			err := storage.Mount(metadata.Instance.Storage.Filesystems[fileSystem])
 			if err != nil {
@@ -85,7 +85,7 @@ var rootioMount = &cobra.Command{
 var rootioPartition = &cobra.Command{
 	Use:   "partition",
 	Short: "Use rootio to partition disks based upon metadata",
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		for disk := range metadata.Instance.Storage.Disks {
 			err := storage.VerifyBlockDevice(metadata.Instance.Storage.Disks[disk].Device)
 			if err != nil {
@@ -129,7 +129,7 @@ var rootioPartition = &cobra.Command{
 var rootioWipe = &cobra.Command{
 	Use:   "wipe",
 	Short: "Use rootio to wipe disks based upon metadata",
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		for disk := range metadata.Instance.Storage.Disks {
 			err := storage.VerifyBlockDevice(metadata.Instance.Storage.Disks[disk].Device)
 			if err != nil {
@@ -152,7 +152,7 @@ var rootioWipe = &cobra.Command{
 var rootioVersion = &cobra.Command{
 	Use:   "version",
 	Short: "Version and Release information about the rootio storage manager",
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		fmt.Printf("rootio Release Information\n")
 		fmt.Printf("Version:  %s\n", Release.Version)
 		fmt.Printf("Build:    %s\n", Release.Build)
@@ -170,7 +170,7 @@ func test() (*storage.Metadata, error) {
 	// defer the closing of our jsonFile so that we can parse it later on
 	defer jsonFile.Close()
 
-	byteValue, _ := ioutil.ReadAll(jsonFile)
+	byteValue, _ := io.ReadAll(jsonFile)
 
 	// we initialize our Users array
 	var w storage.Wrapper

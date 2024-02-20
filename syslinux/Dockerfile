@@ -14,7 +14,7 @@ RUN gcc -Wp,-MT,ldlinux_bin.o,-MMD,./.ldlinux_bin.o.d -W -Wall -Wstrict-prototyp
 RUN gcc -s -static -o syslinux syslinux.o syslxmod.o bootsect_bin.o ldlinux_bin.o
 
 # Build syslinux
-FROM golang:1.15-alpine as syslinux
+FROM golang:1.21-alpine as syslinux
 RUN apk add --no-cache git ca-certificates gcc linux-headers musl-dev
 COPY . /src/syslinux/
 WORKDIR /src/syslinux

@@ -1,3 +1,3 @@
 .PHONY: image
 image:
-	docker buildx build --platform linux/amd64 -t writefile:latest .
+	docker buildx build --platform linux/amd64 --load -t writefile:latest .

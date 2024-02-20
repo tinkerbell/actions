@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"time"
@@ -64,7 +64,7 @@ type Partitions struct {
 	Size   uint64 `json:"size"`
 }
 
-// VolumeGroup defines the configuration of a volume group
+// VolumeGroup defines the configuration of a volume group.
 type VolumeGroup struct {
 	Name            string          `json:"name"`
 	PhysicalVolumes []string        `json:"physical_volumes"`
@@ -107,7 +107,7 @@ func RetrieveData() (*Metadata, error) {
 		defer res.Body.Close()
 	}
 
-	body, readErr := ioutil.ReadAll(res.Body)
+	body, readErr := io.ReadAll(res.Body)
 	if readErr != nil {
 		return nil, err
 	}

@@ -10,9 +10,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var lvNameRegexp = regexp.MustCompile("^[A-Za-z0-9_+.][A-Za-z0-9_+.-]*$")
-var vgNameRegexp = regexp.MustCompile("^[A-Za-z0-9_+.][A-Za-z0-9_+.-]*$")
-var tagRegexp = regexp.MustCompile("^[A-Za-z0-9_+.][A-Za-z0-9_+.-]*$")
+var (
+	lvNameRegexp = regexp.MustCompile("^[A-Za-z0-9_+.][A-Za-z0-9_+.-]*$")
+	vgNameRegexp = regexp.MustCompile("^[A-Za-z0-9_+.][A-Za-z0-9_+.-]*$")
+	tagRegexp    = regexp.MustCompile("^[A-Za-z0-9_+.][A-Za-z0-9_+.-]*$")
+)
 
 type VolumeGroup struct {
 	name string
@@ -21,7 +23,7 @@ type VolumeGroup struct {
 // CreatePhysicalVolume creates a physical volume of the given device.
 func CreatePhysicalVolume(dev string) error {
 	if err := run("lvm", "pvcreate", dev); err != nil {
-		return fmt.Errorf("lvm: CreatePhysicalVolume: %v", err)
+		return fmt.Errorf("lvm: CreatePhysicalVolume: %w", err)
 	}
 	return nil
 }
@@ -93,9 +95,7 @@ func CreateVolumeGroup(name string, pvs []string, tags []string) (*VolumeGroup, 
 	}
 
 	args = append(args, name)
-	for _, pv := range pvs {
-		args = append(args, pv)
-	}
+	args = append(args, pvs...)
 
 	if err := run("lvm", args...); err != nil {
 		return nil, err
@@ -130,7 +130,7 @@ func ValidateLogicalVolumeName(name string) error {
 //
 // If sizeInBytes is zero the entire available space is allocated.
 //
-// Additional optional config items can be specified using CreateLogicalVolumeOpt
+// Additional optional config items can be specified using CreateLogicalVolumeOpt.
 func (vg *VolumeGroup) CreateLogicalVolume(name string, sizeInBytes uint64, tags []string, opts []string) error {
 	if err := ValidateLogicalVolumeName(name); err != nil {
 		return err
@@ -178,12 +178,12 @@ func run(cmd string, extraArgs ...string) error {
 	return c.Run()
 }
 
-// isInsufficientSpace returns true if the error is due to insufficient space
+// isInsufficientSpace returns true if the error is due to insufficient space.
 func isInsufficientSpace(err error) bool {
 	return strings.Contains(strings.ToLower(err.Error()), "insufficient free space")
 }
 
-// isInsufficientDevices returns true if the error is due to insufficient underlying devices
+// isInsufficientDevices returns true if the error is due to insufficient underlying devices.
 func isInsufficientDevices(err error) bool {
 	return strings.Contains(err.Error(), "Insufficient suitable allocatable extents for logical volume")
 }

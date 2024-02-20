@@ -37,20 +37,23 @@ func Write(archiveURL, archiveType, path string, checksum string, httpTimeoutVal
 	}
 
 	absPath, err := filepath.Abs(path)
+	if err != nil {
+		return fmt.Errorf("failed to get absolute path: %w", err)
+	}
 
 	switch strings.ToLower(archiveType) {
 	case "tar":
 		err := extractTarDirectory(absPath, checksum, resp.Body)
 		if err != nil {
-			log.Fatalf("[ERROR] New gzip reader: %v", err) //nolint:gocritic,revive // body.Close not closing doesn't matter if we're exiting
+			return fmt.Errorf("[ERROR] New gzip reader: %w", err)
 		}
 	case "targz":
 		err := extractTarGzip(absPath, checksum, resp.Body)
 		if err != nil {
-			log.Fatalf("[ERROR] New gzip reader:", err)
+			return fmt.Errorf("[ERROR] New gzip reader: %w", err)
 		}
 	default:
-		log.Fatalf("[ERROR] Unknown archiveType supplied:", archiveType)
+		return fmt.Errorf("[ERROR] Unknown archiveType supplied: %v", archiveType)
 	}
 	return nil
 }

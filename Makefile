@@ -6,8 +6,12 @@ all: $(BINS)
 $(BINS):
 	make -C $@
 
-ci: bin/gofumpt
-	./hack/ci-check.sh
-
-include lint.mk
 include rules.mk
+include lint.mk
+
+formatters: $(toolBins)
+	git ls-files '*.go' | xargs -I% sh -c 'sed -i "/^import (/,/^)/ { /^\s*$$/ d }" % && bin/gofumpt -w %'
+	git ls-files '*.go' | xargs -I% bin/goimports -w %
+
+tidy-all:
+	for d in $(BINS); do (cd $$d; go mod tidy); done
