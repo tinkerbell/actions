@@ -2,7 +2,7 @@
 
 
 # Build stream
-FROM golang:1.15-alpine as writefile
+FROM golang:1.21-alpine as writefile
 RUN apk add --no-cache git ca-certificates gcc musl-dev 
 COPY . /go/src/github.com/tinkerbell/hub/actions/writefile/v1
 WORKDIR /go/src/github.com/tinkerbell/hub/actions/writefile/v1
