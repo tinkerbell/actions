@@ -14,5 +14,4 @@ formatters: $(toolBins)
 	git ls-files '*.go' | xargs -I% bin/goimports -w %
 
 tidy-all:
-	(cd tools; go mod tidy)
 	for d in $(BINS); do (cd $$d; go mod tidy); done
