@@ -1,6 +1,6 @@
 module github.com/tinkerbell/actions
 
-go 1.17
+go 1.21
 
 require (
 	github.com/containerd/console v0.0.0-20191219165238-8375c3424e4d
