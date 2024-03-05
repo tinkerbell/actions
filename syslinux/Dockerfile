@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:experimental
+# syntax=docker/dockerfile:1
 
 # Build syslinux as an syslinux3.86
 FROM gcc:10.2.0 as syslinux3.86
@@ -16,9 +16,8 @@ RUN gcc -s -static -o syslinux syslinux.o syslxmod.o bootsect_bin.o ldlinux_bin.
 # Build syslinux
 FROM golang:1.21-alpine as syslinux
 RUN apk add --no-cache git ca-certificates gcc linux-headers musl-dev
-COPY . /src/syslinux/
+COPY . /src
 WORKDIR /src/syslinux
-ENV GO111MODULE=on
 RUN --mount=type=cache,sharing=locked,id=gomod,target=/go/pkg/mod/cache \
     --mount=type=cache,sharing=locked,id=goroot,target=/root/.cache/go-build \
     CGO_ENABLED=1 GOOS=linux go build -a -ldflags "-linkmode external -extldflags '-static' -s -w" -o syslinux
@@ -27,5 +26,5 @@ RUN --mount=type=cache,sharing=locked,id=gomod,target=/go/pkg/mod/cache \
 FROM alpine
 COPY --from=syslinux3.86 /syslinux-3.86/mbr/mbr.bin /mbr.bin.386
 COPY --from=syslinux3.86 /syslinux-3.86/linux/syslinux /syslinux.386
-COPY --from=syslinux /src/syslinux/syslinux .
-ENTRYPOINT ["/syslinux"]
+COPY --from=syslinux /src/syslinux/syslinux /usr/bin/syslinux
+ENTRYPOINT ["/usr/bin/syslinux"]

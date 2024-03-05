@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:experimental
+# syntax=docker/dockerfile:1
 
 # Build mkfs as an static
 FROM gcc:10.5.0 as mke2fs
@@ -21,9 +21,8 @@ RUN make LDFLAGS="-all-static" mkswap
 # Build rootio
 FROM golang:1.21-alpine as rootio
 RUN apk add --no-cache git ca-certificates gcc linux-headers musl-dev
-COPY . /src/rootio/
+COPY . /src
 WORKDIR /src/rootio
-ENV GO111MODULE=on
 RUN --mount=type=cache,sharing=locked,id=gomod,target=/go/pkg/mod/cache \
     --mount=type=cache,sharing=locked,id=goroot,target=/root/.cache/go-build \
     CGO_ENABLED=1 GOOS=linux go build -a -ldflags "-linkmode external -extldflags '-static' -s -w" -o rootio
@@ -47,5 +46,5 @@ COPY --from=swap util-linux/swapon /sbin/swapon
 COPY --from=swap util-linux/mkswap /sbin/mkswap
 COPY --from=fattools dosfstools/src/mkfs.fat /sbin/mkfs.fat
 COPY --from=lvm /usr/sbin/lvm.static /sbin/lvm
-COPY --from=rootio /src/rootio/rootio .
-ENTRYPOINT ["/rootio"]
+COPY --from=rootio /src/rootio/rootio /usr/bin/rootio
+ENTRYPOINT ["/usr/bin/rootio"]

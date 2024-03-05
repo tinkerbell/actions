@@ -6,7 +6,7 @@ all: $(BINS)
 
 .PHONY: $(BINS)
 $(BINS):
-	make -C $@
+	docker buildx build --platform linux/amd64 --load -t  $@:latest -f ./$@/Dockerfile .
 
 formatters: $(toolBins)
 	git ls-files '*.go' | xargs -I% sh -c 'sed -i "/^import (/,/^)/ { /^\s*$$/ d }" % && bin/gofumpt -w %'

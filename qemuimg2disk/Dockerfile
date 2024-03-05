@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1
+
 FROM alpine:3.13 as builder
 ENV QEMU_NAME="qemu"
 ARG QEMU_REV="6.1.0"
@@ -38,21 +40,22 @@ RUN sed -e 's|-lbrotlidec|-lbrotlicommon-static -lbrotlidec-static -lbrotlienc-s
 RUN make -j$(nproc) qemu-img
 RUN cp build/qemu-img /bin/qemu-img
 
-# Build partprobe
-FROM golang:1.21-alpine as partprobe
+FROM golang:1.21-alpine as qemuimg2disk
 COPY . /src
-WORKDIR /src
+WORKDIR /src/qemuimg2disk
 RUN go mod tidy
-RUN go build partprobe.go
+RUN go build -o qemuimg2disk .
 
+# Collect all the files we need into a scratch image.
 FROM scratch as collect
 COPY --from=builder /bin/qemu-img /bin/qemu-img
 COPY --from=builder /bin/sh /bin/sh
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=builder /lib/ld-musl*  /lib/
-COPY --from=partprobe /src/partprobe /bin/partprobe
-COPY entrypoint.sh /entrypoint.sh
+COPY --from=qemuimg2disk /src/qemuimg2disk/qemuimg2disk /usr/bin/qemuimg2disk
+COPY --from=qemuimg2disk /src/qemuimg2disk/entrypoint.sh /usr/bin/entrypoint.sh
 
+# Flatten the collection into a minimal layer set.
 FROM scratch
 COPY --from=collect / /
-ENTRYPOINT /entrypoint.sh
+ENTRYPOINT ["/usr/bin/entrypoint.sh"]
