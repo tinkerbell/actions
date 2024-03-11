@@ -1,0 +1,20 @@
+name: Actions
+on:
+  push:
+    branches:
+      - "*"
+      - "!main"
+  pull_request: {}
+  workflow_dispatch: {}
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: [amd64]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build linux/${{ matrix.platform }}
+        run: make images -j$(nproc) GOOS=linux GOARCH=${{ matrix.platform }}

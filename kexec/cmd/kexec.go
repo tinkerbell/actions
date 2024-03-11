@@ -9,7 +9,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/tinkerbell/hub/kexec/cmd/grub"
+	"github.com/tinkerbell/actions/kexec/cmd/grub"
 	"golang.org/x/sys/unix"
 )
 

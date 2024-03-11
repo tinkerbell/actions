@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/tinkerbell/hub/kexec/cmd"
+	"github.com/tinkerbell/actions/kexec/cmd"
 )
 
 func main() {

@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/tinkerbell/hub/oci2disk/image"
+	"github.com/tinkerbell/actions/oci2disk/image"
 )
 
 func main() {

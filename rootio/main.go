@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/tinkerbell/hub/rootio/cmd"
+	"github.com/tinkerbell/actions/rootio/cmd"
 )
 
 func main() {

@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/tinkerbell/hub/slurp/image"
+	"github.com/tinkerbell/actions/slurp/image"
 )
 
 func main() {
