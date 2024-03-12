@@ -8,7 +8,7 @@ import (
 	"syscall"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/tinkerbell/hub/archive2disk/archive"
+	"github.com/tinkerbell/actions/archive2disk/archive"
 )
 
 const mountAction = "/mountAction"

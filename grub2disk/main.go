@@ -6,7 +6,7 @@ import (
 	"os/exec"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/tinkerbell/hub/grub2disk/grub"
+	"github.com/tinkerbell/actions/grub2disk/grub"
 )
 
 func main() {

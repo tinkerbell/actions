@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/tinkerbell/hub/image2disk/image"
+	"github.com/tinkerbell/actions/image2disk/image"
 )
 
 func main() {

@@ -8,7 +8,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/tinkerbell/hub/rootio/storage"
+	"github.com/tinkerbell/actions/rootio/storage"
 )
 
 var metadata *storage.Metadata

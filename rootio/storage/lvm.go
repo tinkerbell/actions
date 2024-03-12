@@ -3,7 +3,7 @@ package storage
 import (
 	"fmt"
 
-	"github.com/tinkerbell/hub/rootio/lvm"
+	"github.com/tinkerbell/actions/rootio/lvm"
 )
 
 func CreateVolumeGroup(volumeGroup VolumeGroup) error {
