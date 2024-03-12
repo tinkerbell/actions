@@ -9,7 +9,7 @@ SHELL       := bash
 .SECONDEXPANSION:
 
 # Define the list of actions that can be built.
-ACTIONS := archive2disk cexec grub2disk kexec oci2disk qemuimg2disk rootio slurp syslinux writefile
+ACTIONS := archive2disk cexec grub2disk image2disk kexec oci2disk qemuimg2disk rootio slurp syslinux writefile
 
 # Define the commit for tagging images.
 GIT_COMMIT := $(shell git rev-parse HEAD)
