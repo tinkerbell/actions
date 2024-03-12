@@ -15,7 +15,7 @@ ACTIONS := archive2disk cexec grub2disk kexec oci2disk qemuimg2disk rootio slurp
 GIT_COMMIT := $(shell git rev-parse HEAD)
 
 # Define container registry details.
-DOCKER_REPOSITORY := quay.io/tinkerbell/actions
+CONTAINER_REPOSITORY := quay.io/tinkerbell/actions
 
 include Rules.mk
 
@@ -40,7 +40,7 @@ push: $(addprefix push-,$(ACTIONS))
 
 .PHONY: push-%
 push-%: ## Push a specific action image to the registry. This recipe assumes you are already authenticated with the registry.
-	IMAGE_NAME=$(DOCKER_REPOSITORY)/$*:$(GIT_COMMIT)
+	IMAGE_NAME=$(CONTAINER_REPOSITORY)/$*:$(GIT_COMMIT)
 	docker tag $*:latest $$IMAGE_NAME
 	docker push $$IMAGE_NAME
 
