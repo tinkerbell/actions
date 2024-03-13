@@ -1,19 +1,34 @@
+shared:
+  # Rules applicable to both queueing and merge requests.
+  compulsory: &compulsory
+
+    # Ensure the minimal CI checks have passed.
+    - check-success=DCO
+    - check-success=Build (amd64)
+
+    # Ensure we're targetting the default branch.
+    - base=main
+
+    # Ensure we have adequete reviews.
+    - "#approved-reviews-by>=1"
+    - "#changes-requested-reviews-by=0"
+
+    # Ensure we aren't being explicitly blocked with a label.
+    - label!=do-not-merge
+
 queue_rules:
   - name: default
     conditions:
-      # Conditions to get out of the queue (= merged)
-      - check-success=DCO
+      - and: *compulsory
 
 pull_request_rules:
   - name: Automatic merge on approval
     conditions:
-      - base=main
-      - "#approved-reviews-by>=1"
-      - "#changes-requested-reviews-by=0"
-      - "#review-requested=0"
-      - check-success=DCO
-      - label!=do-not-merge
+      - and: *compulsory
+
+      # Ensure the review is opted in using labels.
       - label=ready-to-merge
+
     actions:
       queue:
         method: merge
