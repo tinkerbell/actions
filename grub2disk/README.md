@@ -1,3 +1,7 @@
+```
+quay.io/tinkerbell/actions/grub2disk:latest
+```
+
 The `grub2disk` mounts and writes a grub onto a block device. This lets you see a grub menu during the boot process and select OS of your choice and which is deployed in the system. As a part of the process, [chroot](https://en.wikipedia.org/wiki/Chroot) operation is also performed on `GRUB_INSTALL_PATH`. For this reason respective `volumes` as described in the below template is required.
 
 ```yaml
@@ -23,7 +27,7 @@ tasks:
       - /boot:/boot
     actions:
       - name: "grub_2_disk"
-        image: grub2disk
+        image: quay.io/tinkerbell/actions/grub2disk:latest
         timeout: 180
         environment:
           GRUB_INSTALL_PATH: /dev/sda

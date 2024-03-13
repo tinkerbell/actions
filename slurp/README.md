@@ -1,3 +1,7 @@
+```
+quay.io/tinkerbell/actions/slurp:latest
+```
+
 This action will stream the contents of a block device to a remote server
 allowing a user to easily make a copy of a remote server. This newly created disk image
 can be replicated to easily provision other servers.
@@ -12,14 +16,14 @@ a remote server.
 
 ```yaml
 actions:
-  - name: "slurp_ubuntu"
-    image: quay.io/tinkerbell-actions/slurp:v1.0.0
-    timeout: 90
-    environment:
-      DEST_URL: http://192.168.1.2:3000/image
-      SOURCE_DISK: /dev/sda
-      IMG_NAME: ubuntu_wordpress
-      COMPRESSED: false
+- name: "slurp_ubuntu"
+  image: quay.io/tinkerbell/actions/slurp:latest
+  timeout: 90
+  environment:
+    DEST_URL: http://192.168.1.2:3000/image
+    SOURCE_DISK: /dev/sda
+    IMG_NAME: ubuntu_wordpress
+    COMPRESSED: false
 ```
 
 **Note** the `DEST_URL`, the slurp action has a server that can be used with this action.

@@ -1,3 +1,7 @@
+```
+quay.io/tinkerbell/actions/kexec:latest
+```
+
 This action makes use of the kexec function that should be compiled into the
 tinkie kernel. This provides a faster alternative to rebooting, and allows an action to
 effectively jump straight into the newly provisioned Operating System
@@ -13,16 +17,16 @@ understand the `CMD_LINE`.
 
 ```yaml
 actions:
-    - name: "kexec ubuntu"
-      image: quay.io/tinkerbell-actions/kexec:v1.0.0
-      timeout: 90
-      pid: host
-      environment:
-          BLOCK_DEVICE: /dev/sda3
-          FS_TYPE: ext4
-          KERNEL_PATH: /boot/vmlinuz
-          INITRD_PATH: /boot/initrd
-          CMD_LINE: "root=/dev/sda3 ro"
+- name: "kexec ubuntu"
+  image: quay.io/tinkerbell/actions/kexec:latest
+  timeout: 90
+  pid: host
+  environment:
+      BLOCK_DEVICE: /dev/sda3
+      FS_TYPE: ext4
+      KERNEL_PATH: /boot/vmlinuz
+      INITRD_PATH: /boot/initrd
+      CMD_LINE: "root=/dev/sda3 ro"
 ```
 
 Troubleshooting:

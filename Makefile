@@ -40,9 +40,11 @@ push: $(addprefix push-,$(ACTIONS))
 
 .PHONY: push-%
 push-%: ## Push a specific action image to the registry. This recipe assumes you are already authenticated with the registry.
-	IMAGE_NAME=$(CONTAINER_REPOSITORY)/$*:$(GIT_COMMIT)
-	docker tag $*:latest $$IMAGE_NAME
-	docker push $$IMAGE_NAME
+	IMAGE_NAME=$(CONTAINER_REPOSITORY)/$*
+	docker tag $*:latest $$IMAGE_NAME:$(GIT_COMMIT)
+	docker tag $*:latest $$IMAGE_NAME:latest
+	docker push $$IMAGE_NAME:$(GIT_COMMIT)
+	docker push $$IMAGE_NAME:latest
 
 formatters: ## Run all formatters.
 formatters: $(toolBins)
