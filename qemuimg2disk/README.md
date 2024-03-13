@@ -1,3 +1,7 @@
+```
+quay.io/tinkerbell/actions/qemuimg2disk:latest
+```
+
 This action will stream a remote disk image to a block device, and
 is mainly used to write cloud images to a disk.
 
@@ -12,10 +16,10 @@ directly from Canonical onto block storage disk `/dev/sda` like so:
 
 ```yaml
 actions:
-    - name: "stream ubuntu"
-      image: quay.io/tinkerbell-actions/qemuimg2disk:v1.0.0
-      timeout: 300
-      environment:
-          IMG_URL: https://cloud-images.ubuntu.com/daily/server/focal/current/focal-server-cloudimg-amd64.img
-          DEST_DISK: /dev/sda
+- name: "stream ubuntu"
+  image: quay.io/tinkerbell/actions/qemuimg2disk:latest
+  timeout: 300
+  environment:
+      IMG_URL: https://cloud-images.ubuntu.com/daily/server/focal/current/focal-server-cloudimg-amd64.img
+      DEST_DISK: /dev/sda
 ```

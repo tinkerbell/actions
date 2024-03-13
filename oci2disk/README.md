@@ -1,3 +1,7 @@
+```
+quay.io/tinkerbell/actions/oci2disk:latest
+```
+
 This action provides the capability to stream a raw (compressed) disk
 image from an OCI compliant registry and write this to a block device on a server
 
@@ -17,13 +21,13 @@ We can then use this image by referring too it with teh `IMG_URL` environment va
 
 ```yaml
 actions:
-  - name: "stream-debian-image"
-      image: oci2disk:v1.0.0
-      timeout: 600
-      environment:
-        DEST_DISK: /dev/nvme0n1
-        IMG_URL: "192.168.0.173/test/debian:raw.gz"
-        COMPRESSED: true
+- name: "stream-debian-image"
+    image: quay.io/tinkerbell/actions/oci2disk:latest
+    timeout: 600
+    environment:
+      DEST_DISK: /dev/nvme0n1
+      IMG_URL: "192.168.0.173/test/debian:raw.gz"
+      COMPRESSED: true
 ```
 
 ## Compression format supported:

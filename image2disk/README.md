@@ -1,3 +1,7 @@
+```
+quay.io/tinkerbell/actions/image2disk:latest
+```
+
 This action will stream a remote disk image (raw) to a block device, and
 is mainly used to write cloud images to a disk. It is recommended to use the `qemu-img`
 tool to convert disk images into raw, it is also possible to compress the raw images
@@ -8,13 +12,13 @@ it to the block storage disk `/dev/sda`. The raw image is uncompressed in this e
 
 ```yaml
 actions:
-    - name: "stream ubuntu"
-      image: quay.io/tinkerbell-actions/image2disk:v1.0.0
-      timeout: 90
-      environment:
-          IMG_URL: http://192.168.1.2/ubuntu.raw
-          DEST_DISK: /dev/sda
-          COMPRESSED: false
+- name: "stream ubuntu"
+  image: quay.io/tinkerbell/actions/image2disk:latest
+  timeout: 90
+  environment:
+      IMG_URL: http://192.168.1.2/ubuntu.raw
+      DEST_DISK: /dev/sda
+      COMPRESSED: false
 ```
 
 The below example will stream a compressed raw ubuntu cloud image (converted by qemu-img)
@@ -27,13 +31,13 @@ gzip ubuntu.raw
 
 ```yaml
 actions:
-    - name: "stream ubuntu"
-      image: quay.io/tinkerbell-actions/image2disk:v1.0.0
-      timeout: 90
-      environment:
-          IMG_URL: http://192.168.1.2/ubuntu.tar.gz
-          DEST_DISK: /dev/sda
-          COMPRESSED: true
+- name: "stream ubuntu"
+  image: quay.io/tinkerbell/actions/image2disk:latest
+  timeout: 90
+  environment:
+      IMG_URL: http://192.168.1.2/ubuntu.tar.gz
+      DEST_DISK: /dev/sda
+      COMPRESSED: true
 ```
 
 ## Compression format supported:

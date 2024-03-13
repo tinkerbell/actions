@@ -1,3 +1,7 @@
+```
+quay.io/tinkerbell/actions/rootio:latest
+```
+
 This action can be used in a variety of ways, however its core functionality
 is the management of disks. The action parses the metadata and will partition, format and
 mount disks
@@ -9,24 +13,24 @@ have their actions determined by the contents of the storage section in the meta
 
 ```yaml
 actions:
-  - name: "disk-wipe-partition"
-    image: quay.io/tinkerbell-actions/rootio:v1.0.0
-    timeout: 90
-    command: ["partition"]
-    environment:
-      MIRROR_HOST: 192.168.1.2
-  - name: "format"
-    image: quay.io/tinkerbell-actions/rootio:v1.0.0
-    timeout: 90
-    command: ["format"]
-    environment:
-      MIRROR_HOST: 192.168.1.2
-  - name: "mount"
-    image: quay.io/tinkerbell-actions/rootio:v1.0.0
-    timeout: 90
-    command: ["mount"]
-    environment:
-      MIRROR_HOST: 192.168.1.2
+- name: "disk-wipe-partition"
+  image: quay.io/tinkerbell/actions/rootio:latest
+  timeout: 90
+  command: ["partition"]
+  environment:
+    MIRROR_HOST: 192.168.1.2
+- name: "format"
+  image: quay.io/tinkerbell/actions/rootio:latest
+  timeout: 90
+  command: ["format"]
+  environment:
+    MIRROR_HOST: 192.168.1.2
+- name: "mount"
+  image: quay.io/tinkerbell/actions/rootio:latest
+  timeout: 90
+  command: ["mount"]
+  environment:
+    MIRROR_HOST: 192.168.1.2
 ```
 
 **Advanced**
@@ -37,13 +41,13 @@ an environment variable to rootio for `partition` options.
 
 ```yaml
 actions:
-  - name: "disk-wipe-partition"
-    image: quay.io/tinkerbell-actions/rootio:v1.0.0
-    timeout: 90
-    command: ["partition"]
-    environment:
-      MIRROR_HOST: 192.168.1.2
-      MBR: true
+- name: "disk-wipe-partition"
+  image: quay.io/tinkerbell/actions/rootio:latest
+  timeout: 90
+  command: ["partition"]
+  environment:
+    MIRROR_HOST: 192.168.1.2
+    MBR: true
 ```
 
 This also supports an extended version of CPR:
