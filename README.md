@@ -31,5 +31,4 @@ Our release process may provide stronger compatibility guarantees in the future.
 These actions are built and maintained by third parties. To add your own action to the list, raise
 a PR. If you find an action that's no longer maintained, please raise an issue.
 
-| Name | Description | Repo |
-| --- | --- | --- |
+- [waitdaemon](https://github.com/jacobweinstock/waitdaemon) - Run an action that always reports successful. Useful for reboot, poweroff, or kexec actions.
