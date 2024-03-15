@@ -18,17 +18,23 @@ This repository is a suite of reusable Tinkerbell Actions that are used to compo
 
 ## Releases
 
-Actions are released on a per revision basis. With each PR merged, all actions are built and pushed
+Actions are released on a per revision basis. With each PR merged, all Actions are built and pushed
 to quay.io tagged with the Git revision. The `latest` tag is updated to point to the new image.
 
-We try not to make changes that would break actions, but we do not provide a backward compatibility
+We try not to make changes that would break Actions, but we do not provide a backward compatibility
 guarantee. We recommend using the static Git revision tag for most deployments.
 
 Our release process may provide stronger compatibility guarantees in the future.
 
-## Community actions
+## Community Actions
 
-These actions are built and maintained by third parties. To add your own action to the list, raise
-a PR. If you find an action that's no longer maintained, please raise an issue.
+[Actions](https://tinkerbell.org/docs/concepts/templates/#action) are one of the best parts of Tinkerbell. These reusable building blocks allow us to evolve the way we provision and interact with machines. And sharing Actions is a great way to participate in this evolution. The Actions below are built and maintained by community members, like you! To add your own Action to the list, raise a PR. If you find an Action that's no longer maintained, please raise an issue or PR to have it removed.
 
-- [waitdaemon](https://github.com/jacobweinstock/waitdaemon) - Run an action that always reports successful. Useful for reboot, poweroff, or kexec actions.
+A couple recommendations for making your Action as community friendly as possible:
+
+- Host your Action in a container registry that's publicly accessible. Here's an [example Github Action](docs/example-publish.yaml) that builds and pushes an image to `ghcr.io`.
+- Include a README with usage instructions and examples.
+
+### Actions List
+
+- [waitdaemon](https://github.com/jacobweinstock/waitdaemon) - Run an Action that always reports successful. Useful for reboot, poweroff, or kexec Actions.
