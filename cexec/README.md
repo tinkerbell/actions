@@ -57,3 +57,14 @@ CLI flags take precedence over environment variables, which take precedence over
 
 Any environment variables you set on the Action will be available to the command you execute.
 For example, if you set `DEBIAN_FRONTEND: noninteractive` as an environment variable, it will be available to the command you execute.
+
+### Exit codes
+
+The following exit codes or statuses are returned by the `cexec` Action:
+
+| Code | Description |
+|------|-------------|
+| 0 | The cexec Action was executed successfully. |
+| 10 | The was a failure parsing cli flags and/or env variables. |
+| 20 | Required cli flags and/or env variables were not specified. |
+| 30 | The cexec Action failed to execute successfully. |

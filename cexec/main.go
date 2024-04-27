@@ -47,7 +47,7 @@ func main() {
 
 	if err := ff.Parse(fs, os.Args[1:], ff.WithEnvVarNoPrefix()); err != nil {
 		logger.Error(err.Error())
-		os.Exit(1)
+		os.Exit(10)
 	}
 
 	// check for required fields to be set.
@@ -55,7 +55,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, "missing required fields", missingFields)
 		fmt.Fprintln(os.Stderr)
 		fs.Usage()
-		os.Exit(10)
+		os.Exit(20)
 	}
 
 	// TODO(jacobweinstock): add field validations for the settings struct.
@@ -76,7 +76,7 @@ func main() {
 
 	if err := s.cexec(ctx, logger); err != nil {
 		logger.ErrorContext(ctx, err.Error())
-		os.Exit(20)
+		os.Exit(30)
 	}
 }
 
