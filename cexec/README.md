@@ -49,7 +49,7 @@ CLI flags take precedence over environment variables, which take precedence over
 |--------------|------|------|---------------|----------|-------------|
 | `BLOCK_DEVICE` | `--block-device` | string | "" | yes | The block device to mount. |
 | `FS_TYPE` | `--fs-type` | string | "" | yes | The filesystem type of the block device. |
-| `CHROOT` | `--chroot` | string | "" | no | If set to `y` (or a non empty string), the Action will execute the given command within a chroot environment. This option is DEPRECATED. Future versions will always chroot |
+| `CHROOT` | `--chroot` | string | "" | no | If set to `y` (or a non empty string), the Action will execute the given command within a chroot environment. This option is DEPRECATED. Future versions will always chroot. |
 | `CMD_LINE` | `--cmd-line` | string | "" | yes | The command to execute. |
 | `DEFAULT_INTERPRETER` | `--default-interpreter` | string | "" | no | The default interpreter to use when executing commands. This is useful when you need to execute multiple commands. |
 | `UPDATE_RESOLV_CONF` | `--update-resolv-conf` | boolean | false | no | If set to `true`, the cexec Action will update the `/etc/resolv.conf` file within the chroot environment with the `/etc/resolv.conf` from the host. |
