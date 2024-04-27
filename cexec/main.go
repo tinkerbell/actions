@@ -31,7 +31,7 @@ type settings struct {
 }
 
 func main() {
-	ctx, done := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGHUP, syscall.SIGTERM)
+	ctx, done := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGHUP, syscall.SIGTERM)
 	defer done()
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
@@ -112,7 +112,6 @@ func (s settings) cexec(ctx context.Context, log *slog.Logger) error {
 	}
 	log.Info("mounted device successfully", "source", s.blockDevice, "destination", mountAction)
 
-	var exitChroot func() error
 	if s.chroot != "" {
 		if s.updateResolvConf {
 			// fix resolv.conf as it normally doesn't work in chroot
@@ -139,11 +138,11 @@ func (s settings) cexec(ctx context.Context, log *slog.Logger) error {
 		}
 		defer s.umountSpecialDirs()
 		log.Info("Changing root before executing command")
-		var err error
-		exitChroot, err = chroot(mountAction)
+		exitChroot, err := chroot(mountAction)
 		if err != nil {
 			return fmt.Errorf("error changing root to [%s], error: %w", mountAction, err)
 		}
+		defer exitChroot()
 	}
 
 	if s.defaultInterpreter != "" {
@@ -180,15 +179,6 @@ func (s settings) cexec(ctx context.Context, log *slog.Logger) error {
 			if err := cmd.Wait(); err != nil {
 				return fmt.Errorf("error running [%s] [%w]", debugCMD, err)
 			}
-		}
-	}
-
-	if s.chroot != "" {
-		if err := exitChroot(); err != nil {
-			log.Info("error exiting chroot, execution continuing", "chrootMountPoint", mountAction, "error", err)
-		}
-		if err := s.umountSpecialDirs(); err != nil {
-			log.Error("error unmounting special directories", "error", err)
 		}
 	}
 
