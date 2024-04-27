@@ -126,10 +126,10 @@ func (s settings) cexec(ctx context.Context, log *slog.Logger) error {
 				}()
 				// create an empty resolv.conf in the chroot so that it can be bind mounted
 				if _, err := os.Create(resolv); err != nil {
-					log.Info("error creating resolv.conf, resolv.conf will not work in the chroot", "error", err)
+					return fmt.Errorf("error creating resolv.conf, resolv.conf will not work in the chroot: %w", err)
 				}
 			} else {
-				log.Info("error backing up resolv.conf, resolv.conf will not work in the chroot", "error", err)
+				return fmt.Errorf("error backing up resolv.conf, resolv.conf will not work in the chroot: %w", err)
 			}
 		}
 
