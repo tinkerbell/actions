@@ -1,7 +1,14 @@
 # syntax=docker/dockerfile:1
 
-FROM golang:1.21-alpine as grub2disk
+FROM golang:1.21-alpine AS base
+
+FROM base AS build-amd64
 RUN apk add --no-cache grub grub-bios git ca-certificates gcc musl-dev
+
+FROM base AS build-arm64
+RUN apk add --no-cache grub git ca-certificates gcc musl-dev
+
+FROM build-${TARGETARCH} AS grub2disk
 COPY . /src
 WORKDIR /src/grub2disk
 RUN --mount=type=cache,sharing=locked,id=gomod,target=/go/pkg/mod/cache \
