@@ -64,7 +64,6 @@ release: $(addprefix release-,$(ACTIONS))
 .PHONY: release-%
 release-%: ## Release an actions. x86_64 and arm64.
 	IMAGE_NAME=$(CONTAINER_REPOSITORY)/$*
-	docker buildx build --platform linux/amd64,linux/arm64 --push -t $$IMAGE_NAME:$(GIT_COMMIT) -f ./$*/Dockerfile .
-	docker buildx build --platform linux/amd64,linux/arm64 --push -t $$IMAGE_NAME:latest -f ./$*/Dockerfile .
+	docker buildx build --platform linux/amd64,linux/arm64 --push -t $$IMAGE_NAME:$(GIT_COMMIT) -t $$IMAGE_NAME:latest -f ./$*/Dockerfile .
 
 include Lint.mk
