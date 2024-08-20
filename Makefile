@@ -51,4 +51,20 @@ formatters: $(toolBins)
 	git ls-files '*.go' | xargs -I% sh -c 'sed -i "/^import (/,/^)/ { /^\s*$$/ d }" % && bin/gofumpt -w %'
 	git ls-files '*.go' | xargs -I% bin/goimports -w %
 
+prepare-release:
+	docker buildx create --name tinkerbell-multiarch --use --driver docker-container || true
+
+clean-release:
+	docker buildx rm tinkerbell-multiarch || true
+
+.PHONY: release
+release: ## Push all action images.
+release: $(addprefix release-,$(ACTIONS))
+
+.PHONY: release-%
+release-%: ## Release an actions. x86_64 and arm64.
+	IMAGE_NAME=$(CONTAINER_REPOSITORY)/$*
+	docker buildx build --platform linux/amd64,linux/arm64 --push -t $$IMAGE_NAME:$(GIT_COMMIT) -f ./$*/Dockerfile .
+	docker buildx build --platform linux/amd64,linux/arm64 --push -t $$IMAGE_NAME:latest -f ./$*/Dockerfile .
+
 include Lint.mk
