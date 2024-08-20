@@ -3,6 +3,7 @@ module github.com/tinkerbell/actions
 go 1.21
 
 require (
+	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/containerd/containerd v1.4.4
 	github.com/deislabs/oras v0.11.1
 	github.com/diskfs/go-diskfs v1.1.1

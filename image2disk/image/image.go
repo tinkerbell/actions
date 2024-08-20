@@ -6,20 +6,72 @@ import (
 	"compress/bzip2"
 	"compress/gzip"
 	"context"
+	"errors"
 	"fmt"
 	"io"
+	"log/slog"
+	"math"
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
+	"sync/atomic"
 	"time"
 
-	"github.com/dustin/go-humanize"
 	"github.com/klauspost/compress/zstd"
 	log "github.com/sirupsen/logrus"
 	"github.com/ulikunitz/xz"
 	"golang.org/x/sys/unix"
 )
+
+type Progress struct {
+	w      io.Writer
+	r      io.Reader
+	wBytes atomic.Int64
+	rBytes atomic.Int64
+}
+
+func NewProgress(w io.Writer, r io.Reader) *Progress {
+	return &Progress{w: w, r: r}
+}
+
+func (p *Progress) Write(b []byte) (n int, err error) {
+	nu, err := p.w.Write(b)
+	if err != nil {
+		p.wBytes.Add(int64(nu))
+		return nu, fmt.Errorf("error with write: %w", err)
+	}
+	p.wBytes.Add(int64(nu))
+	return nu, nil
+}
+
+func (p *Progress) Read(b []byte) (n int, err error) {
+	nu, err := p.r.Read(b)
+	if err != nil {
+		p.rBytes.Add(int64(nu))
+		return nu, fmt.Errorf("error with read: %w", err)
+	}
+	p.rBytes.Add(int64(nu))
+	return nu, nil
+}
+
+func (p *Progress) readBytes() int64 {
+	return p.rBytes.Load()
+}
+
+func (p *Progress) writeBytes() int64 {
+	return p.wBytes.Load()
+}
+
+func prettyByteSize(b int64) string {
+	bf := float64(b)
+	for _, unit := range []string{"", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"} {
+		if math.Abs(bf) < 1024.0 {
+			return fmt.Sprintf("%3.6f%sB", bf, unit)
+		}
+		bf /= 1024.0
+	}
+	return fmt.Sprintf("%.6fYiB", bf)
+}
 
 // WriteCounter counts the number of bytes written to it. It implements to the io.Writer interface
 // and we can pass this into io.TeeReader() which will report progress on each write cycle.
@@ -31,16 +83,6 @@ func (wc *WriteCounter) Write(p []byte) (int, error) {
 	n := len(p)
 	wc.Total += uint64(n)
 	return n, nil
-}
-
-func tickerProgress(byteCounter uint64) {
-	// Clear the line by using a character return to go back to the start and remove
-	// the remaining characters by filling it with spaces
-	fmt.Printf("\r%s", strings.Repeat(" ", 35))
-
-	// Return again and print current status of download
-	// We use the humanize package to print the bytes in a meaningful way (e.g. 10 MB)
-	fmt.Printf("\rDownloading... %s complete", humanize.Bytes(byteCounter))
 }
 
 // Write will pull an image and write it to local storage device
@@ -74,12 +116,14 @@ func Write(sourceImage, destinationDevice string, compressed bool) error {
 	}
 	defer fileOut.Close()
 
+	progressRW := NewProgress(fileOut, resp.Body)
+
 	if !compressed {
 		// Without compression send raw output
-		out = resp.Body
+		out = progressRW
 	} else {
 		// Find compression algorithm based upon extension
-		decompressor, err := findDecompressor(sourceImage, resp.Body)
+		decompressor, err := findDecompressor(sourceImage, progressRW)
 		if err != nil {
 			return err
 		}
@@ -88,28 +132,34 @@ func Write(sourceImage, destinationDevice string, compressed bool) error {
 	}
 
 	log.Infof("Beginning write of image [%s] to disk [%s]", filepath.Base(sourceImage), destinationDevice)
-	// Create our progress reporter and pass it to be used alongside our writer
-	ticker := time.NewTicker(500 * time.Millisecond)
-	counter := &WriteCounter{}
 
+	log := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{AddSource: true}))
+
+	ticker := time.NewTicker(time.Second)
+	done := make(chan bool)
 	go func() {
-		for ; true; <-ticker.C {
-			tickerProgress(counter.Total)
+		totalSize := resp.ContentLength
+		for {
+			select {
+			case <-done:
+				log.Info("read and write progress", "written", prettyByteSize(progressRW.writeBytes()), "compressedSize", prettyByteSize(totalSize), "read", prettyByteSize(progressRW.readBytes()))
+				return
+			case <-ticker.C:
+				log.Info("read and write progress", "written", prettyByteSize(progressRW.writeBytes()), "compressedSize", prettyByteSize(totalSize), "read", prettyByteSize(progressRW.readBytes()))
+			}
 		}
 	}()
-	if _, err = io.Copy(fileOut, io.TeeReader(out, counter)); err != nil {
-		ticker.Stop()
-		return err
-	}
 
-	count, err := io.Copy(fileOut, out)
-	if err != nil {
+	count, err := io.Copy(progressRW, out)
+	// EOF and ErrUnexpectedEOF can be ignored.
+	if err != nil && !errors.Is(err, io.EOF) && !errors.Is(err, io.ErrUnexpectedEOF) {
 		ticker.Stop()
-		return fmt.Errorf("error writing %d bytes to disk [%s] -> %w", count, destinationDevice, err)
+		done <- true
+		return fmt.Errorf("error writing %s bytes to disk [%s] -> %w", prettyByteSize(count), destinationDevice, err)
 	}
-	fmt.Printf("\n")
 
 	ticker.Stop()
+	done <- true
 
 	// Do the equivalent of partprobe on the device
 	if err := fileOut.Sync(); err != nil {
@@ -118,7 +168,7 @@ func Write(sourceImage, destinationDevice string, compressed bool) error {
 
 	if err := unix.IoctlSetInt(int(fileOut.Fd()), unix.BLKRRPART, 0); err != nil {
 		// Ignore errors since it may be a partition, but log in case it's helpful
-		log.Errorf("error re-probing the partitions for the specified device: %v", err)
+		log.Error("error re-probing the partitions for the specified device: %v", "err", err)
 	}
 
 	return nil
