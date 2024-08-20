@@ -13,8 +13,9 @@ jobs:
     strategy:
       matrix:
         platform: [amd64]
+        action: [archive2disk,cexec,grub2disk,image2disk,kexec,oci2disk,qemuimg2disk,rootio,slurp,syslinux,writefile]
     steps:
       - uses: actions/checkout@v4
 
       - name: Build linux/${{ matrix.platform }}
-        run: make images -j$(nproc) GOOS=linux GOARCH=${{ matrix.platform }}
+        run: make ${{ matrix.action }} -j$(nproc) GOOS=linux GOARCH=${{ matrix.platform }}
