@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM golang:1.21-alpine as writefile
+FROM golang:1.21-alpine AS writefile
 RUN apk add --no-cache git ca-certificates gcc musl-dev
 COPY . /src
 WORKDIR /src/writefile
