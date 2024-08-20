@@ -12,6 +12,9 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        action: [archive2disk,cexec,grub2disk,image2disk,kexec,oci2disk,qemuimg2disk,rootio,slurp,syslinux,writefile]
     steps:
       - uses: actions/checkout@v4
 
@@ -32,7 +35,4 @@ jobs:
         run: make prepare-release
 
       - name: Run Release
-        run: make release -j $(nprox)
-
-      - name: Clean up Release
-        run: make clean-release
+        run: make release-${{ matrix.action }} -j $(nprox)
