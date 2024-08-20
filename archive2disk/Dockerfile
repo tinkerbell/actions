@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM golang:1.21-alpine as archive2disk
+FROM golang:1.21-alpine AS archive2disk
 RUN apk add --no-cache git ca-certificates gcc musl-dev
 COPY . /src
 WORKDIR /src/archive2disk

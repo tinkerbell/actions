@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # Build mkfs as an static
-FROM gcc:10.5.0 as mke2fs
+FROM gcc:10.5.0 AS mke2fs
 RUN wget https://mirrors.edge.kernel.org/pub/linux/kernel/people/tytso/e2fsprogs/v1.45.6/e2fsprogs-1.45.6.tar.gz; tar -xvzf ./e2fsprogs-1.45.6.tar.gz
 WORKDIR /e2fsprogs-1.45.6/
 RUN ./configure --enable-static=yes CFLAGS='-g -O2 -static'
@@ -9,7 +9,7 @@ RUN make
 RUN make -C misc mke2fs.static
 
 # build swap as static
-FROM gcc:10.5.0 as swap
+FROM gcc:10.5.0 AS swap
 RUN git clone git://git.kernel.org/pub/scm/utils/util-linux/util-linux.git
 WORKDIR /util-linux/
 RUN apt-get update; apt-get install -y gettext bison autopoint flex
@@ -19,7 +19,7 @@ RUN make LDFLAGS="-all-static" swapon
 RUN make LDFLAGS="-all-static" mkswap
 
 # Build rootio
-FROM golang:1.21-alpine as rootio
+FROM golang:1.21-alpine AS rootio
 RUN apk add --no-cache git ca-certificates gcc linux-headers musl-dev
 COPY . /src
 WORKDIR /src/rootio
@@ -28,7 +28,7 @@ RUN --mount=type=cache,sharing=locked,id=gomod,target=/go/pkg/mod/cache \
     CGO_ENABLED=1 GOOS=linux go build -a -ldflags "-linkmode external -extldflags '-static' -s -w" -o rootio
 
 # build fattools as static
-FROM gcc:10.5.0 as fattools
+FROM gcc:10.5.0 AS fattools
 RUN git clone https://github.com/dosfstools/dosfstools
 WORKDIR /dosfstools/
 RUN ./autogen.sh
@@ -36,7 +36,7 @@ RUN ./configure
 RUN make LDFLAGS="--static"
 
 # build lvm2 as static
-FROM alpine:3.18 as lvm
+FROM alpine:3.18 AS lvm
 RUN apk update && apk add lvm2-static=2.03.21-r3
 
 # Build final image
