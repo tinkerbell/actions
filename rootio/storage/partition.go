@@ -95,7 +95,7 @@ func Partition(d Disk) error {
 			case "SWAP":
 				newPartition.Type = gpt.LinuxSwap
 			case "BIOS":
-				newPartition.Type = gpt.BiosBoot
+				newPartition.Type = gpt.BIOSBoot
 			case "EFI":
 				newPartition.Type = gpt.EFISystemPartition
 			default:

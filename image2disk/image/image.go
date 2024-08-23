@@ -18,7 +18,6 @@ import (
 	"time"
 
 	"github.com/klauspost/compress/zstd"
-	log "github.com/sirupsen/logrus"
 	"github.com/ulikunitz/xz"
 	"golang.org/x/sys/unix"
 )
@@ -88,8 +87,8 @@ func (wc *WriteCounter) Write(p []byte) (int, error) {
 // Write will pull an image and write it to local storage device
 // with compress set to true it will use gzip compression to expand the data before
 // writing to an underlying device.
-func Write(sourceImage, destinationDevice string, compressed bool) error {
-	req, err := http.NewRequestWithContext(context.TODO(), "GET", sourceImage, nil)
+func Write(ctx context.Context, log *slog.Logger, sourceImage, destinationDevice string, compressed bool, progressInterval time.Duration) error {
+	req, err := http.NewRequestWithContext(ctx, "GET", sourceImage, nil)
 	if err != nil {
 		return err
 	}
@@ -101,7 +100,7 @@ func Write(sourceImage, destinationDevice string, compressed bool) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode > 300 {
-		// Customise response for the 404 to make degugging simpler
+		// Customize response for the 404 to make debugging simpler
 		if resp.StatusCode == 404 {
 			return fmt.Errorf("%s not found", sourceImage)
 		}
@@ -131,11 +130,8 @@ func Write(sourceImage, destinationDevice string, compressed bool) error {
 		out = decompressor
 	}
 
-	log.Infof("Beginning write of image [%s] to disk [%s]", filepath.Base(sourceImage), destinationDevice)
-
-	log := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{AddSource: true}))
-
-	ticker := time.NewTicker(time.Second)
+	log.Info(fmt.Sprintf("Beginning write of image [%s] to disk [%s]", filepath.Base(sourceImage), destinationDevice))
+	ticker := time.NewTicker(progressInterval)
 	done := make(chan bool)
 	go func() {
 		totalSize := resp.ContentLength
@@ -168,7 +164,7 @@ func Write(sourceImage, destinationDevice string, compressed bool) error {
 
 	if err := unix.IoctlSetInt(int(fileOut.Fd()), unix.BLKRRPART, 0); err != nil {
 		// Ignore errors since it may be a partition, but log in case it's helpful
-		log.Error("error re-probing the partitions for the specified device: %v", "err", err)
+		log.Info("error re-probing the partitions for the specified device", "err", err)
 	}
 
 	return nil
