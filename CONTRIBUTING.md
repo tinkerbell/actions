@@ -13,7 +13,7 @@ Please read and understand the code of conduct found [here](https://github.com/t
 
 ### DCO Sign Off
 
-Please read and understand the DCO found [here](docs/DCO.md).
+Please read and understand the DCO found [here](https://github.com/tinkerbell/org/blob/main/DCO.md).
 
 ### Environment Details
 
