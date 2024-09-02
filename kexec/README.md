@@ -13,7 +13,8 @@ the kexec action can mount the newly created Operating System and find it's kern
 paths should relate to the paths "inside" the newly provisioned OS along with the `CMD_LINE`
 that will be required to boot the new OS successfully. To discover these things you may need to
 examine the `/boot` folder in the newly written OS and look in the `/boot/grub/grub.cfg` to
-understand the `CMD_LINE`.
+understand the `CMD_LINE`. Sometime `/boot/grub/grub.cfg` exists as `/grub/grub.cfg` on a a
+partition that is mounted as `/boot`. If this happens, use `GRUBCFG_PATH` with `grub/grub.cfg`.
 
 ```yaml
 actions:
