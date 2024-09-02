@@ -30,6 +30,7 @@ var kexecCmd = &cobra.Command{
 		filesystemType := os.Getenv("FS_TYPE")
 		kernelPath := os.Getenv("KERNEL_PATH")
 		initrdPath := os.Getenv("INITRD_PATH")
+		grubCfgPath := os.Getenv("GRUBCFG_PATH")
 		cmdLine := os.Getenv("CMD_LINE")
 
 		// These two strings contain the updated paths including the mountAction path
@@ -37,6 +38,10 @@ var kexecCmd = &cobra.Command{
 
 		if blockDevice == "" {
 			log.Fatalf("No Block Device speified with Environment Variable [BLOCK_DEVICE]")
+		}
+
+		if grubCfgPath == "" {
+			grubCfgPath = "boot/grub/grub.cfg"
 		}
 
 		// Create the /mountAction mountpoint (no folders exist previously in scratch container)
@@ -55,7 +60,7 @@ var kexecCmd = &cobra.Command{
 		// If we specify no kernelPath then we will fallback to autodetect and ignore the initrd and cmdline that may be passed
 		// by environment variables
 		if kernelPath == "" {
-			grubFile, err := ioutil.ReadFile(fmt.Sprintf("%s/boot/grub/grub.cfg", mountAction))
+			grubFile, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", mountAction, grubCfgPath))
 			if err != nil {
 				log.Fatal(err)
 			}
