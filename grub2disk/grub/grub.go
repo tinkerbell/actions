@@ -2,6 +2,7 @@ package grub
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
 	"syscall"
 
@@ -9,10 +10,8 @@ import (
 )
 
 func makeDirAndMount(devicePath string, mountPoint string, filesystemType string) (err error) {
-	// if err = os.Mkdir(mountPoint, os.ModeDir); err != nil {
-	if _, err = exec.Command("/bin/sh", "-c", "/bin/mkdir -p "+mountPoint).Output(); err != nil {
-		log.Error(fmt.Errorf("failed to create the directory %s", mountPoint))
-		return err
+	if err := os.MkdirAll(mountPoint, os.ModeDir); err != nil {
+		return fmt.Errorf("failed to create the directory %s: %w", mountPoint, err)
 	}
 
 	// if err = syscall.Mount(devicePath, mountPoint, filesystemType, flag, ""); err != nil {
