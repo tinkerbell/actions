@@ -13,18 +13,7 @@ tasks:
     worker: "{{.device_1}}"
     volumes:
       - /dev:/dev
-      - /proc:/proc
       - /sys:/sys
-      - /mnt:/mnt
-      - /statedir:/statedir
-      - /etc:/etc
-      - /bin:/bin
-      - /sbin:/sbin
-      - /var:/var
-      - /usr:/usr
-      - /lib:/lib
-      - /tmp:/tmp
-      - /boot:/boot
     actions:
       - name: "grub_2_disk"
         image: quay.io/tinkerbell/actions/grub2disk:latest
