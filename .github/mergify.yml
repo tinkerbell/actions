@@ -18,22 +18,20 @@ shared:
 
 queue_rules:
   - name: default
-    conditions:
+    queue_conditions:
       - and: *compulsory
+      - label=ready-to-merge
+    merge_conditions:
+      - and: *compulsory
+
+    commit_message_template: |
+      {{ title }} (#{{ number }})
+
+      {{ body }}
+    merge_method: merge
 
 pull_request_rules:
   - name: Automatic merge on approval
-    conditions:
-      - and: *compulsory
-
-      # Ensure the review is opted in using labels.
-      - label=ready-to-merge
-
+    conditions: []
     actions:
       queue:
-        method: merge
-        name: default
-        commit_message_template: |
-          {{ title }} (#{{ number }})
-
-          {{ body }}
