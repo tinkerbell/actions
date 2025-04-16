@@ -4,7 +4,17 @@ shared:
 
     # Ensure the minimal CI checks have passed.
     - check-success=DCO
-    - check-success=Build (amd64)
+    - check-success=Build (amd64, archive2disk)
+    - check-success=Build (amd64, cexec)
+    - check-success=Build (amd64, grub2disk)
+    - check-success=Build (amd64, image2disk)
+    - check-success=Build (amd64, kexec)
+    - check-success=Build (amd64, oci2disk)
+    - check-success=Build (amd64, qemuimg2disk)
+    - check-success=Build (amd64, rootio)
+    - check-success=Build (amd64, slurp)
+    - check-success=Build (amd64, syslinux)
+    - check-success=Build (amd64, writefile)
 
     # Ensure we're targetting the default branch.
     - base=main
