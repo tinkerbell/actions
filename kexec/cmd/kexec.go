@@ -31,12 +31,17 @@ var kexecCmd = &cobra.Command{
 		kernelPath := os.Getenv("KERNEL_PATH")
 		initrdPath := os.Getenv("INITRD_PATH")
 		cmdLine := os.Getenv("CMD_LINE")
+		grubCfgPath := os.Getenv("GRUBCFG_PATH")		
 
 		// These two strings contain the updated paths including the mountAction path
 		var kernelMountPath, initrdMountPath string
 
 		if blockDevice == "" {
 			log.Fatalf("No Block Device speified with Environment Variable [BLOCK_DEVICE]")
+		}
+
+		if grubCfgPath == "" {
+			grubCfgPath = "boot/grub/grub.cfg"
 		}
 
 		// Create the /mountAction mountpoint (no folders exist previously in scratch container)
@@ -55,13 +60,13 @@ var kexecCmd = &cobra.Command{
 		// If we specify no kernelPath then we will fallback to autodetect and ignore the initrd and cmdline that may be passed
 		// by environment variables
 		if kernelPath == "" {
-			grubFile, err := ioutil.ReadFile(fmt.Sprintf("%s/boot/grub/grub.cfg", mountAction))
+			grubFile, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", mountAction, grubCfgPath))
 			if err != nil {
 				log.Fatal(err)
 			}
 			bootConfig := grub.GetDefaultConfig(string(grubFile))
 			if bootConfig == nil {
-				log.Fatal("No Kernel configuration passed in [KERNEL_PATH] and unable to parse [/boot/grub/grub.conf]")
+				log.Fatalf("No Kernel configuration passed in [KERNEL_PATH] and unable to parse [/%s]", grubCfgPath)
 			}
 			log.Infof("Loaded boot config: %#v", bootConfig)
 			kernelMountPath = filepath.Join(mountAction, bootConfig.Kernel)
