@@ -4,7 +4,17 @@ shared:
 
     # Ensure the minimal CI checks have passed.
     - check-success=DCO
-    - check-success=Build (amd64)
+    - check-success=Build (amd64, archive2disk)
+    - check-success=Build (amd64, cexec)
+    - check-success=Build (amd64, grub2disk)
+    - check-success=Build (amd64, image2disk)
+    - check-success=Build (amd64, kexec)
+    - check-success=Build (amd64, oci2disk)
+    - check-success=Build (amd64, qemuimg2disk)
+    - check-success=Build (amd64, rootio)
+    - check-success=Build (amd64, slurp)
+    - check-success=Build (amd64, syslinux)
+    - check-success=Build (amd64, writefile)
 
     # Ensure we're targetting the default branch.
     - base=main
@@ -18,22 +28,20 @@ shared:
 
 queue_rules:
   - name: default
-    conditions:
+    queue_conditions:
       - and: *compulsory
+      - label=ready-to-merge
+    merge_conditions:
+      - and: *compulsory
+
+    commit_message_template: |
+      {{ title }} (#{{ number }})
+
+      {{ body }}
+    merge_method: merge
 
 pull_request_rules:
   - name: Automatic merge on approval
-    conditions:
-      - and: *compulsory
-
-      # Ensure the review is opted in using labels.
-      - label=ready-to-merge
-
+    conditions: []
     actions:
       queue:
-        method: merge
-        name: default
-        commit_message_template: |
-          {{ title }} (#{{ number }})
-
-          {{ body }}
