@@ -1,12 +1,9 @@
-# syntax=docker/dockerfile:1
-
-FROM golang:1.21-alpine AS cexec
+FROM golang:1.24-alpine AS cexec
 RUN apk add --no-cache git ca-certificates gcc linux-headers musl-dev
 COPY . /src
 WORKDIR /src/cexec
-RUN --mount=type=cache,sharing=locked,id=gomod,target=/go/pkg/mod/cache \
-    --mount=type=cache,sharing=locked,id=goroot,target=/root/.cache/go-build \
-    CGO_ENABLED=1 GOOS=linux go build -a -ldflags "-linkmode external -extldflags '-static' -s -w" -o cexec
+RUN go mod download
+RUN CGO_ENABLED=1 GOOS=linux go build -a -ldflags "-linkmode external -extldflags '-static' -s -w" -o cexec
 
 FROM scratch
 COPY --from=cexec /src/cexec/cexec /usr/bin/cexec

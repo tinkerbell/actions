@@ -110,6 +110,13 @@ func (s settings) cexec(ctx context.Context, log *slog.Logger) error {
 	if err := syscall.Mount(s.blockDevice, mountAction, s.filesystemType, 0, ""); err != nil {
 		return fmt.Errorf("error mounting [%s] -> [%s], error: %v", s.blockDevice, mountAction, err)
 	}
+	defer func() {
+		if err := syscall.Unmount(mountAction, 0); err != nil {
+			log.Error("error unmounting device", "source", s.blockDevice, "destination", mountAction, "error", err)
+		} else {
+			log.Info("unmounted device successfully", "source", s.blockDevice, "destination", mountAction)
+		}
+	}()
 	log.Info("mounted device successfully", "source", s.blockDevice, "destination", mountAction)
 
 	if s.chroot != "" {
@@ -133,10 +140,10 @@ func (s settings) cexec(ctx context.Context, log *slog.Logger) error {
 			}
 		}
 
-		if err := s.mountSpecialDirs(); err != nil {
+		if err := s.mountSpecialDirs(mountAction); err != nil {
 			return err
 		}
-		defer s.umountSpecialDirs()
+		defer s.umountSpecialDirs(mountAction)
 		log.Info("Changing root before executing command")
 		exitChroot, err := chroot(mountAction)
 		if err != nil {
@@ -217,28 +224,28 @@ func chroot(path string) (func() error, error) {
 }
 
 // mountSpecialDirs ensures that /dev /proc /sys /etc/resolv.conf exist in the chroot.
-func (s settings) mountSpecialDirs() error {
+func (s settings) mountSpecialDirs(path string) error {
 	// Mount dev
-	dev := filepath.Join(mountAction, "dev")
+	dev := filepath.Join(path, "dev")
 	if err := syscall.Mount("none", dev, "devtmpfs", syscall.MS_RDONLY, ""); err != nil {
 		return fmt.Errorf("couldn't mount /dev to %v: %w", dev, err)
 	}
 
 	// Mount proc
-	proc := filepath.Join(mountAction, "proc")
+	proc := filepath.Join(path, "proc")
 	if err := syscall.Mount("none", proc, "proc", syscall.MS_RDONLY, ""); err != nil {
 		return fmt.Errorf("couldn't mount /proc to %v: %w", proc, err)
 	}
 
 	// Mount sys
-	sys := filepath.Join(mountAction, "sys")
+	sys := filepath.Join(path, "sys")
 	if err := syscall.Mount("none", sys, "sysfs", syscall.MS_RDONLY, ""); err != nil {
 		return fmt.Errorf("couldn't mount /sys to %v: %w", sys, err)
 	}
 
 	if s.updateResolvConf {
 		// Mount /etc/resolv.conf
-		resolv := filepath.Join(mountAction, "etc/resolv.conf")
+		resolv := filepath.Join(path, "etc/resolv.conf")
 		if err := syscall.Mount("/etc/resolv.conf", resolv, "", syscall.MS_BIND|syscall.MS_RDONLY, ""); err != nil {
 			return fmt.Errorf("couldn't mount /etc/resolv.conf to %v: %w", resolv, err)
 		}
@@ -247,28 +254,28 @@ func (s settings) mountSpecialDirs() error {
 	return nil
 }
 
-func (s settings) umountSpecialDirs() error {
+func (s settings) umountSpecialDirs(path string) error {
 	// Unmount dev
-	dev := filepath.Join(mountAction, "dev")
+	dev := filepath.Join(path, "dev")
 	if err := syscall.Unmount(dev, 0); err != nil {
 		return fmt.Errorf("couldn't unmount %v: %w", dev, err)
 	}
 
 	// Unmount proc
-	proc := filepath.Join(mountAction, "proc")
+	proc := filepath.Join(path, "proc")
 	if err := syscall.Unmount(proc, 0); err != nil {
 		return fmt.Errorf("couldn't unmount %v: %w", proc, err)
 	}
 
 	// Unmount sys
-	sys := filepath.Join(mountAction, "sys")
+	sys := filepath.Join(path, "sys")
 	if err := syscall.Unmount(sys, 0); err != nil {
 		return fmt.Errorf("couldn't unmount %v: %w", sys, err)
 	}
 
 	if s.updateResolvConf {
 		// Unmount /etc/resolv.conf
-		resolv := filepath.Join(mountAction, "etc/resolv.conf")
+		resolv := filepath.Join(path, "etc/resolv.conf")
 		if err := syscall.Unmount(resolv, 0); err != nil {
 			return fmt.Errorf("couldn't unmount %v: %w", resolv, err)
 		}
