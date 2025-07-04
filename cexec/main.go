@@ -110,6 +110,13 @@ func (s settings) cexec(ctx context.Context, log *slog.Logger) error {
 	if err := syscall.Mount(s.blockDevice, mountAction, s.filesystemType, 0, ""); err != nil {
 		return fmt.Errorf("error mounting [%s] -> [%s], error: %v", s.blockDevice, mountAction, err)
 	}
+	defer func() {
+		if err := syscall.Unmount(mountAction, 0); err != nil {
+			log.Error("error unmounting device", "source", s.blockDevice, "destination", mountAction, "error", err)
+		} else {
+			log.Info("unmounted device successfully", "source", s.blockDevice, "destination", mountAction)
+		}
+	}()
 	log.Info("mounted device successfully", "source", s.blockDevice, "destination", mountAction)
 
 	if s.chroot != "" {
