@@ -39,6 +39,9 @@ RUN make LDFLAGS="--static"
 FROM alpine:3.18 AS lvm
 RUN apk update && apk add lvm2-static=2.03.21-r3
 
+FROM alpine:3.18 AS xfs
+RUN apk update && apk add xfsprogs
+
 # Build final image
 FROM scratch
 COPY --from=mke2fs /e2fsprogs-1.45.6/misc/mke2fs.static /sbin/mke2fs
@@ -47,4 +50,9 @@ COPY --from=swap util-linux/mkswap /sbin/mkswap
 COPY --from=fattools dosfstools/src/mkfs.fat /sbin/mkfs.fat
 COPY --from=lvm /usr/sbin/lvm.static /sbin/lvm
 COPY --from=rootio /src/rootio/rootio /usr/bin/rootio
+COPY --from=xfs /sbin/mkfs.xfs /sbin/mkfs.xfs
+COPY --from=xfs /sbin/fsck.xfs /sbin/fsck.xfs
+COPY --from=xfs /sbin/xfs_repair /sbin/xfs_repair
+COPY --from=xfs /lib /lib
+COPY --from=xfs /usr/lib /usr/lib
 ENTRYPOINT ["/usr/bin/rootio"]
