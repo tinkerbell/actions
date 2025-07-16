@@ -85,7 +85,13 @@ func main() {
 		logger.Error("Mounting block device", "blockDevice", blockDevice, "mountAction", mountAction, "error", err)
 		os.Exit(1)
 	}
-
+	defer func() {
+		if err := syscall.Unmount(mountAction, 0); err != nil {
+			logger.Error("Error unmounting device", "source", blockDevice, "destination", mountAction, "error", err)
+		} else {
+			logger.Info("Unmounted device successfully", "source", blockDevice, "destination", mountAction)
+		}
+	}()
 	logger.Info("Mounted device successfully", "source", blockDevice, "destination", mountAction)
 
 	if err := recursiveEnsureDir(mountAction, dirPath, newDirMode, fileUID, fileGID); err != nil {
