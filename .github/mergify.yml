@@ -19,8 +19,10 @@ shared:
     # Ensure we're targetting the default branch.
     - base=main
 
-    # Ensure we have adequete reviews.
-    - "#approved-reviews-by>=1"
+    # Ensure we have adequate reviews.
+    - or:
+          - "#approved-reviews-by>=1"
+          - author=jacobweinstock
     - "#changes-requested-reviews-by=0"
 
     # Ensure we aren't being explicitly blocked with a label.
