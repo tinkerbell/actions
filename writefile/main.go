@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -15,7 +16,8 @@ import (
 const mountAction = "/mountAction"
 
 func main() {
-	fmt.Printf("WriteFile - Write file to disk\n------------------------\n")
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	logger.Info("WriteFile - Write file to a disk device")
 
 	blockDevice := os.Getenv("DEST_DISK")
 	filesystemType := os.Getenv("FS_TYPE")
@@ -29,69 +31,81 @@ func main() {
 
 	// Validate inputs
 	if blockDevice == "" {
-		log.Fatalf("No Block Device speified with Environment Variable [DEST_DISK]")
+		logger.Error("No Block Device speified with Environment Variable [DEST_DISK]")
+		os.Exit(1)
 	}
 
 	if !filepath.IsAbs(filePath) {
-		log.Fatal("Provide path must be an absolute path")
+		logger.Error("Provide path must be an absolute path")
+		os.Exit(1)
 	}
 
 	modePrime, err := strconv.ParseUint(mode, 8, 32)
 	if err != nil {
-		log.Fatalf("Could not parse mode: %v", err)
+		logger.Error("Could not parse mode", "error", err)
+		os.Exit(1)
 	}
 
 	fileMode := os.FileMode(modePrime)
 
 	dirModePrime, err := strconv.ParseUint(dirMode, 8, 32)
 	if err != nil {
-		log.Fatalf("Could not parse dirmode: %v", err)
+		logger.Error("Could not parse dirmode", "error", err)
+		os.Exit(1)
 	}
 
 	newDirMode := os.FileMode(dirModePrime)
 
 	fileUID, err := strconv.Atoi(uid)
 	if err != nil {
-		log.Fatalf("Could not parse uid: %v", err)
+		logger.Error("Could not parse uid", "error", err)
+		os.Exit(1)
 	}
 
 	fileGID, err := strconv.Atoi(gid)
 	if err != nil {
-		log.Fatalf("Could not parse gid: %v", err)
+		logger.Error("Could not parse gid", "error", err)
+		os.Exit(1)
 	}
 
 	dirPath, fileName := filepath.Split(filePath)
 	if len(fileName) == 0 {
-		log.Fatal("Provide path must include a file component")
+		logger.Error("Provide path must include a file component")
+		os.Exit(1)
 	}
 
 	// Create the /mountAction mountpoint (no folders exist previously in scratch container)
 	if err := os.Mkdir(mountAction, os.ModeDir); err != nil {
-		log.Fatalf("Error creating the action Mountpoint [%s]", mountAction)
+		logger.Error("Error creating the action Mountpoint", "mountAction", mountAction, "error", err)
+		os.Exit(1)
 	}
 
 	// Mount the block device to the /mountAction point
 	if err := syscall.Mount(blockDevice, mountAction, filesystemType, 0, ""); err != nil {
-		log.Fatalf("Mounting [%s] -> [%s] error [%v]", blockDevice, mountAction, err)
+		logger.Error("Mounting block device", "blockDevice", blockDevice, "mountAction", mountAction, "error", err)
+		os.Exit(1)
 	}
 
-	log.Infof("Mounted [%s] -> [%s]", blockDevice, mountAction)
+	logger.Info("Mounted device successfully", "source", blockDevice, "destination", mountAction)
 
 	if err := recursiveEnsureDir(mountAction, dirPath, newDirMode, fileUID, fileGID); err != nil {
-		log.Fatalf("Failed to ensure directory exists: %v", err)
+		logger.Error("Failed to ensure directory exists", "error", err)
+		os.Exit(1)
 	}
 
 	fqFilePath := filepath.Join(mountAction, filePath)
 	// Write the file to disk
 	if err := os.WriteFile(fqFilePath, []byte(contents), fileMode); err != nil {
-		log.Fatalf("Could not write file %s: %v", filePath, err)
+		logger.Error("Could not write file", "filePath", filePath, "error", err)
+		os.Exit(1)
 	}
 
 	if err := os.Chown(fqFilePath, fileUID, fileGID); err != nil {
-		log.Fatalf("Could not modify ownership of file %s: %v", filePath, err)
+		logger.Error("Could not modify ownership of file", "filePath", filePath, "error", err)
+		os.Exit(1)
 	}
 
-	log.Infof("Successfully wrote file [%s] to device [%s]", filePath, blockDevice)
+	logger.Info("Successfully wrote file", "filePath", filePath, "blockDevice", blockDevice)
 }
 
 func dirExists(mountPath, path string) (bool, error) {
