@@ -225,21 +225,24 @@ func chroot(path string) (func() error, error) {
 
 // mountSpecialDirs ensures that /dev /proc /sys /etc/resolv.conf exist in the chroot.
 func (s settings) mountSpecialDirs(path string) error {
+	if path == "" {
+		return errors.New("mount path cannot be empty")
+	}
 	// Mount dev
 	dev := filepath.Join(path, "dev")
-	if err := syscall.Mount("none", dev, "devtmpfs", syscall.MS_RDONLY, ""); err != nil {
+	if err := syscall.Mount("/dev", dev, "", syscall.MS_BIND, ""); err != nil {
 		return fmt.Errorf("couldn't mount /dev to %v: %w", dev, err)
 	}
 
 	// Mount proc
 	proc := filepath.Join(path, "proc")
-	if err := syscall.Mount("none", proc, "proc", syscall.MS_RDONLY, ""); err != nil {
+	if err := syscall.Mount("/proc", proc, "", syscall.MS_BIND, ""); err != nil {
 		return fmt.Errorf("couldn't mount /proc to %v: %w", proc, err)
 	}
 
 	// Mount sys
 	sys := filepath.Join(path, "sys")
-	if err := syscall.Mount("none", sys, "sysfs", syscall.MS_RDONLY, ""); err != nil {
+	if err := syscall.Mount("/sys", sys, "", syscall.MS_BIND, ""); err != nil {
 		return fmt.Errorf("couldn't mount /sys to %v: %w", sys, err)
 	}
 
