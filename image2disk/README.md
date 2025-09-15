@@ -58,7 +58,7 @@ actions:
 
 ## Supported Compression formats
 
-- bzip2 (`.bzip2`)
+- bzip2 (`.bzip2`, `.bz2`)
 - gzip (`.gz`)
 - xz (`.xz`)
-- xs (`.xs`)
+- zstd (`.zs`, `.zst`)

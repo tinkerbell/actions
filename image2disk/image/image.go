@@ -186,7 +186,7 @@ func findDecompressor(imageURL string, r io.Reader) (io.ReadCloser, error) {
 			return nil, fmt.Errorf("[ERROR] New xz reader: %w", err)
 		}
 		return io.NopCloser(reader), nil
-	case ".zs":
+	case ".zs", ".zst":
 		reader, err := zstd.NewReader(r)
 		if err != nil {
 			return nil, fmt.Errorf("[ERROR] New zs reader: %w", err)
