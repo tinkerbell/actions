@@ -14,7 +14,8 @@ as this will simplify the process of creating a new "artifact" that can be used 
 The below example will push a `debian` image to a registry:
 
 ```
-oras push  192.168.0.173/test/debian:raw.gz --manifest-config /dev/null:application/vnd.acme.rocket.config ./debian.raw.gz --insecure
+# defaults to expected layer media-type of application/vnd.oci.image.layer.v1.tar
+oras push 192.168.0.173/test/debian:raw.gz ./debian.raw.gz --insecure
 ```
 
 We can then use this image by referring too it with teh `IMG_URL` environment variable.
