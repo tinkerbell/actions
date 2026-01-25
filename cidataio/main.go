@@ -92,7 +92,7 @@ func main() {
 
 	// 3. Create the new partition
 	log.Printf("Creating new partition on %s", disk)
-	run("sgdisk", "-n", "0:0:0", "-t", "0:0700", disk)
+	run("sgdisk", "-n", "0:0:+2M", "-t", "0:0700", disk)
 
 	// 4. Force kernel to re-read and find the new partition
 	run("partprobe", disk)
