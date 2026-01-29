@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"strconv"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/tinkerbell/actions/oci2disk/image"
@@ -15,11 +14,10 @@ func main() {
 	img := os.Getenv("IMG_URL")
 	compressedEnv := os.Getenv("COMPRESSED")
 
-	// We can ignore the error and default compressed to false.
-	cmp, _ := strconv.ParseBool(compressedEnv)
+	compression := image.ParseCompression(compressedEnv, img)
 
 	// Write the image to disk
-	err := image.Write(img, disk, cmp)
+	err := image.Write(img, disk, compression)
 	if err != nil {
 		log.Fatal(err)
 	}

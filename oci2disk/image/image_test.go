@@ -42,50 +42,86 @@ func xzReader(t *testing.T) io.Reader {
 	return rdata
 }
 
-func Test_findDecompressor(t *testing.T) {
+func rawReader(t *testing.T) io.Reader {
+	t.Helper()
+	return strings.NewReader("YourDataHere")
+}
+
+func Test_newDecompressor(t *testing.T) {
 	tests := []struct {
-		name     string
-		imageURL string
-		reader   func(*testing.T) io.Reader
-		wantOut  io.Reader
-		wantErr  bool
+		name        string
+		compression Compression
+		reader      func(*testing.T) io.Reader
+		wantErr     bool
 	}{
 		{
-			"tar gzip",
-			"http://192.168.0.1/a.tar.gz",
+			"gzip",
+			CompressionGzip,
 			gzipReader,
-			nil,
 			false,
 		},
 		{
 			"broken gzip",
-			"http://192.168.0.1/a.gz",
+			CompressionGzip,
 			xzReader,
-			nil,
 			true,
 		},
 		{
 			"xz",
-			"http://192.168.0.1/a.xz",
+			CompressionXZ,
 			xzReader,
-			nil,
 			false,
 		},
 		{
-			"unknown",
-			"http://192.168.0.1/a.abc",
-			xzReader,
-			nil,
-			true,
+			"none",
+			CompressionNone,
+			rawReader,
+			false,
 		},
-		// TODO: Add test cases.
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := findDecompressor(tt.imageURL, tt.reader(t))
+			_, err := newDecompressor(tt.compression, tt.reader(t))
 			if (err != nil) != tt.wantErr {
-				t.Errorf("findDecompressor() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("newDecompressor() error = %v, wantErr %v", err, tt.wantErr)
 				return
+			}
+		})
+	}
+}
+
+func TestParseCompression(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		imageURL string
+		expected Compression
+	}{
+		{"gz", "gz", "", CompressionGzip},
+		{"gzip", "gzip", "", CompressionGzip},
+		{"xz", "xz", "", CompressionXZ},
+		{"zstd", "zstd", "", CompressionZstd},
+		{"zst", "zst", "", CompressionZstd},
+		{"zs", "zs", "", CompressionZstd},
+		{"bzip2", "bzip2", "", CompressionBzip2},
+		{"empty", "", "", CompressionNone},
+		{"false", "false", "", CompressionNone},
+		{"unknown", "unknown", "", CompressionNone},
+		// Backward compatibility: true with URL detection
+		{"true with .gz URL", "true", "registry/image:tag.gz", CompressionGzip},
+		{"true with .gzip URL", "true", "registry/image:tag.gzip", CompressionGzip},
+		{"true with .xz URL", "true", "registry/image:tag.xz", CompressionXZ},
+		{"true with .zstd URL", "true", "registry/image:tag.zstd", CompressionZstd},
+		{"true with .zst URL", "true", "registry/image:tag.zst", CompressionZstd},
+		{"true with .zs URL", "true", "registry/image:tag.zs", CompressionZstd},
+		{"true with .bzip2 URL", "true", "registry/image:tag.bzip2", CompressionBzip2},
+		{"true with no extension", "true", "registry/image:latest", CompressionNone},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := ParseCompression(tt.input, tt.imageURL)
+			if got != tt.expected {
+				t.Errorf("ParseCompression(%q, %q) = %v, want %v", tt.input, tt.imageURL, got, tt.expected)
 			}
 		})
 	}
