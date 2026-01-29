@@ -46,7 +46,7 @@ const (
 )
 
 // ParseCompression parses a compression string into a Compression type.
-// Accepts: gz, gzip, xz, zstd, zst, bzip2
+// Accepts: gz, gzip, xz, zstd, zst, zs, bzip2
 // For backward compatibility: "true" detects compression from the imageURL extension.
 // Empty string or "false" returns CompressionNone.
 func ParseCompression(s string, imageURL string) Compression {
@@ -71,14 +71,14 @@ func ParseCompression(s string, imageURL string) Compression {
 // This provides backward compatibility with COMPRESSED=true.
 func detectCompressionFromURL(imageURL string) Compression {
 	switch filepath.Ext(imageURL) {
-	case ".bzip2":
-		return CompressionBzip2
-	case ".gz":
+	case ".gz", ".gzip":
 		return CompressionGzip
 	case ".xz":
 		return CompressionXZ
 	case ".zstd", ".zst", ".zs":
 		return CompressionZstd
+	case ".bzip2":
+		return CompressionBzip2
 	default:
 		return CompressionNone
 	}
