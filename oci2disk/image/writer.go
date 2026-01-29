@@ -13,22 +13,13 @@ import (
 
 // DiskImageStore -.
 type DiskImageStore struct {
-	sourceImage string
+	compression Compression
 	writer      io.Writer
-	compressed  bool
 }
 
 // NewDiskImageStore -.
-func NewDiskImageStore(sourceImage string, compressed bool, w io.Writer) DiskImageStore {
-	// we have to reprocess the opts to find the blocksize
-	// var wOpts := content.DefaultWriterOpts()
-	// for _, opt := range opts {
-	// 	if err := opt(&wOpts); err != nil {
-	// 		// TODO: we probably should handle errors here
-	// 		continueå
-	// 	}
-	// }
-	return DiskImageStore{sourceImage: sourceImage, writer: w, compressed: compressed}
+func NewDiskImageStore(compression Compression, w io.Writer) DiskImageStore {
+	return DiskImageStore{compression: compression, writer: w}
 }
 
 // Writer get a writer.
@@ -124,25 +115,17 @@ func (d DiskImageStore) Writer(_ context.Context, opts ...ctrcontent.WriterOpt) 
 	if desc.Annotations["org.opencontainers.image.title"] == "" {
 		return content.NewIoContentWriter(io.Discard, content.WithOutputHash(desc.Digest)), nil
 	}
-	if !d.compressed {
-		// Without compression send raw output
-		f = func(r io.Reader, w io.Writer, done chan<- error) {
-			var err error
-			b := make([]byte, wOpts.Blocksize)
-			_, err = io.CopyBuffer(w, r, b)
-			done <- err
+
+	compression := d.compression
+	f = func(r io.Reader, w io.Writer, done chan<- error) {
+		decompressReader, err := newDecompressor(compression, r)
+		if err != nil {
+			log.Fatalf(err.Error()) //nolint:revive // this is fine
 		}
-	} else {
-		f = func(r io.Reader, w io.Writer, done chan<- error) {
-			decompressReader, err := findDecompressor(d.sourceImage, r)
-			if err != nil {
-				log.Fatalf(err.Error()) //nolint:revive // this is fine
-			}
-			defer decompressReader.Close()
-			b := make([]byte, wOpts.Blocksize)
-			_, err = io.CopyBuffer(w, decompressReader, b)
-			done <- err
-		}
+		defer decompressReader.Close()
+		b := make([]byte, wOpts.Blocksize)
+		_, err = io.CopyBuffer(w, decompressReader, b)
+		done <- err
 	}
 	writerOpts := []content.WriterOpt{}
 	return content.NewPassthroughWriter(di, f, writerOpts...), nil
