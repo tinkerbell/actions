@@ -52,6 +52,11 @@ func Write(sourceImage, destinationDevice string, compressed bool) error {
 
 	resolver := docker.NewResolver(opts)
 
+	// Check that the destination device exists before attempting to open it.
+	if _, err := os.Stat(destinationDevice); err != nil {
+		return fmt.Errorf("destination device %s does not exist", destinationDevice)
+	}
+
 	fileOut, err := os.OpenFile(destinationDevice, os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
 		return err
