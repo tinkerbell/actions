@@ -18,7 +18,7 @@ The below example will push a `debian` image to a registry:
 oras push 192.168.0.173/test/debian:raw.gz ./debian.raw.gz --insecure
 ```
 
-We can then use this image by referring too it with teh `IMG_URL` environment variable.
+We can then use this image by referring to it with the `IMG_URL` environment variable.
 
 ```yaml
 actions:
@@ -28,12 +28,9 @@ actions:
     environment:
       DEST_DISK: /dev/nvme0n1
       IMG_URL: "192.168.0.173/test/debian:raw.gz"
-      COMPRESSED: true
 ```
 
-## Compression format supported:
+## Environment Variables:
 
-- bzip2 (`.bzip2`)
-- gzip (`.gz`)
-- xz (`.xz`)
-- xs (`.xs`)
+- `DEST_DISK`: Target block device to write the image to (required)
+- `IMG_URL`: OCI image reference (required)

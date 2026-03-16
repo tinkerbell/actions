@@ -45,44 +45,64 @@ func xzReader(t *testing.T) io.Reader {
 func Test_findDecompressor(t *testing.T) {
 	tests := []struct {
 		name     string
-		imageURL string
+		filename string
 		reader   func(*testing.T) io.Reader
 		wantOut  io.Reader
 		wantErr  bool
 	}{
 		{
-			"tar gzip",
-			"http://192.168.0.1/a.tar.gz",
+			"gzip",
+			"image.raw.gz",
 			gzipReader,
 			nil,
 			false,
 		},
 		{
 			"broken gzip",
-			"http://192.168.0.1/a.gz",
+			"image.raw.gz",
 			xzReader,
 			nil,
 			true,
 		},
 		{
 			"xz",
-			"http://192.168.0.1/a.xz",
+			"image.raw.xz",
 			xzReader,
 			nil,
 			false,
 		},
 		{
-			"unknown",
-			"http://192.168.0.1/a.abc",
+			"unknown extension",
+			"image.raw.abc",
 			xzReader,
 			nil,
 			true,
 		},
-		// TODO: Add test cases.
+		{
+			"no extension",
+			"image.raw",
+			gzipReader,
+			nil,
+			true,
+		},
+		{
+			"bzip2",
+			"image.raw.bz2",
+			gzipReader,
+			nil,
+			false,
+		},
+		{
+			"zstd .zst",
+			"image.raw.zst",
+			gzipReader,
+			nil,
+			false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := findDecompressor(tt.imageURL, tt.reader(t))
+			_, err := findDecompressor(tt.filename, tt.reader(t))
 			if (err != nil) != tt.wantErr {
 				t.Errorf("findDecompressor() error = %v, wantErr %v", err, tt.wantErr)
 				return

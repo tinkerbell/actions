@@ -9,13 +9,13 @@ SHELL       := bash
 .SECONDEXPANSION:
 
 # Define the list of actions that can be built.
-ACTIONS := archive2disk cexec grub2disk image2disk kexec oci2disk qemuimg2disk rootio slurp syslinux writefile
+ACTIONS := archive2disk cidataio cexec grub2disk image2disk kexec oci2disk qemuimg2disk rootio slurp syslinux writefile ubootenv
 
 # Define the commit for tagging images.
 GIT_COMMIT := $(shell git rev-parse HEAD)
 
 # Define container registry details.
-CONTAINER_REPOSITORY := quay.io/tinkerbell/actions
+CONTAINER_REPOSITORY ?= quay.io/tinkerbell/actions
 
 include Rules.mk
 
@@ -28,7 +28,7 @@ help: ## Print this help
 
 .PHONY: $(ACTIONS)
 $(ACTIONS): ## Build a specific action image.
-	docker buildx build --platform linux/amd64 --load -t  $@:latest -f ./$@/Dockerfile .
+	docker buildx build --platform linux/arm64 --load -t  $@:latest -f ./$@/Dockerfile .
 
 .PHONY: images
 images: ## Build all action images.

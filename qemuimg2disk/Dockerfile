@@ -40,7 +40,7 @@ RUN sed -e 's|-lbrotlidec|-lbrotlicommon-static -lbrotlidec-static -lbrotlienc-s
 RUN make -j$(nproc) qemu-img
 RUN cp build/qemu-img /bin/qemu-img
 
-FROM golang:1.21-alpine AS qemuimg2disk
+FROM golang:1.23-alpine AS qemuimg2disk
 COPY . /src
 WORKDIR /src/qemuimg2disk
 RUN go mod tidy

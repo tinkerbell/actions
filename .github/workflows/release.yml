@@ -5,34 +5,62 @@ on:
       - "main"
   workflow_dispatch: {}
 
-env:
-  REGISTRY: quay.io
-
 jobs:
   build:
     name: Release
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        action: [archive2disk,cexec,grub2disk,image2disk,kexec,oci2disk,qemuimg2disk,rootio,slurp,syslinux,writefile]
+        action:
+          [
+            archive2disk,
+            cexec,
+            cidataio,
+            grub2disk,
+            image2disk,
+            kexec,
+            oci2disk,
+            qemuimg2disk,
+            rootio,
+            slurp,
+            syslinux,
+            writefile,
+          ]
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set Registry
+        id: registry
+        run: |
+          if [ -n "${{ secrets.QUAY_USERNAME }}" ] && [ -n "${{ secrets.QUAY_PASSWORD }}" ]; then
+            echo "registry=quay.io" >> $GITHUB_OUTPUT
+          else
+            echo "registry=ghcr.io" >> $GITHUB_OUTPUT
+          fi
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
-      
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Login to Quay.io
+      - name: Login to Registry
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ secrets.QUAY_USERNAME }}
-          password: ${{ secrets.QUAY_PASSWORD }}
+          registry: ${{ steps.registry.outputs.registry }}
+          username: ${{ secrets.QUAY_USERNAME || github.actor }}
+          password: ${{ secrets.QUAY_PASSWORD || github.token }}
 
       - name: Prepare Release
         run: make prepare-release
+        env:
+          CONTAINER_REPOSITORY: ${{ steps.registry.outputs.registry }}/${{ github.repository }}
 
       - name: Run Release
         run: make release-${{ matrix.action }} -j $(nprox)
+        env:
+          CONTAINER_REPOSITORY: ${{ steps.registry.outputs.registry }}/${{ github.repository }}

@@ -19,7 +19,7 @@ RUN make LDFLAGS="-all-static" swapon
 RUN make LDFLAGS="-all-static" mkswap
 
 # Build rootio
-FROM golang:1.21-alpine AS rootio
+FROM golang:1.23-alpine AS rootio
 RUN apk add --no-cache git ca-certificates gcc linux-headers musl-dev
 COPY . /src
 WORKDIR /src/rootio

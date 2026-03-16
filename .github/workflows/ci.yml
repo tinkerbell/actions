@@ -13,7 +13,21 @@ jobs:
     strategy:
       matrix:
         platform: [amd64]
-        action: [archive2disk,cexec,grub2disk,image2disk,kexec,oci2disk,qemuimg2disk,rootio,slurp,syslinux,writefile]
+        action:
+          [
+            archive2disk,
+            cexec,
+            cidataio,
+            grub2disk,
+            image2disk,
+            kexec,
+            oci2disk,
+            qemuimg2disk,
+            rootio,
+            slurp,
+            syslinux,
+            writefile,
+          ]
     steps:
       - uses: actions/checkout@v4
 
