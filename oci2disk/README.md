@@ -29,6 +29,9 @@ actions:
       DEST_DISK: /dev/nvme0n1
       IMG_URL: "192.168.0.173/test/debian:raw.gz"
       COMPRESSED: true
+      # optional fields for registry authentication
+      REGISTRY_USERNAME: "foo"
+      REGISTRY_PASSWORD: "bar
 ```
 
 ## Compression format supported:

@@ -38,7 +38,7 @@ func (wc *WriteCounter) Write(p []byte) (int, error) {
 // Write will pull an image and write it to local storage device
 // with compress set to true it will use gzip compression to expand the data before
 // writing to an underlying device.
-func Write(sourceImage, destinationDevice string, compressed bool) error {
+func Write(sourceImage, destinationDevice string, compressed bool, registryUsername, registryPassword string) error {
 	ctx := context.Background()
 	client := http.DefaultClient
 	opts := docker.ResolverOptions{}
@@ -49,6 +49,13 @@ func Write(sourceImage, destinationDevice string, compressed bool) error {
 	}
 
 	opts.Client = client
+
+	if registryUsername != "" && registryPassword != "" {
+		log.Infof("Registry credentials provided, using authenticated pull")
+		opts.Credentials = func(hostName string) (string, string, error) {
+			return registryUsername, registryPassword, nil
+		}
+	}
 
 	resolver := docker.NewResolver(opts)
 

@@ -14,12 +14,14 @@ func main() {
 	disk := os.Getenv("DEST_DISK")
 	img := os.Getenv("IMG_URL")
 	compressedEnv := os.Getenv("COMPRESSED")
+	registryUsername := os.Getenv("REGISTRY_USERNAME")
+	registryPassword := os.Getenv("REGISTRY_PASSWORD")
 
 	// We can ignore the error and default compressed to false.
 	cmp, _ := strconv.ParseBool(compressedEnv)
 
 	// Write the image to disk
-	err := image.Write(img, disk, cmp)
+	err := image.Write(img, disk, cmp, registryUsername, registryPassword)
 	if err != nil {
 		log.Fatal(err)
 	}
