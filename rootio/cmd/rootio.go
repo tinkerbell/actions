@@ -86,6 +86,17 @@ var rootioPartition = &cobra.Command{
 	Use:   "partition",
 	Short: "Use rootio to partition disks based upon metadata",
 	Run: func(_ *cobra.Command, _ []string) {
+		for _, r := range metadata.Instance.Storage.RAID {
+			if err := storage.StopRAID(r.Name); err != nil {
+				log.Error(err)
+			}
+			for _, d := range append(r.Devices, r.Spare...) {
+				if err := storage.ZeroSuperblock(d); err != nil {
+					log.Error(err)
+				}
+			}
+		}
+
 		for disk := range metadata.Instance.Storage.Disks {
 			err := storage.VerifyBlockDevice(metadata.Instance.Storage.Disks[disk].Device)
 			if err != nil {
@@ -114,6 +125,16 @@ var rootioPartition = &cobra.Command{
 			}
 		}
 
+		if len(metadata.Instance.Storage.RAID) > 0 {
+			log.Infoln("Creating RAID arrays")
+		}
+
+		for _, r := range metadata.Instance.Storage.RAID {
+			if err := storage.CreateRAID(r); err != nil {
+				log.Error(err)
+			}
+		}
+
 		if len(metadata.Instance.Storage.VolumeGroups) > 0 {
 			log.Infoln("Creating Volume Groups")
 		}
@@ -130,6 +151,17 @@ var rootioWipe = &cobra.Command{
 	Use:   "wipe",
 	Short: "Use rootio to wipe disks based upon metadata",
 	Run: func(_ *cobra.Command, _ []string) {
+		for _, r := range metadata.Instance.Storage.RAID {
+			if err := storage.StopRAID(r.Name); err != nil {
+				log.Error(err)
+			}
+			for _, d := range append(r.Devices, r.Spare...) {
+				if err := storage.ZeroSuperblock(d); err != nil {
+					log.Error(err)
+				}
+			}
+		}
+
 		for disk := range metadata.Instance.Storage.Disks {
 			err := storage.VerifyBlockDevice(metadata.Instance.Storage.Disks[disk].Device)
 			if err != nil {

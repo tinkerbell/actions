@@ -34,6 +34,7 @@ type Instance struct {
 	Storage struct {
 		Disks        []Disk        `json:"disks"`
 		Filesystems  []Filesystem  `json:"filesystems"`
+		RAID         []RAID        `json:"raid"`
 		VolumeGroups []VolumeGroup `json:"volume_groups"`
 	} `json:"storage"`
 }

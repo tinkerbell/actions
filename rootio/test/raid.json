@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "instance": {
+      "crypted_root_password": "$6$password$u/Cn/tSGIYFtqv4AwZ9tjP1gMxjlvLHt3KO8zbK6ZnMn8anv6tSCo.XidktlU0MdRjWe3./lahF9FTMcnja9q.",
+      "hostname": "server001",
+      "operating_system_version": {
+        "distro": "debian",
+        "os_codename": "bookworm",
+        "os_slug": "debian_12",
+        "version": "12"
+      },
+      "storage": {
+        "disks": [
+          {
+            "device": "/dev/sdb",
+            "wipe_table": true,
+            "partitions": [
+              {"label": "BIOS",  "number": 1, "size": 4096},
+              {"label": "LINUX", "number": 2, "size": 0}
+            ]
+          },
+          {
+            "device": "/dev/sdc",
+            "wipe_table": true,
+            "partitions": [
+              {"label": "BIOS",  "number": 1, "size": 4096},
+              {"label": "LINUX", "number": 2, "size": 0}
+            ]
+          }
+        ],
+        "raid": [
+          {
+            "name": "md0",
+            "level": "1",
+            "devices": ["/dev/sdb2", "/dev/sdc2"]
+          }
+        ],
+        "filesystems": [
+          {
+            "mount": {
+              "create": {"options": ["-L", "ROOT"]},
+              "device": "/dev/md0",
+              "format": "ext4",
+              "point": "/"
+            }
+          }
+        ]
+      }
+    }
+  }
+}
