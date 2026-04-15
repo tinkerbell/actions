@@ -7,27 +7,10 @@ import (
 	"os"
 	"path/filepath"
 
-	// See https://github.com/opencontainers/go-digest#usage
-	_ "crypto/sha256"
-	_ "crypto/sha512"
-	"fmt"
-
-	digest "github.com/opencontainers/go-digest"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
 
-func extractTarDirectory(root string, checksum string, r io.Reader) error {
-	var verifier digest.Verifier
-	if checksum != "" {
-		log.Infof("checksum validation during untar [%s]", checksum)
-		dd, err := digest.Parse(checksum)
-		if err != nil {
-			return fmt.Errorf("failed to parse digest - %w", err)
-		}
-		verifier = dd.Verifier()
-		r = io.TeeReader(r, verifier)
-	}
+func extractTarDirectory(root string, r io.Reader) error {
 	hardLinks := make(map[string]string)
 	tr := tar.NewReader(r)
 	for {
@@ -92,19 +75,14 @@ func extractTarDirectory(root string, checksum string, r io.Reader) error {
 		}
 	}
 
-	if verifier != nil && !verifier.Verified() {
-		return errors.New("digest mismatch")
-	}
-
 	return nil
 }
 
-func extractTarGzip(root string, checksum string, g io.Reader) error {
+func extractTarGzip(root string, g io.Reader) error {
 	zr, err := gzip.NewReader(g)
 	if err != nil {
 		return err
 	}
 	defer zr.Close()
-	var r io.Reader = zr
-	return extractTarDirectory(root, checksum, r)
+	return extractTarDirectory(root, zr)
 }

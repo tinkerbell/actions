@@ -19,8 +19,11 @@ Archive types supported:
 Environment Variables:
   - ARCHIVE_URL (Required) Specify the compressed file URL
   - ARCHIVE_TYPE (Required) Specify the type of archive.  Supported archive types are TAR and TARGZ
-  - TARFILE_CHECKSUM (Required, overridable) Specify the checksum of the TAR file
-    The format for specifying the checksum is algorithm:hash. See examples below, more informaiton can be found at github.com/opencontainers/go-digest
+  - TARFILE_CHECKSUM (Required, overridable) Specify the checksum of the downloaded archive.
+    The format is `algorithm:hash` (e.g. `sha256:...`). The hash is verified against the raw
+    bytes of the archive as downloaded over HTTP, so it matches the output of running
+    `sha256sum file.tar.gz` (or `sha512sum`) on the archive locally. See examples below; more
+    information can be found at github.com/opencontainers/go-digest
   - INSECURE_NO_TARFILE_CHECKSUM_VERIFICATION (optional) Set to true to skip the check for the TARFILE_CHECKSUM environment variable
   - DEST_DISK (Required) Specify the block device that will get mounted and where the archive will uncompress
   - FS_TYPE (Required) Specify the file system type of DEST_DISK
