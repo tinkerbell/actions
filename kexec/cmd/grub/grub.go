@@ -9,7 +9,7 @@ import (
 type Config struct {
 	Name          string   `json:"name,omitempty"`
 	Kernel        string   `json:"kernel"`
-	Initramfs     string   `json:"initramfs,omitempty"`
+	Initramfs     []string `json:"initramfs,omitempty"`
 	KernelArgs    string   `json:"kernel_args,omitempty"`
 	Multiboot     string   `json:"multiboot_kernel,omitempty"`
 	MultibootArgs string   `json:"multiboot_args,omitempty"`
@@ -53,7 +53,7 @@ func ParseGrubCfg(grubcfg string) (configs []Config, defaultConfig int64) {
 			// if a "menuentry", start a new boot config
 			if cfg != nil {
 				// save the previous boot config, if any
-				if cfg.Kernel != "" && cfg.Initramfs != "" {
+				if cfg.Kernel != "" && len(cfg.Initramfs) > 0 {
 					// only consider valid boot configs, i.e. the ones that have
 					// both kernel and initramfs
 					configs = append(configs, *cfg)
@@ -84,8 +84,7 @@ func ParseGrubCfg(grubcfg string) (configs []Config, defaultConfig int64) {
 				cfg.Kernel = kernel
 				cfg.KernelArgs = cmdline
 			case "initrd", "initrd16", "initrdefi":
-				initrd := sline[1]
-				cfg.Initramfs = initrd
+				cfg.Initramfs = sline[1:]
 			case "multiboot", "multiboot2":
 				multiboot := sline[1]
 				cmdline := strings.Join(sline[2:], " ")
@@ -106,7 +105,7 @@ func ParseGrubCfg(grubcfg string) (configs []Config, defaultConfig int64) {
 	}
 
 	// append last kernel config if it wasn't already
-	if inMenuEntry && cfg.Kernel != "" && cfg.Initramfs != "" {
+	if inMenuEntry && cfg.Kernel != "" && len(cfg.Initramfs) > 0 {
 		configs = append(configs, *cfg)
 	}
 	return configs, defaultConfig
