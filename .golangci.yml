@@ -1,4 +1,7 @@
 version: "2"
+run:
+  # The default runtime timeout is 1m, which doesn't work well on GitHub Actions.
+  timeout: 4m
 linters:
   default: none
   enable:

@@ -4,7 +4,7 @@ FROM base AS build-amd64
 RUN apk add --no-cache grub grub-bios ca-certificates
 
 FROM base AS build-arm64
-RUN apk add --no-cache grub git ca-certificates gcc musl-dev
+RUN apk add --no-cache grub ca-certificates
 
 FROM build-${TARGETARCH} AS grub2disk
 WORKDIR /src
