@@ -18,7 +18,7 @@ The below example will push a `debian` image to a registry:
 oras push 192.168.0.173/test/debian:raw.gz ./debian.raw.gz --insecure
 ```
 
-We can then use this image by referring too it with teh `IMG_URL` environment variable.
+We can then use this image by referring to it with the `IMG_URL` environment variable.
 
 ```yaml
 actions:
@@ -31,7 +31,9 @@ actions:
       COMPRESSED: true
       # optional fields for registry authentication
       REGISTRY_USERNAME: "foo"
-      REGISTRY_PASSWORD: "bar
+      REGISTRY_PASSWORD: "bar"
+      # optional field to skip TLS verification (defaults to false)
+      SKIP_VERIFY: "true"
 ```
 
 ## Compression format supported:

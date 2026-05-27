@@ -3,6 +3,7 @@ package archive
 // This package handles the pulling and management of images
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"path/filepath"
@@ -14,7 +15,7 @@ import (
 
 // Write will pull an image and write it to local storage device image must be a tar file or tar.gz file as set by archiveType.
 func Write(archiveURL, archiveType, path string, checksum string, httpTimeoutVal int) error {
-	req, err := http.NewRequest("GET", archiveURL, nil)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, archiveURL, nil)
 	if err != nil {
 		return err
 	}

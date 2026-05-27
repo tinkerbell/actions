@@ -3,6 +3,7 @@ package archive
 import (
 	"archive/tar"
 	"compress/gzip"
+	"errors"
 	"io"
 	"os"
 	"path/filepath"
@@ -13,7 +14,6 @@ import (
 	"fmt"
 
 	digest "github.com/opencontainers/go-digest"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -32,7 +32,7 @@ func extractTarDirectory(root string, checksum string, r io.Reader) error {
 	tr := tar.NewReader(r)
 	for {
 		header, err := tr.Next()
-		if err == io.EOF { /*end of file reached */
+		if errors.Is(err, io.EOF) { /*end of file reached */
 			break
 		} else if err != nil {
 			return err
@@ -64,7 +64,9 @@ func extractTarDirectory(root string, checksum string, r io.Reader) error {
 		case tar.TypeReg:
 			// Ensure any missing directories are created
 			if _, err := os.Stat(filepath.Dir(path)); os.IsNotExist(err) {
-				os.MkdirAll(filepath.Dir(path), 0o755)
+				if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+					return fmt.Errorf("failed to create parent directory for [%s]: %w", path, err)
+				}
 			}
 			log.Infof("processing file [%s]", path)
 			file, err := os.OpenFile(path, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, info.Mode())

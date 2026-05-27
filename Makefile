@@ -15,7 +15,7 @@ ACTIONS := archive2disk cexec grub2disk image2disk kexec oci2disk qemuimg2disk r
 GIT_COMMIT := $(shell git rev-parse HEAD)
 
 # Define container registry details.
-CONTAINER_REPOSITORY := quay.io/tinkerbell/actions
+CONTAINER_REPOSITORY ?= quay.io/tinkerbell/actions
 
 include Rules.mk
 

@@ -20,6 +20,9 @@ func VerifyBlockDevice(device string) error {
 	if os.IsNotExist(err) {
 		return fmt.Errorf("%s does not exist", device)
 	}
+	if err != nil {
+		return fmt.Errorf("failed to stat %s: %w", device, err)
+	}
 	if !isBlockDevice(&d) {
 		return fmt.Errorf("%s is not a block device", device)
 	}
@@ -30,16 +33,24 @@ func VerifyBlockDevice(device string) error {
 func isBlockDevice(d *os.FileInfo) bool {
 	// this probably shouldn't be so hard
 	// but d.Mode()&os.ModeDevice == 0 doesn't work as expected
-	mode := (*d).Sys().(*syscall.Stat_t).Mode
-	return (mode & syscall.S_IFMT) == syscall.S_IFBLK
+	stat, ok := (*d).Sys().(*syscall.Stat_t)
+	if !ok {
+		return false
+	}
+	return (stat.Mode & syscall.S_IFMT) == syscall.S_IFBLK
 }
 
 // ExamineDisk will look at the configuration of a disk.
-func ExamineDisk(d Disk) error {
+func ExamineDisk(d Disk) (err error) {
 	disk, err := diskfs.Open(d.Device)
 	if err != nil {
 		return err
 	}
+	defer func() {
+		if cerr := disk.Close(); cerr != nil && err == nil {
+			err = cerr
+		}
+	}()
 	log.Infof("Examining disk [%s]", d.Device)
 	log.Infof("Disk Size [%dMB]", disk.Size/1024/1024)
 
@@ -49,20 +60,19 @@ func ExamineDisk(d Disk) error {
 	}
 	partitions := p.GetPartitions()
 	log.Infof("Found [%d] partitions", len(partitions))
-	err = disk.File.Sync()
+	f, err := disk.Backend.Sys()
 	if err != nil {
+		return err
+	}
+	if err := f.Sync(); err != nil {
 		return err
 	}
 	time.Sleep(time.Second * 2)
-	err = disk.File.Close()
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
 // Partition will create the partitions and write them to the disk.
-func Partition(d Disk) error {
+func Partition(d Disk) (err error) {
 	table := &gpt.Table{
 		ProtectiveMBR:      true,
 		LogicalSectorSize:  sectorSize,
@@ -72,6 +82,11 @@ func Partition(d Disk) error {
 	if err != nil {
 		return err
 	}
+	defer func() {
+		if cerr := disk.Close(); cerr != nil && err == nil {
+			err = cerr
+		}
+	}()
 
 	// Build the table
 	partitionNumber := 1
@@ -117,19 +132,15 @@ func Partition(d Disk) error {
 		return err
 	}
 	log.Infoln("Flushing writes to new partition")
-	err = disk.File.Sync()
+	f, err := disk.Backend.Sys()
 	if err != nil {
 		return err
 	}
-	err = disk.File.Close()
-	if err != nil {
-		return err
-	}
-	return nil
+	return f.Sync()
 }
 
 // MBRPartition will create the partitions and write them to the disk.
-func MBRPartition(d Disk) error {
+func MBRPartition(d Disk) (err error) {
 	table := &mbr.Table{
 		LogicalSectorSize:  sectorSize,
 		PhysicalSectorSize: sectorSize,
@@ -138,6 +149,11 @@ func MBRPartition(d Disk) error {
 	if err != nil {
 		return err
 	}
+	defer func() {
+		if cerr := disk.Close(); cerr != nil && err == nil {
+			err = cerr
+		}
+	}()
 
 	// Build the table
 	partitionNumber := 1
@@ -188,13 +204,9 @@ func MBRPartition(d Disk) error {
 		return err
 	}
 	log.Infoln("Flushing writes to new partition")
-	err = disk.File.Sync()
+	f, err := disk.Backend.Sys()
 	if err != nil {
 		return err
 	}
-	err = disk.File.Close()
-	if err != nil {
-		return err
-	}
-	return nil
+	return f.Sync()
 }

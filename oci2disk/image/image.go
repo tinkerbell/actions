@@ -16,11 +16,12 @@ import (
 
 	"github.com/containerd/containerd/reference"
 	"github.com/containerd/containerd/remotes/docker"
-	"github.com/deislabs/oras/pkg/oras"
 	"github.com/klauspost/compress/zstd"
 	log "github.com/sirupsen/logrus"
 	"github.com/ulikunitz/xz"
 	"golang.org/x/sys/unix"
+
+	"oras.land/oras-go/pkg/oras"
 )
 
 // WriteCounter counts the number of bytes written to it. It implements to the io.Writer interface
@@ -38,26 +39,31 @@ func (wc *WriteCounter) Write(p []byte) (int, error) {
 // Write will pull an image and write it to local storage device
 // with compress set to true it will use gzip compression to expand the data before
 // writing to an underlying device.
-func Write(sourceImage, destinationDevice string, compressed bool, registryUsername, registryPassword string) error {
+func Write(sourceImage, destinationDevice string, compressed bool, registryUsername, registryPassword string, skipVerify bool) error {
 	ctx := context.Background()
-	client := http.DefaultClient
-	opts := docker.ResolverOptions{}
-	client.Transport = &http.Transport{
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: true, //nolint:gosec // GA402 TODO
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: skipVerify, //nolint:gosec // This is intentional: the top-level setting defaults to false, but this option is configurable to provide flexibility when needed.
+			},
 		},
 	}
 
-	opts.Client = client
-
+	registryOpts := []docker.RegistryOpt{docker.WithClient(client)}
 	if registryUsername != "" && registryPassword != "" {
 		log.Infof("Registry credentials provided, using authenticated pull")
-		opts.Credentials = func(hostName string) (string, string, error) {
-			return registryUsername, registryPassword, nil
-		}
+		authorizer := docker.NewDockerAuthorizer(
+			docker.WithAuthClient(client),
+			docker.WithAuthCreds(func(_ string) (string, string, error) {
+				return registryUsername, registryPassword, nil
+			}),
+		)
+		registryOpts = append(registryOpts, docker.WithAuthorizer(authorizer))
 	}
 
-	resolver := docker.NewResolver(opts)
+	resolver := docker.NewResolver(docker.ResolverOptions{
+		Hosts: docker.ConfigureDefaultRegistries(registryOpts...),
+	})
 
 	fileOut, err := os.OpenFile(destinationDevice, os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
@@ -70,11 +76,11 @@ func Write(sourceImage, destinationDevice string, compressed bool, registryUsern
 	f := NewDiskImageStore(sourceImage, compressed, fileOut)
 
 	log.Infof("Beginning write of image [%s] to disk [%s]", filepath.Base(sourceImage), destinationDevice)
-	pullOpts := []oras.PullOpt{
+	copyOpts := []oras.CopyOpt{
 		oras.WithAllowedMediaTypes(allowedMediaTypes),
 		oras.WithPullStatusTrack(os.Stdout),
 	}
-	_, _, err = oras.Pull(ctx, resolver, sourceImage, f, pullOpts...)
+	_, err = oras.Copy(ctx, resolver, sourceImage, f, "", copyOpts...)
 	if err != nil {
 		if errors.Is(err, reference.ErrObjectRequired) {
 			return fmt.Errorf("image reference format is invalid. Please specify <name:tag|name@digest>")
