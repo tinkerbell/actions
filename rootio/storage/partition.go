@@ -35,11 +35,16 @@ func isBlockDevice(d *os.FileInfo) bool {
 }
 
 // ExamineDisk will look at the configuration of a disk.
-func ExamineDisk(d Disk) error {
+func ExamineDisk(d Disk) (err error) {
 	disk, err := diskfs.Open(d.Device)
 	if err != nil {
 		return err
 	}
+	defer func() {
+		if cerr := disk.Close(); cerr != nil && err == nil {
+			err = cerr
+		}
+	}()
 	log.Infof("Examining disk [%s]", d.Device)
 	log.Infof("Disk Size [%dMB]", disk.Size/1024/1024)
 
@@ -57,14 +62,11 @@ func ExamineDisk(d Disk) error {
 		return err
 	}
 	time.Sleep(time.Second * 2)
-	if err := disk.Close(); err != nil {
-		return err
-	}
 	return nil
 }
 
 // Partition will create the partitions and write them to the disk.
-func Partition(d Disk) error {
+func Partition(d Disk) (err error) {
 	table := &gpt.Table{
 		ProtectiveMBR:      true,
 		LogicalSectorSize:  sectorSize,
@@ -74,6 +76,11 @@ func Partition(d Disk) error {
 	if err != nil {
 		return err
 	}
+	defer func() {
+		if cerr := disk.Close(); cerr != nil && err == nil {
+			err = cerr
+		}
+	}()
 
 	// Build the table
 	partitionNumber := 1
@@ -126,14 +133,11 @@ func Partition(d Disk) error {
 	if err := f.Sync(); err != nil {
 		return err
 	}
-	if err := disk.Close(); err != nil {
-		return err
-	}
 	return nil
 }
 
 // MBRPartition will create the partitions and write them to the disk.
-func MBRPartition(d Disk) error {
+func MBRPartition(d Disk) (err error) {
 	table := &mbr.Table{
 		LogicalSectorSize:  sectorSize,
 		PhysicalSectorSize: sectorSize,
@@ -142,6 +146,11 @@ func MBRPartition(d Disk) error {
 	if err != nil {
 		return err
 	}
+	defer func() {
+		if cerr := disk.Close(); cerr != nil && err == nil {
+			err = cerr
+		}
+	}()
 
 	// Build the table
 	partitionNumber := 1
@@ -197,9 +206,6 @@ func MBRPartition(d Disk) error {
 		return err
 	}
 	if err := f.Sync(); err != nil {
-		return err
-	}
-	if err := disk.Close(); err != nil {
 		return err
 	}
 	return nil

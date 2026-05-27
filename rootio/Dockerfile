@@ -18,7 +18,7 @@ RUN make LDFLAGS="-all-static" mkswap
 
 # Build rootio
 FROM golang:1.26-alpine AS rootio
-RUN apk add --no-cache git ca-certificates gcc linux-headers musl-dev
+RUN apk add --no-cache ca-certificates
 COPY . /src
 WORKDIR /src/rootio
 RUN --mount=type=cache,sharing=locked,id=gomod,target=/go/pkg/mod/cache \

@@ -20,6 +20,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/ulikunitz/xz"
 	"golang.org/x/sys/unix"
+
 	"oras.land/oras-go/pkg/oras"
 )
 

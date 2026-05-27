@@ -93,7 +93,6 @@ func main() {
 		bctx := backoff.WithContext(boff, ctx)
 		retryNotifier := func(err error, duration time.Duration) {
 			log.Error("retrying image2disk", "err", err, "duration", duration)
-
 		}
 		// try to write the image to disk with exponential backoff for 10 minutes
 		if err := backoff.RetryNotify(operation, bctx, retryNotifier); err != nil {

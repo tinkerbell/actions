@@ -64,7 +64,8 @@ func main() {
 		logger = slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	}
 
-	logger.Info("debugging",
+	logger.Info(
+		"debugging",
 		"block-device", s.blockDevice,
 		"fs-type", s.filesystemType,
 		"chroot", s.chroot,

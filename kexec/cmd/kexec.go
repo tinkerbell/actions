@@ -131,7 +131,7 @@ func concatFiles(paths []string) (*os.File, func(), error) {
 		f, err := os.Open(paths[0])
 		return f, func() {}, err
 	}
-	if err := os.MkdirAll("/tmp", 0755); err != nil {
+	if err := os.MkdirAll("/tmp", 0o755); err != nil {
 		return nil, func() {}, fmt.Errorf("creating /tmp: %w", err)
 	}
 	tmp, err := os.CreateTemp("/tmp", "initrd-*")
