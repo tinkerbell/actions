@@ -3,6 +3,7 @@ package archive
 import (
 	"archive/tar"
 	"compress/gzip"
+	"errors"
 	"io"
 	"os"
 	"path/filepath"
@@ -13,7 +14,6 @@ import (
 	"fmt"
 
 	digest "github.com/opencontainers/go-digest"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
 

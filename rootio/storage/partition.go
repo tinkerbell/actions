@@ -49,13 +49,15 @@ func ExamineDisk(d Disk) error {
 	}
 	partitions := p.GetPartitions()
 	log.Infof("Found [%d] partitions", len(partitions))
-	err = disk.File.Sync()
+	f, err := disk.Backend.Sys()
 	if err != nil {
 		return err
 	}
+	if err := f.Sync(); err != nil {
+		return err
+	}
 	time.Sleep(time.Second * 2)
-	err = disk.File.Close()
-	if err != nil {
+	if err := disk.Close(); err != nil {
 		return err
 	}
 	return nil
@@ -117,12 +119,14 @@ func Partition(d Disk) error {
 		return err
 	}
 	log.Infoln("Flushing writes to new partition")
-	err = disk.File.Sync()
+	f, err := disk.Backend.Sys()
 	if err != nil {
 		return err
 	}
-	err = disk.File.Close()
-	if err != nil {
+	if err := f.Sync(); err != nil {
+		return err
+	}
+	if err := disk.Close(); err != nil {
 		return err
 	}
 	return nil
@@ -188,12 +192,14 @@ func MBRPartition(d Disk) error {
 		return err
 	}
 	log.Infoln("Flushing writes to new partition")
-	err = disk.File.Sync()
+	f, err := disk.Backend.Sys()
 	if err != nil {
 		return err
 	}
-	err = disk.File.Close()
-	if err != nil {
+	if err := f.Sync(); err != nil {
+		return err
+	}
+	if err := disk.Close(); err != nil {
 		return err
 	}
 	return nil

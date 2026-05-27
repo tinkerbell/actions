@@ -16,11 +16,11 @@ import (
 
 	"github.com/containerd/containerd/reference"
 	"github.com/containerd/containerd/remotes/docker"
-	"github.com/deislabs/oras/pkg/oras"
 	"github.com/klauspost/compress/zstd"
 	log "github.com/sirupsen/logrus"
 	"github.com/ulikunitz/xz"
 	"golang.org/x/sys/unix"
+	"oras.land/oras-go/pkg/oras"
 )
 
 // WriteCounter counts the number of bytes written to it. It implements to the io.Writer interface
@@ -70,11 +70,11 @@ func Write(sourceImage, destinationDevice string, compressed bool, registryUsern
 	f := NewDiskImageStore(sourceImage, compressed, fileOut)
 
 	log.Infof("Beginning write of image [%s] to disk [%s]", filepath.Base(sourceImage), destinationDevice)
-	pullOpts := []oras.PullOpt{
+	copyOpts := []oras.CopyOpt{
 		oras.WithAllowedMediaTypes(allowedMediaTypes),
 		oras.WithPullStatusTrack(os.Stdout),
 	}
-	_, _, err = oras.Pull(ctx, resolver, sourceImage, f, pullOpts...)
+	_, err = oras.Copy(ctx, resolver, sourceImage, f, "", copyOpts...)
 	if err != nil {
 		if errors.Is(err, reference.ErrObjectRequired) {
 			return fmt.Errorf("image reference format is invalid. Please specify <name:tag|name@digest>")

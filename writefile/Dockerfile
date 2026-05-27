@@ -1,10 +1,8 @@
-# syntax=docker/dockerfile:1
-
-FROM golang:1.24-alpine AS writefile
-RUN apk add --no-cache git ca-certificates gcc musl-dev
+FROM golang:1.26-alpine AS writefile
+RUN apk add --no-cache ca-certificates
 COPY . /src
 WORKDIR /src/writefile
-RUN CGO_ENABLED=1 GOOS=linux go build -a -ldflags "-linkmode external -extldflags '-static' -s -w" -o writefile
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags "-s -w" -o writefile
 
 FROM scratch
 # Add Certificates into the image, for anything that does HTTPS calls

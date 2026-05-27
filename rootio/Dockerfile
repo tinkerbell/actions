@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1
-
 # Build mkfs as an static
 FROM gcc:10.5.0 AS mke2fs
 RUN wget https://mirrors.edge.kernel.org/pub/linux/kernel/people/tytso/e2fsprogs/v1.45.6/e2fsprogs-1.45.6.tar.gz; tar -xvzf ./e2fsprogs-1.45.6.tar.gz
@@ -19,13 +17,13 @@ RUN make LDFLAGS="-all-static" swapon
 RUN make LDFLAGS="-all-static" mkswap
 
 # Build rootio
-FROM golang:1.21-alpine AS rootio
+FROM golang:1.26-alpine AS rootio
 RUN apk add --no-cache git ca-certificates gcc linux-headers musl-dev
 COPY . /src
 WORKDIR /src/rootio
 RUN --mount=type=cache,sharing=locked,id=gomod,target=/go/pkg/mod/cache \
     --mount=type=cache,sharing=locked,id=goroot,target=/root/.cache/go-build \
-    CGO_ENABLED=1 GOOS=linux go build -a -ldflags "-linkmode external -extldflags '-static' -s -w" -o rootio
+    CGO_ENABLED=0 GOOS=linux go build -ldflags "-s -w" -o rootio
 
 # build fattools as static
 FROM gcc:10.5.0 AS fattools

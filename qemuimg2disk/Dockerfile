@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1
-
 FROM alpine:3.13 AS builder
 ENV QEMU_NAME="qemu"
 ARG QEMU_REV="6.1.0"
@@ -40,11 +38,11 @@ RUN sed -e 's|-lbrotlidec|-lbrotlicommon-static -lbrotlidec-static -lbrotlienc-s
 RUN make -j$(nproc) qemu-img
 RUN cp build/qemu-img /bin/qemu-img
 
-FROM golang:1.21-alpine AS qemuimg2disk
+FROM golang:1.26-alpine AS qemuimg2disk
 COPY . /src
 WORKDIR /src/qemuimg2disk
-RUN go mod tidy
-RUN go build -o qemuimg2disk .
+RUN go mod download
+RUN CGO_ENABLED=0 go build -ldflags "-s -w" -o qemuimg2disk .
 
 # Collect all the files we need into a scratch image.
 FROM scratch AS collect

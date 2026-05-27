@@ -7,8 +7,10 @@ import (
 	"log"
 
 	ctrcontent "github.com/containerd/containerd/content"
-	"github.com/deislabs/oras/pkg/content"
+	"github.com/containerd/containerd/remotes"
 	"github.com/opencontainers/go-digest"
+	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
+	"oras.land/oras-go/pkg/content"
 )
 
 // DiskImageStore -.
@@ -195,4 +197,31 @@ func (w *DiskImage) Status() (ctrcontent.Status, error) {
 // Truncate updates the size of the target blob.
 func (w *DiskImage) Truncate(int64) error {
 	return nil
+}
+
+// Resolve satisfies the remotes.Resolver portion of oras target.Target. The
+// destination store does not resolve refs; oras.Copy only invokes Resolve on
+// the source target.
+func (d DiskImageStore) Resolve(_ context.Context, _ string) (string, ocispec.Descriptor, error) {
+	return "", ocispec.Descriptor{}, fmt.Errorf("DiskImageStore does not support Resolve")
+}
+
+// Fetcher satisfies remotes.Resolver. The destination store is never fetched
+// from during oras.Copy.
+func (d DiskImageStore) Fetcher(_ context.Context, _ string) (remotes.Fetcher, error) {
+	return nil, fmt.Errorf("DiskImageStore does not support Fetch")
+}
+
+// Pusher returns a pusher that adapts our Ingester-style Writer to the
+// remotes.Pusher interface expected by oras.Copy.
+func (d DiskImageStore) Pusher(_ context.Context, _ string) (remotes.Pusher, error) {
+	return diskImagePusher{store: d}, nil
+}
+
+type diskImagePusher struct {
+	store DiskImageStore
+}
+
+func (p diskImagePusher) Push(ctx context.Context, desc ocispec.Descriptor) (ctrcontent.Writer, error) {
+	return p.store.Writer(ctx, ctrcontent.WithDescriptor(desc))
 }

@@ -1,9 +1,8 @@
-FROM golang:1.24-alpine AS cexec
-RUN apk add --no-cache git ca-certificates gcc linux-headers musl-dev
+FROM golang:1.26-alpine AS cexec
 COPY . /src
 WORKDIR /src/cexec
 RUN go mod download
-RUN CGO_ENABLED=1 GOOS=linux go build -a -ldflags "-linkmode external -extldflags '-static' -s -w" -o cexec
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags "-s -w" -o cexec
 
 FROM scratch
 COPY --from=cexec /src/cexec/cexec /usr/bin/cexec
