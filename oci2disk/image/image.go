@@ -49,16 +49,20 @@ func Write(sourceImage, destinationDevice string, compressed bool, registryUsern
 		},
 	}
 
-	registryOpts := []docker.RegistryOpt{docker.WithClient(client)}
+	// Always install an authorizer so the resolver can handle Bearer-token
+	// challenges from registries like ghcr.io even for anonymous pulls. When
+	// credentials are provided, wire them into the auth callback; otherwise the
+	// authorizer performs an unauthenticated token exchange.
+	authorizerOpts := []docker.AuthorizerOpt{docker.WithAuthClient(client)}
 	if registryUsername != "" && registryPassword != "" {
 		log.Infof("Registry credentials provided, using authenticated pull")
-		authorizer := docker.NewDockerAuthorizer(
-			docker.WithAuthClient(client),
-			docker.WithAuthCreds(func(_ string) (string, string, error) {
-				return registryUsername, registryPassword, nil
-			}),
-		)
-		registryOpts = append(registryOpts, docker.WithAuthorizer(authorizer))
+		authorizerOpts = append(authorizerOpts, docker.WithAuthCreds(func(_ string) (string, string, error) {
+			return registryUsername, registryPassword, nil
+		}))
+	}
+	registryOpts := []docker.RegistryOpt{
+		docker.WithClient(client),
+		docker.WithAuthorizer(docker.NewDockerAuthorizer(authorizerOpts...)),
 	}
 
 	resolver := docker.NewResolver(docker.ResolverOptions{
