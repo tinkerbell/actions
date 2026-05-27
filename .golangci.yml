@@ -104,7 +104,6 @@ linters:
         - name: import-shadowing
         - name: increment-decrement
         - name: indent-error-flow
-        - name: indent-error-flow
         - name: package-comments
         - name: range
         - name: receiver-naming

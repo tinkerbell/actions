@@ -20,6 +20,9 @@ func VerifyBlockDevice(device string) error {
 	if os.IsNotExist(err) {
 		return fmt.Errorf("%s does not exist", device)
 	}
+	if err != nil {
+		return fmt.Errorf("failed to stat %s: %w", device, err)
+	}
 	if !isBlockDevice(&d) {
 		return fmt.Errorf("%s is not a block device", device)
 	}

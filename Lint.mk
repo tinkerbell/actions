@@ -48,12 +48,16 @@ hadolint-lint: $(HADOLINT_BIN)
 
 GOLANGCI_LINT_CONFIG := $(LINT_ROOT)/.golangci.yml
 GOLANGCI_LINT_VERSION ?= v2.12.2
-GOLANGCI_LINT_BIN := $(LINT_ROOT)/out/linters/golangci-lint-$(GOLANGCI_LINT_VERSION)-$(LINT_ARCH)
+# golangci-lint release assets use Go's arch naming (amd64/arm64), not uname -m.
+GOLANGCI_LINT_ARCH := $(if $(filter x86_64,$(shell uname -m)),amd64,$(if $(filter aarch64,$(shell uname -m)),arm64,$(shell uname -m)))
+GOLANGCI_LINT_DIST := golangci-lint-$(GOLANGCI_LINT_VERSION:v%=%)-$(LINT_OS_LOWER)-$(GOLANGCI_LINT_ARCH)
+GOLANGCI_LINT_BIN := $(LINT_ROOT)/out/linters/golangci-lint-$(GOLANGCI_LINT_VERSION)-$(GOLANGCI_LINT_ARCH)
 $(GOLANGCI_LINT_BIN):
 	mkdir -p out/linters
 	rm -rf out/linters/golangci-lint-*
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s -- -b out/linters $(GOLANGCI_LINT_VERSION)
-	mv out/linters/golangci-lint $@
+	curl -sSfL https://github.com/golangci/golangci-lint/releases/download/$(GOLANGCI_LINT_VERSION)/$(GOLANGCI_LINT_DIST).tar.gz | tar -C out/linters -xzf -
+	mv out/linters/$(GOLANGCI_LINT_DIST)/golangci-lint $@
+	rm -rf out/linters/$(GOLANGCI_LINT_DIST)
 
 LINTERS += golangci-lint-lint
 golangci-lint-lint: $(GOLANGCI_LINT_BIN)
