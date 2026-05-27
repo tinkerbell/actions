@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -13,7 +14,7 @@ import (
 func Mount(f Filesystem) error {
 	if f.Mount.Format == "swap" {
 		// Format disk
-		cmd := exec.Command("/sbin/swapon", f.Mount.Device)
+		cmd := exec.CommandContext(context.Background(), "/sbin/swapon", f.Mount.Device)
 		cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 		debugCMD := fmt.Sprintf("%s %s", "/sbin/swapon", f.Mount.Device)
 		err := cmd.Start()

@@ -6,14 +6,55 @@ on:
       - "!main"
   pull_request: {}
   workflow_dispatch: {}
+env:
+  GO_VERSION: "1.26"
 jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      - name: Run tests
+        run: go test -race ./...
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      - name: Run linters
+        run: make lint
+
   build:
     name: Build
     runs-on: ubuntu-latest
     strategy:
       matrix:
         platform: [amd64]
-        action: [archive2disk,cexec,grub2disk,image2disk,kexec,oci2disk,qemuimg2disk,rootio,slurp,syslinux,writefile]
+        action:
+          - archive2disk
+          - cexec
+          - grub2disk
+          - image2disk
+          - kexec
+          - oci2disk
+          - qemuimg2disk
+          - rootio
+          - slurp
+          - syslinux
+          - writefile
     steps:
       - uses: actions/checkout@v6
 

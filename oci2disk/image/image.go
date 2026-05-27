@@ -41,24 +41,29 @@ func (wc *WriteCounter) Write(p []byte) (int, error) {
 // writing to an underlying device.
 func Write(sourceImage, destinationDevice string, compressed bool, registryUsername, registryPassword string) error {
 	ctx := context.Background()
-	client := http.DefaultClient
-	opts := docker.ResolverOptions{}
-	client.Transport = &http.Transport{
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: true, //nolint:gosec // GA402 TODO
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true, //nolint:gosec // GA402 TODO
+			},
 		},
 	}
 
-	opts.Client = client
-
+	registryOpts := []docker.RegistryOpt{docker.WithClient(client)}
 	if registryUsername != "" && registryPassword != "" {
 		log.Infof("Registry credentials provided, using authenticated pull")
-		opts.Credentials = func(hostName string) (string, string, error) {
-			return registryUsername, registryPassword, nil
-		}
+		authorizer := docker.NewDockerAuthorizer(
+			docker.WithAuthClient(client),
+			docker.WithAuthCreds(func(_ string) (string, string, error) {
+				return registryUsername, registryPassword, nil
+			}),
+		)
+		registryOpts = append(registryOpts, docker.WithAuthorizer(authorizer))
 	}
 
-	resolver := docker.NewResolver(opts)
+	resolver := docker.NewResolver(docker.ResolverOptions{
+		Hosts: docker.ConfigureDefaultRegistries(registryOpts...),
+	})
 
 	fileOut, err := os.OpenFile(destinationDevice, os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {

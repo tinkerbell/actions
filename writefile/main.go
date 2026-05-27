@@ -96,7 +96,7 @@ func main() {
 
 	if err := recursiveEnsureDir(mountAction, dirPath, newDirMode, fileUID, fileGID); err != nil {
 		logger.Error("Failed to ensure directory exists", "error", err)
-		os.Exit(1)
+		os.Exit(1) //nolint:gocritic // best-effort unmount via defer is acceptable on error exit
 	}
 
 	fqFilePath := filepath.Join(mountAction, filePath)

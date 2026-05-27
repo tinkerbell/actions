@@ -46,7 +46,7 @@ func main() {
 
 	if img == "" {
 		log.Error("IMG_URL is required", "image", img)
-		os.Exit(1)
+		os.Exit(1) //nolint:gocritic // deferred signal context cancellation is unnecessary on exit
 	}
 
 	if disk == "" {

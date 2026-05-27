@@ -139,7 +139,7 @@ func (d DiskImageStore) Writer(_ context.Context, opts ...ctrcontent.WriterOpt) 
 		f = func(r io.Reader, w io.Writer, done chan<- error) {
 			decompressReader, err := findDecompressor(d.sourceImage, r)
 			if err != nil {
-				log.Fatalf(err.Error()) //nolint:revive // this is fine
+				log.Fatal(err) //nolint:revive // this is fine
 			}
 			defer decompressReader.Close()
 			b := make([]byte, wOpts.Blocksize)

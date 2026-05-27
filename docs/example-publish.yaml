@@ -5,7 +5,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  REPO_IMAGE: repo/my-tinkerbell-action 
+  REPO_IMAGE: repo/my-tinkerbell-action
 
 jobs:
   push_to_registry:

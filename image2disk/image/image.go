@@ -93,7 +93,7 @@ func Write(ctx context.Context, log *slog.Logger, sourceImage, destinationDevice
 		return err
 	}
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := http.DefaultClient.Do(req) //nolint:bodyclose // body closed via defer below; linter loses track through NewProgress wrapper
 	if err != nil {
 		return err
 	}

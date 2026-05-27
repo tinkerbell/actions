@@ -30,8 +30,11 @@ func VerifyBlockDevice(device string) error {
 func isBlockDevice(d *os.FileInfo) bool {
 	// this probably shouldn't be so hard
 	// but d.Mode()&os.ModeDevice == 0 doesn't work as expected
-	mode := (*d).Sys().(*syscall.Stat_t).Mode
-	return (mode & syscall.S_IFMT) == syscall.S_IFBLK
+	stat, ok := (*d).Sys().(*syscall.Stat_t)
+	if !ok {
+		return false
+	}
+	return (stat.Mode & syscall.S_IFMT) == syscall.S_IFBLK
 }
 
 // ExamineDisk will look at the configuration of a disk.
@@ -130,10 +133,7 @@ func Partition(d Disk) (err error) {
 	if err != nil {
 		return err
 	}
-	if err := f.Sync(); err != nil {
-		return err
-	}
-	return nil
+	return f.Sync()
 }
 
 // MBRPartition will create the partitions and write them to the disk.
@@ -205,8 +205,5 @@ func MBRPartition(d Disk) (err error) {
 	if err != nil {
 		return err
 	}
-	if err := f.Sync(); err != nil {
-		return err
-	}
-	return nil
+	return f.Sync()
 }

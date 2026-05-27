@@ -1,6 +1,7 @@
 package grub
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -22,8 +23,8 @@ func makeDirAndMount(devicePath string, mountPoint string, filesystemType string
 		params = "--bind"
 	}
 	cmd := fmt.Sprintf("/bin/mount %s %s %s", params, devicePath, mountPoint)
-	log.Infof(cmd)
-	if _, err = exec.Command("/bin/sh", "-c", cmd).Output(); err != nil {
+	log.Info(cmd)
+	if _, err = exec.CommandContext(context.Background(), "/bin/sh", "-c", cmd).Output(); err != nil {
 		return err
 	}
 	return
@@ -45,11 +46,12 @@ func doChroot(chrootPath string) (err error) {
 }
 
 func execGrub(path string) (err error) {
-	if _, err = exec.Command("/bin/sh", "-c", "/usr/sbin/grub-install "+path).Output(); err != nil {
+	ctx := context.Background()
+	if _, err = exec.CommandContext(ctx, "/bin/sh", "-c", "/usr/sbin/grub-install "+path).Output(); err != nil {
 		log.Error(fmt.Errorf("failed to execute grub-install on %s", path))
 		return err
 	}
-	if _, err = exec.Command("/bin/sh", "-c", "/usr/sbin/grub-mkconfig -o /boot/grub/grub.cfg").Output(); err != nil {
+	if _, err = exec.CommandContext(ctx, "/bin/sh", "-c", "/usr/sbin/grub-mkconfig -o /boot/grub/grub.cfg").Output(); err != nil {
 		log.Error("failed to make grub config file")
 		return err
 	}
@@ -70,12 +72,12 @@ func MountGrub(grubInstallPath string, grubBlockDevice string, filesystemType st
 	}
 	log.Infof("chroot step is completed successfully.")
 
-	outPut, err := exec.Command("/bin/sh", "-c", "ls -lrt /mnt/chrootdir/").Output()
+	outPut, err := exec.CommandContext(context.Background(), "/bin/sh", "-c", "ls -lrt /mnt/chrootdir/").Output()
 	if err != nil {
 		log.Error(fmt.Errorf("failed to get output %s", outPut))
 		return err
 	}
-	log.Infof(fmt.Sprint(string(outPut)))
+	log.Info(string(outPut))
 
 	if err = execGrub(grubInstallPath); err != nil {
 		return err

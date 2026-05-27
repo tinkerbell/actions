@@ -1,6 +1,7 @@
 package lvm
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -169,10 +170,11 @@ func (vg *VolumeGroup) CreateLogicalVolume(name string, sizeInBytes uint64, tags
 	return nil
 }
 
-func run(cmd string, extraArgs ...string) error {
-	var args []string
-	args = append(args, extraArgs...)
-	c := exec.Command(cmd, args...)
+// run executes the given command with the supplied args, wiring stdout/stderr
+// through to the parent process.
+func run(cmd string, extraArgs ...string) error { //nolint:unparam // generic exec helper; current callers happen to pass "lvm"
+	args := append([]string(nil), extraArgs...)
+	c := exec.CommandContext(context.Background(), cmd, args...)
 	c.Stdout, c.Stderr = os.Stdout, os.Stderr
 
 	return c.Run()

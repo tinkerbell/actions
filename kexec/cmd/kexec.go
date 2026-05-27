@@ -24,7 +24,7 @@ const mountAction = "/mountAction"
 var kexecCmd = &cobra.Command{
 	Use:   "kexec",
 	Short: "This is an action for performing a kexec into a new kernel/ramdisk",
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		// Parse the environment variables that are passed into the action
 		blockDevice := os.Getenv("BLOCK_DEVICE")
 		filesystemType := os.Getenv("FS_TYPE")
