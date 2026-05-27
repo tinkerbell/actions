@@ -1,0 +1,24 @@
+---
+extends: default
+
+rules:
+  # GitHub Actions uses `on:` as a top-level key, which yamllint
+  # interprets as a truthy value. Limit the check to actual values.
+  truthy:
+    check-keys: false
+    level: error
+  # 80 columns is too tight for workflow/action YAML.
+  line-length:
+    max: 200
+    level: error
+  # Leading `---` is optional; don't enforce.
+  document-start: disable
+  # Allow `# foo` style comments without strict spacing rules.
+  comments:
+    require-starting-space: false
+    min-spaces-from-content: 1
+  comments-indentation: disable
+  # Mergify, GitHub Actions, etc. mix sequence indentation styles.
+  indentation:
+    indent-sequences: consistent
+    spaces: consistent

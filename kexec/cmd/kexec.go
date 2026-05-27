@@ -24,7 +24,7 @@ const mountAction = "/mountAction"
 var kexecCmd = &cobra.Command{
 	Use:   "kexec",
 	Short: "This is an action for performing a kexec into a new kernel/ramdisk",
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		// Parse the environment variables that are passed into the action
 		blockDevice := os.Getenv("BLOCK_DEVICE")
 		filesystemType := os.Getenv("FS_TYPE")
@@ -131,7 +131,7 @@ func concatFiles(paths []string) (*os.File, func(), error) {
 		f, err := os.Open(paths[0])
 		return f, func() {}, err
 	}
-	if err := os.MkdirAll("/tmp", 0755); err != nil {
+	if err := os.MkdirAll("/tmp", 0o755); err != nil {
 		return nil, func() {}, fmt.Errorf("creating /tmp: %w", err)
 	}
 	tmp, err := os.CreateTemp("/tmp", "initrd-*")

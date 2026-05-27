@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -13,9 +14,10 @@ func FileSystemCreate(f Filesystem) error {
 	var cmd *exec.Cmd
 	var debugCMD string
 
+	ctx := context.Background()
 	switch f.Mount.Format {
 	case "swap":
-		cmd = exec.Command("/sbin/mkswap", f.Mount.Device)
+		cmd = exec.CommandContext(ctx, "/sbin/mkswap", f.Mount.Device)
 		debugCMD = fmt.Sprintf("%s %s", "/sbin/mkswap", f.Mount.Device)
 	case "ext4", "ext3", "ext2":
 		// Add filesystem flags
@@ -29,7 +31,7 @@ func FileSystemCreate(f Filesystem) error {
 		f.Mount.Create.Options = append(f.Mount.Create.Options, f.Mount.Device)
 
 		// Format disk
-		cmd = exec.Command("/sbin/mke2fs", f.Mount.Create.Options...)
+		cmd = exec.CommandContext(ctx, "/sbin/mke2fs", f.Mount.Create.Options...)
 
 		// Build command for error message
 		debugCMD := "/sbin/mke2fs"
@@ -38,7 +40,7 @@ func FileSystemCreate(f Filesystem) error {
 		}
 	case "vfat":
 		f.Mount.Create.Options = append(f.Mount.Create.Options, f.Mount.Device)
-		cmd = exec.Command("/sbin/mkfs.fat", f.Mount.Create.Options...)
+		cmd = exec.CommandContext(ctx, "/sbin/mkfs.fat", f.Mount.Create.Options...)
 
 		// Build command for error message
 		debugCMD := "/sbin/mkfs.fat"
@@ -53,7 +55,7 @@ func FileSystemCreate(f Filesystem) error {
 		f.Mount.Create.Options = append(f.Mount.Create.Options, f.Mount.Device)
 
 		// Format disk
-		cmd = exec.Command("/sbin/mkfs.xfs", f.Mount.Create.Options...)
+		cmd = exec.CommandContext(ctx, "/sbin/mkfs.xfs", f.Mount.Create.Options...)
 
 		// Build command for error message
 		debugCMD := "/sbin/mkfs.xfs"

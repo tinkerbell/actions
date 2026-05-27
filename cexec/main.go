@@ -47,7 +47,7 @@ func main() {
 
 	if err := ff.Parse(fs, os.Args[1:], ff.WithEnvVarNoPrefix()); err != nil {
 		logger.Error(err.Error())
-		os.Exit(10)
+		os.Exit(10) //nolint:gocritic // deferred signal context cancellation is unnecessary on exit
 	}
 
 	// check for required fields to be set.
@@ -64,7 +64,8 @@ func main() {
 		logger = slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	}
 
-	logger.Info("debugging",
+	logger.Info(
+		"debugging",
 		"block-device", s.blockDevice,
 		"fs-type", s.filesystemType,
 		"chroot", s.chroot,
@@ -94,7 +95,7 @@ func (s settings) checkRequiredFields() []string {
 	return missingFields
 }
 
-func (s settings) cexec(ctx context.Context, log *slog.Logger) error {
+func (s settings) cexec(_ context.Context, log *slog.Logger) error {
 	log.Info("CEXEC - Chroot Exec")
 
 	if s.blockDevice == "" {
@@ -108,7 +109,7 @@ func (s settings) cexec(ctx context.Context, log *slog.Logger) error {
 
 	// Mount the block device to the /mountAction point
 	if err := syscall.Mount(s.blockDevice, mountAction, s.filesystemType, 0, ""); err != nil {
-		return fmt.Errorf("error mounting [%s] -> [%s], error: %v", s.blockDevice, mountAction, err)
+		return fmt.Errorf("error mounting [%s] -> [%s], error: %w", s.blockDevice, mountAction, err)
 	}
 	defer func() {
 		if err := syscall.Unmount(mountAction, 0); err != nil {
@@ -143,13 +144,21 @@ func (s settings) cexec(ctx context.Context, log *slog.Logger) error {
 		if err := s.mountSpecialDirs(mountAction); err != nil {
 			return err
 		}
-		defer s.umountSpecialDirs(mountAction)
+		defer func() {
+			if err := s.umountSpecialDirs(mountAction); err != nil {
+				log.Error("error unmounting special dirs", "error", err)
+			}
+		}()
 		log.Info("Changing root before executing command")
 		exitChroot, err := chroot(mountAction)
 		if err != nil {
 			return fmt.Errorf("error changing root to [%s], error: %w", mountAction, err)
 		}
-		defer exitChroot()
+		defer func() {
+			if err := exitChroot(); err != nil {
+				log.Error("error exiting chroot", "error", err)
+			}
+		}()
 	}
 
 	if s.defaultInterpreter != "" {
