@@ -21,8 +21,8 @@ shared:
 
     # Ensure we have adequate reviews.
     - or:
-          - "#approved-reviews-by>=1"
-          - author=jacobweinstock
+        - "#approved-reviews-by>=1"
+        - author=jacobweinstock
     - "#changes-requested-reviews-by=0"
 
     # Ensure we aren't being explicitly blocked with a label.
@@ -47,3 +47,5 @@ pull_request_rules:
     conditions: []
     actions:
       queue:
+merge_protections_settings:
+  reporting_method: check-runs
