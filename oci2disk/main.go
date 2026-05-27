@@ -16,12 +16,14 @@ func main() {
 	compressedEnv := os.Getenv("COMPRESSED")
 	registryUsername := os.Getenv("REGISTRY_USERNAME")
 	registryPassword := os.Getenv("REGISTRY_PASSWORD")
+	// We can ignore the error and default to false.
+	skipVerify, _ := strconv.ParseBool(os.Getenv("SKIP_VERIFY"))
 
 	// We can ignore the error and default compressed to false.
 	cmp, _ := strconv.ParseBool(compressedEnv)
 
 	// Write the image to disk
-	err := image.Write(img, disk, cmp, registryUsername, registryPassword)
+	err := image.Write(img, disk, cmp, registryUsername, registryPassword, skipVerify)
 	if err != nil {
 		log.Fatal(err)
 	}

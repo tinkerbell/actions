@@ -75,7 +75,7 @@ func run(logger *slog.Logger) error {
 	}
 
 	// Create the /mountAction mountpoint (no folders exist previously in scratch container)
-	if err := os.Mkdir(mountAction, os.ModeDir); err != nil {
+	if err := os.MkdirAll(mountAction, 0o755); err != nil {
 		return fmt.Errorf("error creating the action mountpoint %s: %w", mountAction, err)
 	}
 

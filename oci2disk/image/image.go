@@ -39,12 +39,12 @@ func (wc *WriteCounter) Write(p []byte) (int, error) {
 // Write will pull an image and write it to local storage device
 // with compress set to true it will use gzip compression to expand the data before
 // writing to an underlying device.
-func Write(sourceImage, destinationDevice string, compressed bool, registryUsername, registryPassword string) error {
+func Write(sourceImage, destinationDevice string, compressed bool, registryUsername, registryPassword string, skipVerify bool) error {
 	ctx := context.Background()
 	client := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true, //nolint:gosec // GA402 TODO
+				InsecureSkipVerify: skipVerify, //nolint:gosec // This is intentional: the top-level setting defaults to false, but this option is configurable to provide flexibility when needed.
 			},
 		},
 	}
