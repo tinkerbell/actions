@@ -14,6 +14,8 @@ import (
 	"syscall"
 
 	"github.com/peterbourgon/ff/v3"
+
+	"github.com/tinkerbell/actions/rootio/storage"
 )
 
 const (
@@ -22,27 +24,35 @@ const (
 )
 
 type settings struct {
-	blockDevice        string
-	filesystemType     string
-	chroot             string
-	defaultInterpreter string
-	cmdLine            string
-	updateResolvConf   bool
+	blockDevice         string
+	filesystemType      string
+	chroot              string
+	defaultInterpreter  string
+	cmdLine             string
+	updateResolvConf    bool
+	mirrorHost          string
+	metadataServicePort int
 }
 
+var metadata *storage.Metadata
+
 func main() {
+	var err error
+
 	ctx, done := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGHUP, syscall.SIGTERM)
 	defer done()
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	fs := flag.NewFlagSet("cexec", flag.ExitOnError)
 	s := settings{}
-	fs.StringVar(&s.blockDevice, "block-device", "", "block device to mount (required)")
-	fs.StringVar(&s.filesystemType, "fs-type", "", "filesystem type (required)")
+	fs.StringVar(&s.blockDevice, "block-device", "", "block device to mount")
+	fs.StringVar(&s.filesystemType, "fs-type", "", "filesystem type")
 	fs.StringVar(&s.chroot, "chroot", "", "use chroot environment to run given command (deprecated)")
 	fs.StringVar(&s.defaultInterpreter, "default-interpreter", "", "default interpreter (optional)")
 	fs.StringVar(&s.cmdLine, "cmd-line", "", "command line to execute (required)")
 	fs.BoolVar(&s.updateResolvConf, "update-resolv-conf", false, "update /etc/resolv.conf in chroot environment (optional)")
+	fs.StringVar(&s.mirrorHost, "mirror-host", "", "Metadata host (optional)")
+	fs.IntVar(&s.metadataServicePort, "metadata-service-port", 7172, "Metadata service port (optional)")
 	jsonLogger := fs.Bool("json-outout", true, "enable json output for logging")
 
 	if err := ff.Parse(fs, os.Args[1:], ff.WithEnvVarNoPrefix()); err != nil {
@@ -56,6 +66,15 @@ func main() {
 		fmt.Fprintln(os.Stderr)
 		fs.Usage()
 		os.Exit(20)
+	}
+
+	if os.Getenv("MIRROR_HOST") != "" {
+		metadata, err = storage.RetrieveData()
+		if err != nil {
+			logger.Error(err.Error())
+			os.Exit(20)
+		}
+		fmt.Printf("Successfully parsed the MetaData, Found [%d] Disks\n", len(metadata.Instance.Storage.Disks))
 	}
 
 	// TODO(jacobweinstock): add field validations for the settings struct.
@@ -72,6 +91,8 @@ func main() {
 		"cmd-line", s.cmdLine,
 		"json-output", *jsonLogger,
 		"update-resolv-conf", s.updateResolvConf,
+		"mirror-host", s.mirrorHost,
+		"metadata-service-port", s.metadataServicePort,
 	)
 
 	if err := s.cexec(ctx, logger); err != nil {
@@ -82,11 +103,13 @@ func main() {
 
 func (s settings) checkRequiredFields() []string {
 	var missingFields []string
-	if s.blockDevice == "" {
-		missingFields = append(missingFields, "block-device")
-	}
-	if s.filesystemType == "" {
-		missingFields = append(missingFields, "fs-type")
+	if s.mirrorHost == "" {
+		if s.blockDevice == "" {
+			missingFields = append(missingFields, "block-device")
+		}
+		if s.filesystemType == "" {
+			missingFields = append(missingFields, "fs-type")
+		}
 	}
 	if s.cmdLine == "" {
 		missingFields = append(missingFields, "cmd-line")
@@ -95,29 +118,60 @@ func (s settings) checkRequiredFields() []string {
 }
 
 func (s settings) cexec(ctx context.Context, log *slog.Logger) error {
+	var err error
 	log.Info("CEXEC - Chroot Exec")
 
-	if s.blockDevice == "" {
-		return errors.New("no Block Device speified with Environment Variable [BLOCK_DEVICE]")
-	}
-
 	// Create the /mountAction mountpoint (no folders exist previously in scratch container)
-	if err := os.Mkdir(mountAction, os.ModeDir); err != nil {
+	if err = os.Mkdir(mountAction, os.ModeDir); err != nil {
 		return fmt.Errorf("error creating the mount point [%s], error: %w", mountAction, err)
 	}
 
-	// Mount the block device to the /mountAction point
-	if err := syscall.Mount(s.blockDevice, mountAction, s.filesystemType, 0, ""); err != nil {
-		return fmt.Errorf("error mounting [%s] -> [%s], error: %v", s.blockDevice, mountAction, err)
-	}
-	defer func() {
-		if err := syscall.Unmount(mountAction, 0); err != nil {
-			log.Error("error unmounting device", "source", s.blockDevice, "destination", mountAction, "error", err)
-		} else {
-			log.Info("unmounted device successfully", "source", s.blockDevice, "destination", mountAction)
+	if metadata != nil && len(metadata.Instance.Storage.Filesystems) > 0 {
+		// Mount the block device according to the metadata to the /mountAction point
+		log.Info("Using the Block Devices from metadata")
+
+		for _, fileSystem := range metadata.Instance.Storage.Filesystems {
+			if fileSystem.Mount.Format != "SWAP" {
+				fileSystem.Mount.Point = fmt.Sprintf("%s/%s", mountAction, fileSystem.Mount.Point)
+				err = os.MkdirAll(fileSystem.Mount.Point, 0755)
+				if err != nil {
+					log.Error("error creating directory mountpoint", "directory", fileSystem.Mount.Point)
+				} else {
+					err := storage.Mount(fileSystem)
+					if err != nil {
+						log.Error(err.Error())
+					} else {
+						defer func() {
+							if err := syscall.Unmount(fileSystem.Mount.Point, 0); err != nil {
+								log.Error("error unmounting device", "source", fileSystem.Mount.Device, "destination", fileSystem.Mount.Point, "error", err)
+							} else {
+								log.Info("unmounted device successfully", "source", fileSystem.Mount.Device, "destination", fileSystem.Mount.Point)
+							}
+						}()
+					}
+				}
+			}
 		}
-	}()
-	log.Info("mounted device successfully", "source", s.blockDevice, "destination", mountAction)
+	} else {
+		// Mount the block device from env to the /mountAction point
+		log.Info("Using the Block Device from env")
+
+		if s.blockDevice == "" {
+			return errors.New("no Block Device specified with Environment Variable [BLOCK_DEVICE]")
+		}
+
+		if err := syscall.Mount(s.blockDevice, mountAction, s.filesystemType, 0, ""); err != nil {
+			return fmt.Errorf("error mounting [%s] -> [%s], error: %v", s.blockDevice, mountAction, err)
+		}
+		defer func() {
+			if err := syscall.Unmount(mountAction, 0); err != nil {
+				log.Error("error unmounting device", "source", s.blockDevice, "destination", mountAction, "error", err)
+			} else {
+				log.Info("unmounted device successfully", "source", s.blockDevice, "destination", mountAction)
+			}
+		}()
+		log.Info("mounted device successfully", "source", s.blockDevice, "destination", mountAction)
+	}
 
 	if s.chroot != "" {
 		if s.updateResolvConf {

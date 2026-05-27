@@ -40,6 +40,22 @@ actions:
       DEBIAN_FRONTEND: noninteractive
 ```
 
+If you want to use the mountpoints provided by metadata, replace the env variables called `BLOCK_DEVICE` and `FS_TYPE`
+by `MIRROR_HOST` and `METADATA_SERVICE_PORT` (if required).
+
+```yaml
+actions:
+- name: Use cexec to check the mount points using the metedata
+  image: registry.ring0:5000/tinkerbell/actions/cexec:dev
+  timeout: 3601
+  environment:
+      MIRROR_HOST: 192.168.3.5
+      METADATA_SERVICE_PORT: 7172
+      CHROOT: y
+      DEFAULT_INTERPRETER: "/bin/bash -c"
+      CMD_LINE: "df -h"
+```
+
 ### Environment variables and CLI flags
 
 All options can be set either via environment variables or CLI flags.
@@ -47,13 +63,15 @@ CLI flags take precedence over environment variables, which take precedence over
 
 | Env variable | Flag | Type | Default Value | Required | Description |
 |--------------|------|------|---------------|----------|-------------|
-| `BLOCK_DEVICE` | `--block-device` | string | "" | yes | The block device to mount. |
-| `FS_TYPE` | `--fs-type` | string | "" | yes | The filesystem type of the block device. |
+| `BLOCK_DEVICE` | `--block-device` | string | "" | no | The block device to mount. |
+| `FS_TYPE` | `--fs-type` | string | "" | no | The filesystem type of the block device. |
 | `CHROOT` | `--chroot` | string | "" | no | If set to `y` (or a non empty string), the Action will execute the given command within a chroot environment. This option is DEPRECATED. Future versions will always chroot. |
 | `CMD_LINE` | `--cmd-line` | string | "" | yes | The command to execute. |
 | `DEFAULT_INTERPRETER` | `--default-interpreter` | string | "" | no | The default interpreter to use when executing commands. This is useful when you need to execute multiple commands. |
 | `UPDATE_RESOLV_CONF` | `--update-resolv-conf` | boolean | false | no | If set to `true`, the cexec Action will update the `/etc/resolv.conf` file within the chroot environment with the `/etc/resolv.conf` from the host. |
 | `JSON_OUTPUT` | `--json-output` | boolean | true | no | If set to `true`, the cexec Action will log output in JSON format. The defaults to `true`. If set to `false`, the cexec Action will log output in plain text format. |
+| `MIRROR_HOST` | `--mirror-host` | string | "" | no | The hostname of the metadata service. If defined, `.hardware.spec.metadata.storage.filesystems` will be used instead of `BLOCK_DEVICE` |
+| `METADATA_SERVICE_PORT` | `--metadata-service-port | int | 7172 | no | The port of the metadata service. |
 
 Any environment variables you set on the Action will be available to the command you execute.
 For example, if you set `DEBIAN_FRONTEND: noninteractive` as an environment variable, it will be available to the command you execute.
