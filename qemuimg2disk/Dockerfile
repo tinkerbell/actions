@@ -1,4 +1,4 @@
-FROM alpine:3.13 AS builder
+FROM alpine:3.21 AS builder
 ENV QEMU_NAME="qemu"
 ARG QEMU_REV="6.1.0"
 ENV QEMU_SRC_BASENAME="${QEMU_NAME}-${QEMU_REV}"
@@ -12,11 +12,12 @@ RUN apk add --update --upgrade \
     make \
     perl \
     pkgconf \
-    python3 \
+    python3 py3-setuptools \
     samurai \
     zlib-dev zlib-static \
     bash git parted patch xz \
-    curl-dev curl-static nettle-dev nettle-static brotli-dev brotli-static nghttp2-dev nghttp2-static openssl-libs-static
+    curl-dev curl-static nettle-dev nettle-static brotli-dev brotli-static nghttp2-dev nghttp2-static openssl-libs-static \
+    zstd-dev zstd-static libpsl-static libunistring-static libidn2-static
 
 WORKDIR /work
 RUN wget "${QEMU_SRC_URL}" -O- | tar xJ
