@@ -1,6 +1,6 @@
 FROM alpine:3.21 AS builder
 ENV QEMU_NAME="qemu"
-ARG QEMU_REV="6.1.0"
+ARG QEMU_REV="11.0.1"
 ENV QEMU_SRC_BASENAME="${QEMU_NAME}-${QEMU_REV}"
 ENV QEMU_SRC_URL="https://download.qemu.org/${QEMU_SRC_BASENAME}.tar.xz"
 
@@ -10,6 +10,8 @@ RUN apk add --update --upgrade \
     libc-dev \
     linux-headers \
     make \
+    meson \
+    ninja \
     perl \
     pkgconf \
     python3 py3-setuptools \
@@ -17,7 +19,7 @@ RUN apk add --update --upgrade \
     zlib-dev zlib-static \
     bash git parted patch xz \
     curl-dev curl-static nettle-dev nettle-static brotli-dev brotli-static nghttp2-dev nghttp2-static openssl-libs-static \
-    zstd-dev zstd-static libpsl-static libunistring-static libidn2-static
+    zstd-dev zstd-static libpsl-static libunistring-static libidn2-static bzip2-static
 
 WORKDIR /work
 RUN wget "${QEMU_SRC_URL}" -O- | tar xJ
@@ -50,6 +52,11 @@ FROM scratch AS collect
 COPY --from=builder /bin/qemu-img /bin/qemu-img
 COPY --from=builder /bin/sh /bin/sh
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+# qemu-img's static libcurl is built with --with-ca-bundle=/etc/ssl/cert.pem,
+# so HTTPS sources fail without a CA bundle at that path. On Alpine this is a
+# symlink, which `COPY --from` would preserve and break in the scratch image,
+# so copy the resolved bundle directly.
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/cert.pem
 COPY --from=builder /lib/ld-musl*  /lib/
 COPY --from=qemuimg2disk /src/qemuimg2disk/qemuimg2disk /usr/bin/qemuimg2disk
 COPY --from=qemuimg2disk /src/qemuimg2disk/entrypoint.sh /usr/bin/entrypoint.sh
