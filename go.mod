@@ -5,7 +5,7 @@ go 1.25.0
 require (
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/containerd/containerd v1.7.32
-	github.com/diskfs/go-diskfs v1.9.3
+	github.com/diskfs/go-diskfs v1.9.4
 	github.com/dustin/go-humanize v1.0.1
 	github.com/klauspost/compress v1.18.6
 	github.com/lmittmann/tint v1.1.3

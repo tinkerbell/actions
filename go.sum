@@ -40,8 +40,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f h1:lO4WD4F/rVNCu3HqELle0jiPLLBs70cWOduZpkS1E78=
 github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f/go.mod h1:cuUVRXasLTGF7a8hSLbxyZXjz+1KgoB3wDUb6vlszIc=
-github.com/diskfs/go-diskfs v1.9.3 h1:cLciNCeZ4QAXVxyPJDr1ZJ9N9CCG3rQlQ/z/Cs/cNDM=
-github.com/diskfs/go-diskfs v1.9.3/go.mod h1:TePJORO83Adh5pb2SqsxAwaP0fofFxKLkxctiS/9OQc=
+github.com/diskfs/go-diskfs v1.9.4 h1:0j2d7eG4IjyxL6+ChWbDPocdBCF6HQ4HBWU2WDYWVnc=
+github.com/diskfs/go-diskfs v1.9.4/go.mod h1:TePJORO83Adh5pb2SqsxAwaP0fofFxKLkxctiS/9OQc=
 github.com/distribution/distribution/v3 v3.0.0 h1:q4R8wemdRQDClzoNNStftB2ZAfqOiN6UX90KJc4HjyM=
 github.com/distribution/distribution/v3 v3.0.0/go.mod h1:tRNuFoZsUdyRVegq8xGNeds4KLjwLCRin/tTo6i1DhU=
 github.com/distribution/reference v0.6.0 h1:0IXCQ5g4/QMHHkarYzh5l+u8T3t73zM5QvfrDyIgxBk=
