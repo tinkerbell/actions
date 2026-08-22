@@ -14,6 +14,19 @@ import (
 
 const sectorSize = 512
 
+// alignmentSectors is 1MiB in 512-byte sectors - the conventional start alignment
+// for modern partitioning tools, which keeps every partition start a multiple of 
+// common physical sector sizes.
+const alignmentSectors = 2048
+
+// alignUp rounds sector up to the next multiple of alignmentSectors.
+func alignUp(sector uint64) uint64 {
+	if sector%alignmentSectors == 0 {
+		return sector
+	}
+	return (sector/alignmentSectors + 1) * alignmentSectors
+}
+
 // VerifyBlockDevice will check that the device actually exists and is a block device.
 func VerifyBlockDevice(device string) error {
 	d, err := os.Stat(device)
@@ -102,9 +115,11 @@ func Partition(d Disk) (err error) {
 				Name:  d.Partitions[x].Label,
 				Start: sectorStart,
 				End:   sectorEnd,
+				// go-diskfs requires a 1-based Index into its 128-entry GPT array.
+				Index: d.Partitions[x].Number,
 			}
 
-			sectorStart = sectorEnd + 1
+			sectorStart = alignUp(sectorEnd + 1)
 
 			switch d.Partitions[x].Label {
 			case "SWAP":
