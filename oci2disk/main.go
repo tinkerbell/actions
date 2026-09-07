@@ -13,19 +13,14 @@ func main() {
 	fmt.Printf("OCI2DISK - OCI Container Disk image streamer\n------------------------\n")
 	disk := os.Getenv("DEST_DISK")
 	img := os.Getenv("IMG_URL")
-	compressedEnv := os.Getenv("COMPRESSED")
 	registryUsername := os.Getenv("REGISTRY_USERNAME")
 	registryPassword := os.Getenv("REGISTRY_PASSWORD")
 	// We can ignore the error and default to false.
 	skipVerify, _ := strconv.ParseBool(os.Getenv("SKIP_VERIFY"))
 
-	// We can ignore the error and default compressed to false.
-	cmp, _ := strconv.ParseBool(compressedEnv)
-
-	// Write the image to disk
-	err := image.Write(img, disk, cmp, registryUsername, registryPassword, skipVerify)
+	// Write the image to disk (platform and compression auto-detected)
+	err := image.Write(img, disk, registryUsername, registryPassword, skipVerify)
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Infof("Successfully written [%s] to [%s]", img, disk)
 }

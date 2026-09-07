@@ -5,7 +5,7 @@ quay.io/tinkerbell/actions/oci2disk:latest
 This action provides the capability to stream a raw (compressed) disk
 image from an OCI compliant registry and write this to a block device on a server
 
-To upload a disk image to a compliant OCI registry the [ORAS]() tool is recommended,
+To upload a disk image to a compliant OCI registry the [ORAS](https://oras.land) tool is recommended,
 as this will simplify the process of creating a new "artifact" that can be used by
 `oci2disk`.
 
@@ -28,7 +28,6 @@ actions:
     environment:
       DEST_DISK: /dev/nvme0n1
       IMG_URL: "192.168.0.173/test/debian:raw.gz"
-      COMPRESSED: true
       # optional fields for registry authentication
       REGISTRY_USERNAME: "foo"
       REGISTRY_PASSWORD: "bar"
@@ -36,9 +35,23 @@ actions:
       SKIP_VERIFY: "true"
 ```
 
-## Compression format supported:
+## Environment Variables:
 
-- bzip2 (`.bzip2`)
+- `DEST_DISK`: Target block device to write the image to (required)
+- `IMG_URL`: OCI image reference, `<name:tag|name@digest>` (required)
+- `REGISTRY_USERNAME` / `REGISTRY_PASSWORD`: registry credentials (optional, anonymous pull when unset)
+- `SKIP_VERIFY`: set to `true` to skip TLS certificate verification (optional, defaults to `false`)
+
+The platform (`linux/amd64`, `linux/arm64`, ...) is selected automatically from the
+architecture the action runs on when the image is a multi-platform index.
+
+## Compression format supported:
+
+The compression format is detected from the file name recorded in the layer's
+`org.opencontainers.image.title` annotation, which `oras push` sets to the name of
+the pushed file.
+
+- bzip2 (`.bzip2`, `.bz2`)
 - gzip (`.gz`)
 - xz (`.xz`)
-- xs (`.xs`)
+- zstd (`.zst`, `.zs`)

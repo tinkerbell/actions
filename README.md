@@ -6,6 +6,7 @@ This repository is a suite of reusable Tinkerbell Actions that are used to compo
 | --- | --- |
 | [archive2disk](/archive2disk/)    | Write archives to a block device |
 | [cexec](/cexec/)                  | chroot and execute binaries |
+| [cidataio](/cidataio/)            | Create a cloud-init `cidata` partition on a block device |
 | [grub2disk](/grub2disk/)          | Write grub configs to a block device |
 | [image2disk](/image2disk/)        | Write images to a block device |
 | [kexec](/kexec/)                  | kexec to a Linux Kernel |
@@ -14,6 +15,9 @@ This repository is a suite of reusable Tinkerbell Actions that are used to compo
 | [rootio](/rootio/)                | Manage disks (partition, format etc)
 | [slurp](/slurp/)                  | Stream a block device to a remote server |
 | [syslinux](/syslinux/)            | Install the syslinux bootloader to a block device |
+| [taloscmdline](/taloscmdline/)    | Set kernel arguments in Talos Linux unified kernel images |
+| [talosmeta](/talosmeta/)          | Write Talos Linux network configuration to the META partition |
+| [ubootenv](/ubootenv/)            | Update U-Boot environment variables on a block device |
 | [writefile](/writefile/)          | Write a file to a file system on a block device |
 
 ## Releases

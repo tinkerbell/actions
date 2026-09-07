@@ -41,11 +41,13 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         platform: [amd64]
         action:
           - archive2disk
           - cexec
+          - cidataio
           - grub2disk
           - image2disk
           - kexec
@@ -54,6 +56,9 @@ jobs:
           - rootio
           - slurp
           - syslinux
+          - taloscmdline
+          - talosmeta
+          - ubootenv
           - writefile
     steps:
       - uses: actions/checkout@v7
