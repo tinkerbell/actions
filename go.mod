@@ -1,6 +1,6 @@
 module github.com/tinkerbell/actions
 
-go 1.25.0
+go 1.26.0
 
 require (
 	github.com/cenkalti/backoff v2.2.1+incompatible
@@ -16,7 +16,7 @@ require (
 	github.com/sirupsen/logrus v1.9.4
 	github.com/spf13/cobra v1.10.2
 	github.com/ulikunitz/xz v0.5.16
-	golang.org/x/sys v0.47.0
+	golang.org/x/sys v0.48.0
 	oras.land/oras-go v1.2.7
 )
 
