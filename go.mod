@@ -6,7 +6,7 @@ require (
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/containerd/containerd v1.7.34
 	github.com/diskfs/go-diskfs v1.9.4
-	github.com/dustin/go-humanize v1.0.1
+	github.com/dustin/go-humanize v1.1.0
 	github.com/klauspost/compress v1.19.1
 	github.com/lmittmann/tint v1.1.3
 	github.com/mattn/go-isatty v0.0.24
