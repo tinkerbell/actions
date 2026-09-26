@@ -1,198 +1,232 @@
+// Package image pulls a remote disk image and streams it onto a block device.
 package image
 
-// This package handles the pulling and management of images
-
 import (
-	"compress/bzip2"
-	"compress/gzip"
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"log/slog"
-	"math"
-	"net/http"
 	"os"
 	"path/filepath"
-	"sync/atomic"
 	"time"
 
-	"github.com/klauspost/compress/zstd"
-	"github.com/ulikunitz/xz"
-	"golang.org/x/sys/unix"
+	"github.com/dustin/go-humanize"
+	"golang.org/x/sync/errgroup"
 )
 
-type Progress struct {
-	w      io.Writer
-	r      io.Reader
-	wBytes atomic.Int64
-	rBytes atomic.Int64
-}
-
-func NewProgress(w io.Writer, r io.Reader) *Progress {
-	return &Progress{w: w, r: r}
-}
-
-func (p *Progress) Write(b []byte) (n int, err error) {
-	nu, err := p.w.Write(b)
-	if err != nil {
-		p.wBytes.Add(int64(nu))
-		return nu, fmt.Errorf("error with write: %w", err)
+// Write streams sourceImage onto destinationDevice and reports what it did.
+//
+// The transfer runs as a pipeline: an HTTP read-ahead ring, a decompressor, a
+// chunker emitting block-aligned chunks, and a pool of workers issuing pwrite.
+// The stages overlap, so network, decompression and disk IO proceed at once
+// instead of taking turns.
+func Write(ctx context.Context, sourceImage, destinationDevice string, opts Options) (Result, error) {
+	log := opts.Logger
+	if log == nil {
+		log = slog.New(slog.NewTextHandler(io.Discard, nil))
 	}
-	p.wBytes.Add(int64(nu))
-	return nu, nil
-}
 
-func (p *Progress) Read(b []byte) (n int, err error) {
-	nu, err := p.r.Read(b)
-	if err != nil {
-		p.rBytes.Add(int64(nu))
-		return nu, fmt.Errorf("error with read: %w", err)
+	// ModeDiff reads the destination back, so it cannot use O_WRONLY.
+	flags := os.O_WRONLY
+	if opts.Mode == ModeDiff {
+		flags = os.O_RDWR
 	}
-	p.rBytes.Add(int64(nu))
-	return nu, nil
-}
-
-func (p *Progress) readBytes() int64 {
-	return p.rBytes.Load()
-}
-
-func (p *Progress) writeBytes() int64 {
-	return p.wBytes.Load()
-}
-
-func prettyByteSize(b int64) string {
-	bf := float64(b)
-	for _, unit := range []string{"", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"} {
-		if math.Abs(bf) < 1024.0 {
-			return fmt.Sprintf("%3.6f%sB", bf, unit)
+	fileOut, err := os.OpenFile(destinationDevice, flags, 0o644)
+	if err != nil {
+		return Result{}, fmt.Errorf("opening %s: %w", destinationDevice, err)
+	}
+	// Not deferred: Close reports errors that matter, and the shutdown sequence
+	// below has to order sync, partition reread and close explicitly.
+	closed := false
+	closeOut := func() error {
+		if closed {
+			return nil
 		}
-		bf /= 1024.0
-	}
-	return fmt.Sprintf("%.6fYiB", bf)
-}
-
-// WriteCounter counts the number of bytes written to it. It implements to the io.Writer interface
-// and we can pass this into io.TeeReader() which will report progress on each write cycle.
-type WriteCounter struct {
-	Total uint64
-}
-
-func (wc *WriteCounter) Write(p []byte) (int, error) {
-	n := len(p)
-	wc.Total += uint64(n)
-	return n, nil
-}
-
-// Write will pull an image and write it to local storage device
-// with compress set to true it will use gzip compression to expand the data before
-// writing to an underlying device.
-func Write(ctx context.Context, log *slog.Logger, sourceImage, destinationDevice string, compressed bool, progressInterval time.Duration) error {
-	req, err := http.NewRequestWithContext(ctx, "GET", sourceImage, nil)
-	if err != nil {
-		return err
+		closed = true
+		if cerr := fileOut.Close(); cerr != nil {
+			return fmt.Errorf("closing %s: %w", destinationDevice, cerr)
+		}
+		return nil
 	}
 
-	resp, err := http.DefaultClient.Do(req) //nolint:bodyclose // body closed via defer below; linter loses track through NewProgress wrapper
+	geom, err := ProbeGeometry(fileOut)
 	if err != nil {
-		return err
+		_ = closeOut()
+		return Result{}, err
+	}
+	opts.applyDefaults(geom)
+
+	res, err := writeTo(ctx, fileOut, destinationDevice, sourceImage, geom, opts, log)
+	if err != nil {
+		_ = closeOut()
+		return res, err
+	}
+
+	if err := finish(fileOut, destinationDevice, opts, log); err != nil {
+		_ = closeOut()
+		return res, err
+	}
+
+	return res, closeOut()
+}
+
+// writeTo runs the pipeline against an already-open destination.
+func writeTo(ctx context.Context, fileOut *os.File, devName, sourceImage string, geom Geometry, opts Options, log *slog.Logger) (Result, error) {
+	res := Result{Geometry: geom, ChunkSize: opts.ChunkSize, Writers: opts.Writers, Format: formatNone}
+
+	client := opts.HTTPClient
+	if client == nil {
+		client = newHTTPClient()
+	}
+
+	// A separate cancellable layer so the stall watchdog can name itself as the
+	// cause; errgroup derives its own context from this one.
+	watchCtx, cancelWatch := context.WithCancelCause(ctx)
+	defer cancelWatch(nil)
+
+	resp, err := openSource(watchCtx, client, sourceImage)
+	if err != nil {
+		return res, err
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode > 300 {
-		// Customize response for the 404 to make debugging simpler
-		if resp.StatusCode == 404 {
-			return fmt.Errorf("%s not found", sourceImage)
+	if err := checkFits(geom, opts, resp.ContentLength, devName); err != nil {
+		return res, err
+	}
+
+	ctr := &counters{}
+	g, gctx := errgroup.WithContext(watchCtx)
+
+	raw := newReadAhead(gctx, g, resp.Body, opts.ReadAheadBufSize, opts.ReadAheadBufs, func(n int) {
+		ctr.read.Add(int64(n))
+	})
+
+	dec := io.NopCloser(raw)
+	if opts.Compressed {
+		d, format, derr := findDecompressor(gctx, sourceImage, raw)
+		if derr != nil {
+			// Stop the read-ahead producer and let it finish before returning,
+			// so no goroutine outlives this call.
+			_ = raw.Close()
+			_ = g.Wait()
+			return res, derr
 		}
-		return fmt.Errorf("%s", resp.Status)
-	}
-
-	var out io.Reader
-
-	fileOut, err := os.OpenFile(destinationDevice, os.O_WRONLY, 0o644)
-	if err != nil {
-		return err
-	}
-	defer fileOut.Close()
-
-	progressRW := NewProgress(fileOut, resp.Body)
-
-	if !compressed {
-		// Without compression send raw output
-		out = progressRW
-	} else {
-		// Find compression algorithm based upon extension
-		decompressor, err := findDecompressor(sourceImage, progressRW)
-		if err != nil {
-			return err
+		dec, res.Format = d, format
+		if format == formatGzip || format == formatXZ {
+			log.Info("this format decompresses on a single core and will likely be the bottleneck; "+
+				"zstd or bzip2 images decode across all cores",
+				"format", format)
 		}
-		defer decompressor.Close()
-		out = decompressor
 	}
 
-	log.Info(fmt.Sprintf("Beginning write of image [%s] to disk [%s]", filepath.Base(sourceImage), destinationDevice))
-	ticker := time.NewTicker(progressInterval)
-	done := make(chan bool)
-	go func() {
-		totalSize := resp.ContentLength
-		for {
-			select {
-			case <-done:
-				log.Info("read and write progress", "written", prettyByteSize(progressRW.writeBytes()), "compressedSize", prettyByteSize(totalSize), "read", prettyByteSize(progressRW.readBytes()))
-				return
-			case <-ticker.C:
-				log.Info("read and write progress", "written", prettyByteSize(progressRW.writeBytes()), "compressedSize", prettyByteSize(totalSize), "read", prettyByteSize(progressRW.readBytes()))
-			}
-		}
-	}()
+	cw, mode := selectChunkWriter(fileOut, geom, opts, log)
+	res.Mode = mode
 
-	count, err := io.Copy(progressRW, out)
-	// EOF and ErrUnexpectedEOF can be ignored.
-	if err != nil && !errors.Is(err, io.EOF) && !errors.Is(err, io.ErrUnexpectedEOF) {
-		ticker.Stop()
-		done <- true
-		return fmt.Errorf("error writing %s bytes to disk [%s] -> %w", prettyByteSize(count), destinationDevice, err)
+	p := &pipeline{
+		raw:     raw,
+		dec:     dec,
+		cw:      cw,
+		pool:    newChunkPool(opts.ChunkSize),
+		ctr:     ctr,
+		chunk:   make(chan *Chunk, opts.QueueDepth),
+		limit:   geom.SizeBytes,
+		devName: devName,
 	}
 
-	ticker.Stop()
-	done <- true
+	log.Info("beginning write of image to disk",
+		"image", filepath.Base(sourceImage), "disk", devName, "format", res.Format,
+		"mode", mode, "chunkSize", humanize.IBytes(uint64(opts.ChunkSize)),
+		"writers", opts.Writers, "queueDepth", opts.QueueDepth)
 
-	// Do the equivalent of partprobe on the device
+	stopWatchdog := startStallWatchdog(gctx, ctr, opts.StallTimeout, cancelWatch)
+	stopProgress := startReporter(log, ctr, resp.ContentLength, mode == ModeDiff, opts.ProgressInterval)
+
+	start := time.Now()
+	runErr := p.run(gctx, g, opts.Writers)
+
+	stopWatchdog()
+	stopProgress()
+
+	res.Duration = time.Since(start)
+	res.BytesRead = ctr.read.Load()
+	res.BytesDecoded = ctr.decoded.Load()
+	res.BytesWritten = ctr.written.Load()
+	res.BytesSkipped = ctr.skipped.Load()
+	res.WriteCalls = ctr.calls.Load()
+	if dw, ok := cw.(*diffWriter); ok {
+		res.DiffFallbacks = dw.Fallbacks()
+	}
+
+	if runErr != nil {
+		return res, runErr
+	}
+
+	return res, verifyComplete(res, resp.ContentLength, opts, sourceImage)
+}
+
+// checkFits fails early when the image is known to be larger than the device.
+// Only an uncompressed image with a Content-Length has a knowable size up
+// front; a compressed one is bounded by the chunker instead.
+func checkFits(geom Geometry, opts Options, contentLength int64, devName string) error {
+	if opts.Compressed || contentLength <= 0 || geom.SizeBytes <= 0 {
+		return nil
+	}
+	if contentLength > geom.SizeBytes {
+		return fmt.Errorf("%w: image is %s, %s is %s",
+			ErrImageTooLarge, humanize.IBytes(uint64(contentLength)), devName, humanize.IBytes(uint64(geom.SizeBytes)))
+	}
+	return nil
+}
+
+// verifyComplete rejects a transfer that ended early.
+//
+// The previous implementation wrapped io.EOF inside its progress reader, which
+// forced it to ignore io.EOF and io.ErrUnexpectedEOF from the copy, so a
+// download cut short reported success and the machine booted a corrupt disk.
+// Nothing swallows those errors now, and an uncompressed transfer is also
+// checked against the advertised length.
+func verifyComplete(res Result, contentLength int64, opts Options, sourceImage string) error {
+	if res.BytesDecoded == 0 {
+		return fmt.Errorf("%s produced no data", sourceImage)
+	}
+	if opts.Compressed || contentLength <= 0 {
+		// A compressed stream's own trailer check (gzip CRC, zstd checksum)
+		// already catches truncation, and it is no longer suppressed.
+		return nil
+	}
+	if res.BytesRead != contentLength {
+		return fmt.Errorf("truncated download of %s: got %d of %d bytes", sourceImage, res.BytesRead, contentLength)
+	}
+	return nil
+}
+
+// finish flushes the device and asks the kernel to re-read its partition table.
+func finish(fileOut *os.File, devName string, opts Options, log *slog.Logger) error {
+	if opts.SkipSync {
+		return nil
+	}
+
 	if err := fileOut.Sync(); err != nil {
-		return fmt.Errorf("failed to sync the block device")
+		return fmt.Errorf("syncing %s: %w", devName, err)
 	}
 
-	if err := unix.IoctlSetInt(int(fileOut.Fd()), unix.BLKRRPART, 0); err != nil {
-		// Ignore errors since it may be a partition, but log in case it's helpful
+	// The equivalent of partprobe. This fails with EINVAL when the destination
+	// is a partition rather than a whole disk, which is not an error.
+	if err := RereadPartitionTable(fileOut); err != nil {
 		log.Info("error re-probing the partitions for the specified device", "err", err)
 	}
 
 	return nil
 }
 
-func findDecompressor(imageURL string, r io.Reader) (io.ReadCloser, error) {
-	switch filepath.Ext(imageURL) {
-	case ".bzip2", ".bz2":
-		return io.NopCloser(bzip2.NewReader(r)), nil
-	case ".gz":
-		reader, err := gzip.NewReader(r)
-		if err != nil {
-			return nil, fmt.Errorf("[ERROR] New gzip reader: %w", err)
-		}
-		return reader, nil
-	case ".xz":
-		reader, err := xz.NewReader(r)
-		if err != nil {
-			return nil, fmt.Errorf("[ERROR] New xz reader: %w", err)
-		}
-		return io.NopCloser(reader), nil
-	case ".zs", ".zst":
-		reader, err := zstd.NewReader(r)
-		if err != nil {
-			return nil, fmt.Errorf("[ERROR] New zs reader: %w", err)
-		}
-		return reader.IOReadCloser(), nil
-	}
-
-	return nil, fmt.Errorf("unknown compression suffix [%s]", filepath.Ext(imageURL))
+// WriteSimple preserves the call signature used before the pipeline rewrite.
+//
+// Deprecated: use [Write] with [Options].
+func WriteSimple(ctx context.Context, log *slog.Logger, sourceImage, destinationDevice string, compressed bool, progressInterval time.Duration) error {
+	_, err := Write(ctx, sourceImage, destinationDevice, Options{
+		Logger:           log,
+		ProgressInterval: progressInterval,
+		Compressed:       compressed,
+	})
+	return err
 }

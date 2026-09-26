@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff"
+	"github.com/dustin/go-humanize"
 	"github.com/lmittmann/tint"
 	"github.com/mattn/go-isatty"
 	"github.com/tinkerbell/actions/image2disk/image"
@@ -63,16 +64,33 @@ func main() {
 	cmp, _ := strconv.ParseBool(compressedEnv)
 	re, _ := strconv.ParseBool(retryEnabled)
 	pi, err := strconv.Atoi(progressInterval)
-	if err != nil {
+	if err != nil || pi < 0 {
 		pi = defaultProgressInterval
 	}
 
-	// convert progress interval to duration in seconds
-	interval := time.Duration(pi) * time.Second
+	opts := image.Options{
+		Logger: log,
+		// A zero interval deliberately disables progress logging rather than
+		// panicking in time.NewTicker, which is what it used to do.
+		ProgressInterval: time.Duration(pi) * time.Second,
+		Compressed:       cmp,
+		Mode:             image.ModePlain,
+		MemoryBudget:     envInt64("MEMORY_BUDGET_BYTES"),
+		ChunkSize:        int(envInt64("WRITE_CHUNK_SIZE_BYTES")),
+		Writers:          int(envInt64("WRITE_WORKERS")),
+		QueueDepth:       int(envInt64("QUEUE_DEPTH")),
+		DiffBlockSize:    int(envInt64("DIFF_BLOCK_SIZE_BYTES")),
+	}
+	if changed, _ := strconv.ParseBool(os.Getenv("WRITE_CHANGED_BLOCKS_ONLY")); changed {
+		opts.Mode = image.ModeDiff
+	}
 
+	var res image.Result
 	operation := func() error {
-		if err := image.Write(ctx, log, u.String(), disk, cmp, interval); err != nil {
-			return fmt.Errorf("error writing image to disk: %w", err)
+		var opErr error
+		res, opErr = image.Write(ctx, u.String(), disk, opts)
+		if opErr != nil {
+			return fmt.Errorf("error writing image to disk: %w", opErr)
 		}
 		return nil
 	}
@@ -107,5 +125,34 @@ func main() {
 		}
 	}
 
-	log.Info("Successfully wrote image to disk", "image", img, "disk", disk)
+	attrs := []any{
+		"image", img,
+		"disk", disk,
+		"format", res.Format,
+		"mode", string(res.Mode),
+		"decoded", humanize.IBytes(uint64(res.BytesDecoded)),
+		"written", humanize.IBytes(uint64(res.BytesWritten)),
+		"writeCalls", res.WriteCalls,
+		"duration", res.Duration.Round(time.Millisecond).String(),
+	}
+	if res.Mode == image.ModeDiff {
+		attrs = append(attrs, "skipped", humanize.IBytes(uint64(res.BytesSkipped)))
+		if touched := res.BytesWritten + res.BytesSkipped; touched > 0 {
+			attrs = append(attrs, "skippedPct", fmt.Sprintf("%.1f%%", float64(res.BytesSkipped)/float64(touched)*100))
+		}
+		if res.DiffFallbacks > 0 {
+			attrs = append(attrs, "readBackFailures", res.DiffFallbacks)
+		}
+	}
+	log.Info("Successfully wrote image to disk", attrs...)
+}
+
+// envInt64 reads a non-negative integer environment variable, returning zero
+// when it is unset or unparseable so that the caller's default applies.
+func envInt64(name string) int64 {
+	v, err := strconv.ParseInt(os.Getenv(name), 10, 64)
+	if err != nil || v < 0 {
+		return 0
+	}
+	return v
 }
